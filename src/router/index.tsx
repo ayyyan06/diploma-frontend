@@ -7,6 +7,7 @@ import { Tests } from "../pages/Tests";
 import { About } from "../pages/About";
 import { Auth } from "../pages/Login";
 import { BauyrsaqAdventurePage } from "../components/games/BauyrsaqAdventurePage";
+import { TulparDash } from "../components/games/TulparDash";
 export const router = createBrowserRouter([
   {
     path: "/auth",
@@ -23,12 +24,14 @@ export const router = createBrowserRouter([
       {
         path: "games",
         element: <Games />,
-        children: [
-          {
-            path: "bauyrsaq",
-            element: <BauyrsaqAdventurePage />,
-          },
-        ],
+      },
+      {
+        path: "games/bauyrsaq",
+        element: <BauyrsaqAdventurePage />,
+      },
+      {
+        path: "games/tulpar",
+        element: <TulparDash />,
       },
       {
         path: "tests",

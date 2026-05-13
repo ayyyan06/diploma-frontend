@@ -5,13 +5,13 @@ const GAMES = [
     title: "Bauyrsaq's adventure",
     desc: `A playful platformer where bauyrsaq jumps, rolls and avoids obstacles.`,
     img: "/images/card1.svg",
-    to: "/games/bauyrsaq",
+    to: "bauyrsaq",
   },
   {
     title: "Tulpar Dash",
     desc: `A fast-paced steppe runner game inspired by legendary horses.`,
     img: "/images/card2.svg",
-    to: "/games/",
+    to: "tulpar",
   },
   {
     title: "Coming soon",
