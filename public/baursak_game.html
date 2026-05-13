@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <title>Баурсак — Прыгающий Герой</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #1a0a00;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        font-family: "Press Start 2P", monospace;
+        overflow: hidden;
+      }
+      #gameContainer {
+        position: relative;
+        width: 400px;
+        max-width: 100vw;
+      }
+      canvas {
+        display: block;
+        width: 100%;
+        border: 3px solid #c8860a;
+        border-radius: 8px;
+        box-shadow:
+          0 0 40px rgba(200, 134, 10, 0.4),
+          0 0 80px rgba(200, 134, 10, 0.1);
+      }
+      #ui {
+        position: absolute;
+        top: 12px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 16px;
+        pointer-events: none;
+        z-index: 10;
+      }
+      .score-box {
+        background: rgba(0, 0, 0, 0.5);
+        border: 1.5px solid rgba(200, 134, 10, 0.6);
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-size: 9px;
+        color: #f5c842;
+        text-shadow: 0 0 8px rgba(245, 200, 66, 0.5);
+      }
+      #title {
+        text-align: center;
+        color: #f5c842;
+        font-size: 11px;
+        margin-bottom: 10px;
+        text-shadow: 0 0 12px rgba(245, 200, 66, 0.6);
+        letter-spacing: 2px;
+      }
+      #hint {
+        text-align: center;
+        color: #c8860a;
+        font-size: 7px;
+        margin-top: 8px;
+        opacity: 0.7;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="title">🥟 БАУРСАК 🥟</div>
+    <div id="gameContainer">
+      <canvas id="c" width="400" height="560"></canvas>
+      <div id="ui">
+        <div class="score-box">ОЧКИ: <span id="scoreEl">0</span></div>
+        <div class="score-box">🪙 <span id="coinEl">0</span></div>
+      </div>
+    </div>
+    <div id="hint">ПРОБЕЛ / КЛИК / ТАП — ПРЫЖОК</div>
+
+    <script>
+      const canvas = document.getElementById("c");
+      const ctx = canvas.getContext("2d");
+      const W = 400,
+        H = 560;
+
+      let state = "IDLE";
+      let score = 0,
+        coins = 0,
+        bestScore = 0,
+        frame = 0;
+      let bgOffset = 0,
+        groundOffset = 0;
+
+      const baursak = {
+        x: 90,
+        y: H / 2,
+        vy: 0,
+        r: 22,
+        angle: 0,
+        JUMP: -7.5,
+        GRAVITY: 0.38,
+        MAX_FALL: 9,
+        jump() {
+          this.vy = this.JUMP;
+        },
+        update() {
+          this.vy = Math.min(this.vy + this.GRAVITY, this.MAX_FALL);
+          this.y += this.vy;
+          this.angle = Math.max(-0.5, Math.min(0.5, this.vy * 0.06));
+        },
+        reset() {
+          this.y = H / 2;
+          this.vy = 0;
+          this.angle = 0;
+        },
+      };
+
+      const PIPE_W = 52,
+        PIPE_GAP = 155,
+        PIPE_SPEED = 2.6;
+      let pipes = [],
+        pipeTimer = 0,
+        PIPE_INTERVAL = 110;
+
+      function spawnPipe() {
+        const minY = 90,
+          maxY = H - 110 - PIPE_GAP;
+        const topH = minY + Math.random() * (maxY - minY);
+        pipes.push({ x: W + 10, topH, scored: false });
+      }
+
+      let coinItems = [];
+      function spawnCoins(pipe) {
+        const cx = pipe.x + PIPE_W / 2;
+        const gapMid = pipe.topH + PIPE_GAP / 2;
+        const n = Math.floor(Math.random() * 3) + 1;
+        for (let i = 0; i < n; i++) {
+          coinItems.push({
+            x: cx + (i - 1) * 18,
+            y: gapMid + (Math.random() - 0.5) * 50,
+            r: 9,
+            collected: false,
+            anim: 0,
+          });
+        }
+      }
+
+      let particles = [];
+      function burst(x, y, color, n = 12) {
+        for (let i = 0; i < n; i++) {
+          const a = (Math.PI * 2 * i) / n + Math.random() * 0.5;
+          const sp = 2 + Math.random() * 4;
+          particles.push({
+            x,
+            y,
+            vx: Math.cos(a) * sp,
+            vy: Math.sin(a) * sp - 1,
+            life: 1,
+            color,
+            r: 3 + Math.random() * 3,
+          });
+        }
+      }
+
+      function drawBg() {
+        // Sky gradient (baked draw calls)
+        const sky = ctx.createLinearGradient(0, 0, 0, H - 60);
+        sky.addColorStop(0, "#1a3a6e");
+        sky.addColorStop(0.5, "#c45c0a");
+        sky.addColorStop(1, "#8b2c00");
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, W, H - 60);
+
+        // Sun
+        ctx.save();
+        ctx.globalAlpha = 0.25;
+        ctx.fillStyle = "#ffe066";
+        ctx.beginPath();
+        ctx.arc(320, 80, 45, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.restore();
+
+        ctx.fillStyle = "#5a2200";
+        ctx.beginPath();
+        ctx.moveTo(0, H - 80);
+        for (let x = 0; x <= W; x += 40) {
+          const bx = ((x + bgOffset) % (W + 80)) - 40;
+          ctx.lineTo(bx, H - 80 - 20 * Math.sin(bx * 0.018));
+        }
+        ctx.lineTo(W, H);
+        ctx.lineTo(0, H);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = "#3d1a00";
+        ctx.fillRect(0, H - 60, W, 60);
+
+        ctx.fillStyle = "#6b3300";
+        const gW = 40;
+        for (let i = -1; i < W / gW + 2; i++) {
+          const gx = ((i * gW - (groundOffset % gW) + gW) % (W + gW)) - gW;
+          if (Math.floor(i + Math.floor(groundOffset / gW)) % 2 === 0) {
+            ctx.fillRect(gx, H - 60, gW, 10);
+          }
+        }
+
+        drawKazakhBand(0, 0, W, 6);
+        drawKazakhBand(0, H - 66, W, 6);
+      }
+
+      function drawKazakhBand(x, y, w, h) {
+        ctx.fillStyle = "#c8860a";
+        ctx.fillRect(x, y, w, h);
+        ctx.fillStyle = "#f5c842";
+        const step = 12;
+        for (let i = 0; i < w / step; i++) {
+          const bx = x + i * step;
+          ctx.fillRect(bx, y + 1, h - 2, h - 2);
+          ctx.fillRect(bx + step / 2, y + 1, h - 2, h - 2);
+        }
+      }
+
+      function drawPipe(p) {
+        const { x, topH } = p;
+        const botY = topH + PIPE_GAP;
+        const botH = H - 60 - botY;
+
+        function drawPipeBody(px, py, pw, ph, flip) {
+          const grad = ctx.createLinearGradient(px, 0, px + pw, 0);
+          grad.addColorStop(0, "#7a3d00");
+          grad.addColorStop(0.3, "#c8860a");
+          grad.addColorStop(0.7, "#9a5500");
+          grad.addColorStop(1, "#5c2800");
+          ctx.fillStyle = grad;
+          ctx.fillRect(px, py, pw, ph);
+
+          const stripH = 18;
+          const stripY = flip ? py + ph - stripH - 4 : py + 4;
+          ctx.fillStyle = "#3d1a00";
+          ctx.fillRect(px + 2, stripY, pw - 4, stripH);
+          ctx.fillStyle = "#f5c842";
+          const dStep = 12;
+          for (let i = 0; i < (pw - 4) / dStep; i++) {
+            const dx = px + 4 + i * dStep + 4;
+            const dy = stripY + stripH / 2;
+            ctx.beginPath();
+            ctx.moveTo(dx, dy - 5);
+            ctx.lineTo(dx + 4, dy);
+            ctx.lineTo(dx, dy + 5);
+            ctx.lineTo(dx - 4, dy);
+            ctx.closePath();
+            ctx.fill();
+          }
+
+          const capW = pw + 8,
+            capH = 16;
+          const capX = px - 4;
+          const capY = flip ? py + ph - capH : py - capH;
+          const capGrad = ctx.createLinearGradient(capX, 0, capX + capW, 0);
+          capGrad.addColorStop(0, "#5c2800");
+          capGrad.addColorStop(0.4, "#e09020");
+          capGrad.addColorStop(1, "#7a3d00");
+          ctx.fillStyle = capGrad;
+          ctx.beginPath();
+          ctx.roundRect(
+            capX,
+            capY,
+            capW,
+            capH,
+            flip ? [0, 0, 4, 4] : [4, 4, 0, 0],
+          );
+          ctx.fill();
+
+          ctx.fillStyle = "rgba(255,220,100,0.12)";
+          ctx.fillRect(px + 4, py, 8, ph);
+        }
+
+        drawPipeBody(x, 0, PIPE_W, topH, true);
+        drawPipeBody(x, botY, PIPE_W, botH, false);
+      }
+
+      function drawBaursak() {
+        const { x, y, r, angle } = baursak;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+
+        ctx.save();
+        ctx.globalAlpha = 0.2;
+        ctx.fillStyle = "#000";
+        ctx.beginPath();
+        ctx.ellipse(2, r + 4, r * 0.8, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        const bg = ctx.createRadialGradient(
+          -r * 0.25,
+          -r * 0.25,
+          r * 0.05,
+          0,
+          0,
+          r,
+        );
+        bg.addColorStop(0, "#f5c842");
+        bg.addColorStop(0.5, "#d4820a");
+        bg.addColorStop(1, "#7a3d00");
+        ctx.fillStyle = bg;
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = "rgba(120,55,0,0.45)";
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(-8, -5);
+        ctx.bezierCurveTo(-3, -12, 5, -10, 9, -4);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(-10, 3);
+        ctx.bezierCurveTo(-4, 8, 4, 11, 10, 5);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(-3, -14);
+        ctx.bezierCurveTo(-6, -6, -8, 2, -5, 12);
+        ctx.stroke();
+
+        ctx.fillStyle = "rgba(255,240,180,0.35)";
+        ctx.beginPath();
+        ctx.ellipse(
+          -r * 0.28,
+          -r * 0.28,
+          r * 0.28,
+          r * 0.18,
+          -0.6,
+          0,
+          Math.PI * 2,
+        );
+        ctx.fill();
+
+        ctx.fillStyle = "#2a0800";
+        ctx.beginPath();
+        ctx.arc(-6, -4, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(6, -4, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.arc(-5, -5, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(7, -5, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = "#2a0800";
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.arc(0, 2, 7, 0.2, Math.PI - 0.2);
+        ctx.stroke();
+
+        ctx.globalAlpha = 0.3;
+        ctx.fillStyle = "#e06020";
+        ctx.beginPath();
+        ctx.ellipse(-10, 4, 5, 3, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(10, 4, 5, 3, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      function drawCoin(c) {
+        if (c.collected) return;
+        const pulse = 1 + 0.08 * Math.sin(c.anim * 0.1);
+        ctx.save();
+        ctx.translate(c.x, c.y);
+        ctx.scale(pulse, pulse);
+
+        const cg = ctx.createRadialGradient(-3, -3, 1, 0, 0, c.r);
+        cg.addColorStop(0, "#fff8a0");
+        cg.addColorStop(0.5, "#f5c842");
+        cg.addColorStop(1, "#c8860a");
+        ctx.fillStyle = cg;
+        ctx.beginPath();
+        ctx.arc(0, 0, c.r, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = "#c8860a";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.fillStyle = "#c8860a";
+        ctx.font = "bold 9px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("₸", 0, 0.5);
+
+        ctx.restore();
+      }
+
+      function drawParticles() {
+        particles.forEach((p) => {
+          ctx.save();
+          ctx.globalAlpha = p.life;
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
+      }
+
+      function drawOverlay() {
+        if (state === "IDLE") {
+          ctx.fillStyle = "rgba(0,0,0,0.45)";
+          ctx.fillRect(0, 0, W, H);
+
+          ctx.fillStyle = "rgba(30,10,0,0.85)";
+          ctx.strokeStyle = "#c8860a";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.roundRect(40, 160, 320, 200, 12);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = "#f5c842";
+          ctx.font = '14px "Press Start 2P"';
+          ctx.textAlign = "center";
+          ctx.fillText("БАУРСАК", W / 2, 205);
+
+          ctx.fillStyle = "#e09020";
+          ctx.font = '7px "Press Start 2P"';
+          ctx.fillText("ПРЫГАЮЩИЙ ГЕРОЙ", W / 2, 225);
+
+          ctx.fillStyle = "#fff";
+          ctx.font = '7px "Press Start 2P"';
+          ctx.fillText("Собирай монеты", W / 2, 260);
+          ctx.fillText("Избегай препятствий", W / 2, 278);
+
+          ctx.fillStyle = "#f5c842";
+          ctx.font = '8px "Press Start 2P"';
+          const blink = Math.floor(frame / 25) % 2 === 0;
+          if (blink) ctx.fillText("НАЖМИ ДЛЯ СТАРТА", W / 2, 320);
+
+          if (bestScore > 0) {
+            ctx.fillStyle = "#c8860a";
+            ctx.font = '7px "Press Start 2P"';
+            ctx.fillText("РЕКОРД: " + bestScore, W / 2, 348);
+          }
+        }
+
+        if (state === "DEAD") {
+          ctx.fillStyle = "rgba(0,0,0,0.5)";
+          ctx.fillRect(0, 0, W, H);
+
+          ctx.fillStyle = "rgba(100,20,0,0.9)";
+          ctx.strokeStyle = "#c8860a";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.roundRect(40, 150, 320, 230, 12);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = "#e04010";
+          ctx.font = '14px "Press Start 2P"';
+          ctx.textAlign = "center";
+          ctx.fillText("ОЙ!", W / 2, 195);
+
+          ctx.fillStyle = "#fff";
+          ctx.font = '8px "Press Start 2P"';
+          ctx.fillText("ОЧКИ: " + score, W / 2, 230);
+          ctx.fillStyle = "#f5c842";
+          ctx.fillText("МОНЕТЫ: " + coins, W / 2, 255);
+
+          if (score >= bestScore) {
+            ctx.fillStyle = "#f5c842";
+            ctx.font = '7px "Press Start 2P"';
+            ctx.fillText("🏆 НОВЫЙ РЕКОРД!", W / 2, 285);
+          } else {
+            ctx.fillStyle = "#aaa";
+            ctx.font = '7px "Press Start 2P"';
+            ctx.fillText("РЕКОРД: " + bestScore, W / 2, 285);
+          }
+
+          const blink = Math.floor(frame / 25) % 2 === 0;
+          if (blink) {
+            ctx.fillStyle = "#f5c842";
+            ctx.font = '7px "Press Start 2P"';
+            ctx.fillText("НАЖМИ ДЛЯ РЕСТАРТА", W / 2, 350);
+          }
+        }
+      }
+
+      function circleRect(cx, cy, cr, rx, ry, rw, rh) {
+        const nearX = Math.max(rx, Math.min(cx, rx + rw));
+        const nearY = Math.max(ry, Math.min(cy, ry + rh));
+        return (cx - nearX) ** 2 + (cy - nearY) ** 2 < cr * cr;
+      }
+
+      function checkCollisions() {
+        const { x, y, r } = baursak;
+        if (y - r < 6 || y + r > H - 60) return true;
+        for (const p of pipes) {
+          const hit =
+            circleRect(x, y, r - 2, p.x, 0, PIPE_W, p.topH) ||
+            circleRect(x, y, r - 2, p.x, p.topH + PIPE_GAP, PIPE_W, H);
+          if (hit) return true;
+        }
+        return false;
+      }
+
+      function reset() {
+        baursak.reset();
+        pipes = [];
+        coinItems = [];
+        particles = [];
+        score = 0;
+        coins = 0;
+        pipeTimer = 0;
+        frame = 0;
+        document.getElementById("scoreEl").textContent = 0;
+        document.getElementById("coinEl").textContent = 0;
+      }
+
+      function handleInput() {
+        if (state === "IDLE") {
+          state = "PLAYING";
+          reset();
+          baursak.jump();
+        } else if (state === "PLAYING") {
+          baursak.jump();
+        } else if (state === "DEAD") {
+          state = "PLAYING";
+          reset();
+          baursak.jump();
+        }
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (e.code === "Space") {
+          e.preventDefault();
+          handleInput();
+        }
+      });
+      canvas.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        handleInput();
+      });
+
+      function loop() {
+        requestAnimationFrame(loop);
+        frame++;
+        ctx.clearRect(0, 0, W, H);
+
+        bgOffset += 0.4;
+        groundOffset += PIPE_SPEED;
+        drawBg();
+
+        if (state === "PLAYING") {
+          pipeTimer++;
+          if (pipeTimer >= PIPE_INTERVAL) {
+            spawnPipe();
+            spawnCoins(pipes[pipes.length - 1]);
+            pipeTimer = 0;
+          }
+          pipes = pipes.filter((p) => p.x > -PIPE_W - 10);
+          pipes.forEach((p) => {
+            p.x -= PIPE_SPEED;
+            if (!p.scored && p.x + PIPE_W < baursak.x) {
+              p.scored = true;
+              score++;
+              document.getElementById("scoreEl").textContent = score;
+              burst(baursak.x, baursak.y, "#f5c842", 8);
+            }
+          });
+
+          coinItems = coinItems.filter((c) => c.x > -20);
+          coinItems.forEach((c) => {
+            c.x -= PIPE_SPEED;
+            c.anim++;
+            if (!c.collected) {
+              const dx = baursak.x - c.x,
+                dy = baursak.y - c.y;
+              if (dx * dx + dy * dy < (baursak.r + c.r - 2) ** 2) {
+                c.collected = true;
+                coins++;
+                document.getElementById("coinEl").textContent = coins;
+                burst(c.x, c.y, "#f5c842", 10);
+              }
+            }
+          });
+
+          baursak.update();
+
+          if (checkCollisions()) {
+            state = "DEAD";
+            bestScore = Math.max(bestScore, score);
+            burst(baursak.x, baursak.y, "#e04010", 20);
+            for (let i = 0; i < 5; i++)
+              setTimeout(
+                () =>
+                  burst(
+                    baursak.x + (Math.random() - 0.5) * 30,
+                    baursak.y + (Math.random() - 0.5) * 30,
+                    "#f5c842",
+                    8,
+                  ),
+                i * 80,
+              );
+          }
+        }
+
+        pipes.forEach(drawPipe);
+        coinItems.forEach(drawCoin);
+
+        particles.forEach((p) => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.12;
+          p.life -= 0.025;
+          p.r *= 0.97;
+        });
+        particles = particles.filter((p) => p.life > 0);
+        drawParticles();
+
+        drawBaursak();
+        drawOverlay();
+      }
+
+      loop();
+    </script>
+  </body>
+</html>

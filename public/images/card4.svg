@@ -1,0 +1,31 @@
+<svg width="281" height="281" viewBox="0 0 281 281" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="281" height="281" rx="48" fill="#FBF7EF"/>
+  <rect x="41" y="72" width="84" height="84" rx="26" fill="url(#blue-card)"/>
+  <rect x="156" y="72" width="84" height="84" rx="26" fill="url(#green-card)"/>
+  <rect x="41" y="171" width="84" height="84" rx="26" fill="url(#red-card)"/>
+  <rect x="156" y="171" width="84" height="84" rx="26" fill="url(#gold-card)"/>
+  <circle cx="140.5" cy="140.5" r="42" fill="#F7E1A0" stroke="#C9971E" stroke-width="6"/>
+  <circle cx="140.5" cy="140.5" r="18" stroke="#C9971E" stroke-width="5"/>
+  <path d="M140.5 98V183" stroke="#C9971E" stroke-width="5" stroke-linecap="round"/>
+  <path d="M98 140.5H183" stroke="#C9971E" stroke-width="5" stroke-linecap="round"/>
+  <path d="M109.7 109.7L171.3 171.3" stroke="#C9971E" stroke-width="5" stroke-linecap="round"/>
+  <path d="M171.3 109.7L109.7 171.3" stroke="#C9971E" stroke-width="5" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="blue-card" x1="41" y1="72" x2="125" y2="156" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#77D9F2"/>
+      <stop offset="1" stop-color="#249EC9"/>
+    </linearGradient>
+    <linearGradient id="green-card" x1="156" y1="72" x2="240" y2="156" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8EC36D"/>
+      <stop offset="1" stop-color="#4F8A4B"/>
+    </linearGradient>
+    <linearGradient id="red-card" x1="41" y1="171" x2="125" y2="255" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D97A56"/>
+      <stop offset="1" stop-color="#B64A35"/>
+    </linearGradient>
+    <linearGradient id="gold-card" x1="156" y1="171" x2="240" y2="255" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F0CF67"/>
+      <stop offset="1" stop-color="#C9971E"/>
+    </linearGradient>
+  </defs>
+</svg>
