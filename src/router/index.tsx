@@ -8,6 +8,13 @@ import { About } from "../pages/About";
 import { Auth } from "../pages/Login";
 import { BauyrsaqAdventurePage } from "../components/games/BauyrsaqAdventurePage";
 import { TulparDash } from "../components/games/TulparDash";
+import { PersonalityTestIntroPage } from "../pages/Personality/Personality";
+import { PersonalityQuestion } from "../pages/Personality/PersonalityQuestion";
+import { PersonalityResult } from "../pages/Personality/PersonalityResult";
+import AnimalTestIntroPage from "../pages/AnimalTest/AnimalIntroPage";
+import { AnimalResult } from "../pages/AnimalTest/AnimalResult";
+import { AnimalQuestion } from "../pages/AnimalTest/AnimalQuestion";
+
 export const router = createBrowserRouter([
   {
     path: "/auth",
@@ -40,6 +47,30 @@ export const router = createBrowserRouter([
       {
         path: "about",
         element: <About />,
+      },
+      {
+        path: "tests/personality-intro",
+        element: <PersonalityTestIntroPage />,
+      },
+      {
+        path: "tests/personality-questions",
+        element: <PersonalityQuestion />,
+      },
+      {
+        path: "tests/personality-result",
+        element: <PersonalityResult />,
+      },
+      {
+        path: "tests/animal-intro",
+        element: <AnimalTestIntroPage />,
+      },
+      {
+        path: "tests/animal-questions",
+        element: <AnimalQuestion />,
+      },
+      {
+        path: "tests/animal-result",
+        element: <AnimalResult />,
       },
     ],
   },

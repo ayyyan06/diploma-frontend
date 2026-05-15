@@ -10,6 +10,7 @@ export const Auth = () => {
 
   const [loginName, setLoginName] = useState("");
   const [password, setPassword] = useState("");
+  const [nickName, setNickName] = useState("");
 
   const [email, setEmail] = useState("");
 
@@ -18,21 +19,25 @@ export const Auth = () => {
 
     try {
       if (mode === "login") {
-        await login({ login: loginName, password });
+        await login({ email: loginName, password });
         navigate("/");
       } else {
         // 👉 тут твой register endpoint
-        await fetch("/api/v1/user/register", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+        await fetch(
+          "https://diploma-back-a49a574c3cdb.herokuapp.com/api/v1/user/register",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              username: loginName,
+              nickname: nickName,
+              password,
+              email,
+            }),
           },
-          body: JSON.stringify({
-            login: loginName,
-            password,
-            email,
-          }),
-        });
+        );
 
         // после регистрации можно сразу логинить или переключать
         setMode("login");
@@ -69,19 +74,27 @@ export const Auth = () => {
         className="flex w-[300px] flex-col space-y-4 gap-4"
         onSubmit={submit}
       >
-        <TextField
-          label="Логин"
-          value={loginName}
-          onChange={(e) => setLoginName(e.target.value)}
-        />
+        {mode === "register" && (
+          <TextField
+            label="Логин"
+            value={loginName}
+            onChange={(e) => setLoginName(e.target.value)}
+          />
+        )}
 
         {mode === "register" && (
           <TextField
-            label="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            label="Никнеймы"
+            value={nickName}
+            onChange={(e) => setNickName(e.target.value)}
           />
         )}
+
+        <TextField
+          label="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
         <TextField
           label="Пароль"

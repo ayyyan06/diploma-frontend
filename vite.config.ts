@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "https://qyzylorda-idm-test.curs.kz",
+        target: "https://diploma-back-a49a574c3cdb.herokuapp.com",
         changeOrigin: true,
         secure: false,
       },

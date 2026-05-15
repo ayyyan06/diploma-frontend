@@ -5,25 +5,25 @@ const TESTS = [
     title: "What's your personality?",
     desc: `A psychological test based on Big Five, mapped to Kazakh archetypes.`,
     img: "/images/card1.svg",
-    to: "/tests/personality",
+    to: "/tests/personality-intro",
   },
   {
     title: "What's your animal?",
     desc: `Eysenck temperament mapped to Kazakh animals.`,
     img: "/images/card2.svg",
-    to: "/tests/animal",
+    to: "/tests/animal-intro",
   },
   {
     title: "What's your weapon?",
     desc: `Conflict style based on Thomas-Kilmann model.`,
     img: "/images/card3.svg",
-    to: "/tests/weapon",
+    to: "/tests/weapon-intro",
   },
   {
     title: "Which color is yours?",
     desc: `Color psychology inspired by Luscher test.`,
     img: "/images/card4.svg",
-    to: "/tests/color",
+    to: "/tests/color-intro",
   },
 ];
 

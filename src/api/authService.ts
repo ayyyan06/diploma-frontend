@@ -1,13 +1,16 @@
 import { tokenManager } from "./apiutils";
 
 export async function login(body: any) {
-  const res = await fetch("/api/v1/user/login", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json;charset=utf-8",
+  const res = await fetch(
+    "https://diploma-back-a49a574c3cdb.herokuapp.com/api/v1/user/login",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json;charset=utf-8",
+      },
+      body: JSON.stringify(body),
     },
-    body: JSON.stringify(body),
-  });
+  );
 
   if (!res.ok) {
     throw new Error("Неверный логин или пароль");

@@ -25,7 +25,7 @@ const tokenManager = (() => {
 
   const refreshTokenFunction = async (
     currentToken: string,
-    currentRefreshToken: string
+    currentRefreshToken: string,
   ): Promise<TokenResponse> => {
     const url = "/api/users/token/refresh";
     const body = { token: currentToken, refreshToken: currentRefreshToken };
@@ -39,10 +39,10 @@ const tokenManager = (() => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      window.location.href = "/login";
+      window.location.href = "/auth";
 
       throw new Error(
-        `HTTP error! Status: ${response.status}, Details: ${errorText}`
+        `HTTP error! Status: ${response.status}, Details: ${errorText}`,
       );
     }
 
@@ -84,7 +84,7 @@ const tokenManager = (() => {
 export async function fetchWithToken(
   url: string,
   options: RequestInit = {},
-  body?: any
+  body?: any,
 ): Promise<Response> {
   const headers: Record<string, string> = {
     ...(options.headers as Record<string, string>),
@@ -103,7 +103,7 @@ export async function fetchWithToken(
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(
-        `HTTP error! Status: ${response.status}, Details: ${errorText}`
+        `HTTP error! Status: ${response.status}, Details: ${errorText}`,
       );
     }
     return response;
@@ -119,7 +119,7 @@ export async function fetchWithToken(
         headers["Authorization"] = `Bearer ${newToken}`;
         return await executeRequest();
       } catch (refreshError) {
-        window.location.href = "/login";
+        window.location.href = "/auth";
         if (refreshError instanceof Error) {
           throw new Error(`Failed to refresh token: ${refreshError.message}`);
         }
