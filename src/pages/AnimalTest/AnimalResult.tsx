@@ -28,6 +28,14 @@ interface AnimalResultData {
   axes: EysenckAxis[];
 }
 
+interface ApiResponse {
+  results: {
+    id: number;
+    type: string;
+    result: AnimalResultData;
+  }[];
+}
+
 export const AnimalResult = () => {
   const navigate = useNavigate();
 
@@ -41,8 +49,14 @@ export const AnimalResult = () => {
         const response = await fetchWithToken("/api/v1/tests?type=animal", {
           method: "GET",
         });
-        const data = await response.json();
-        setResult(data);
+        const data: ApiResponse = await response.json();
+        const entry = data.results?.[0];
+
+        if (!entry?.result) {
+          throw new Error("No animal result found.");
+        }
+
+        setResult(entry.result);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load result");
       } finally {
@@ -105,7 +119,7 @@ export const AnimalResult = () => {
         YOUR RESULT:
       </p>
 
-      <h1 className="text-[48px] font-bold leading-[1.12] text-[#181818] max-[640px]:text-[34px]">
+      <h1 className="text-[48px] font-bold leading-[1.12] text-[#181818] max-[640px]:text-[34px] mb-5">
         {result.title}
       </h1>
 

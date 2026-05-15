@@ -10,9 +10,9 @@ import { TulparDash } from "../components/games/TulparDash";
 import { PersonalityTestIntroPage } from "../pages/Personality/Personality";
 import { PersonalityQuestion } from "../pages/Personality/PersonalityQuestion";
 import { PersonalityResult } from "../pages/Personality/PersonalityResult";
-import AnimalTestIntroPage from "../pages/AnimalTest/AnimalIntroPage";
 import { AnimalResult } from "../pages/AnimalTest/AnimalResult";
 import { AnimalQuestion } from "../pages/AnimalTest/AnimalQuestion";
+import { AnimalIntroPage } from "../pages/AnimalTest/AnimalIntroPage";
 
 export const router = createBrowserRouter([
   {
@@ -61,7 +61,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "tests/animal-intro",
-        element: <AnimalTestIntroPage />,
+        element: <AnimalIntroPage />,
       },
       {
         path: "tests/animal-questions",

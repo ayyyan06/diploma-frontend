@@ -28,6 +28,14 @@ interface PersonalityResultData {
   bigFive: BigFiveTrait[];
 }
 
+interface PersonalityApiResponse {
+  results: {
+    id: number;
+    type: string;
+    result: PersonalityResultData;
+  }[];
+}
+
 export const PersonalityResult = () => {
   const navigate = useNavigate();
 
@@ -38,18 +46,37 @@ export const PersonalityResult = () => {
   useEffect(() => {
     const fetchResult = async () => {
       try {
+        setLoading(true);
+
         const response = await fetchWithToken(
           "/api/v1/tests?type=personality",
-          { method: "GET" },
+          {
+            method: "GET",
+          },
         );
 
-        const data: any = await response.json();
+        const data: PersonalityApiResponse = await response.json();
 
-        // берем первый результат personality
-        const personalityResult = data.results?.[0]?.result || null;
+        // берем только personality результаты
+        const personalityResults =
+          data.results?.filter(
+            (item) => item.type === "personality" && item.result,
+          ) || [];
 
-        setResult(personalityResult);
+        if (personalityResults.length === 0) {
+          setResult(null);
+          return;
+        }
+
+        // сортируем по id DESC и берем самый новый
+        const latestResult = personalityResults.sort((a, b) => b.id - a.id)[0];
+
+        setResult(latestResult.result);
+
+        console.log("Latest result:", latestResult);
       } catch (err) {
+        console.error(err);
+
         setError(err instanceof Error ? err.message : "Failed to load result");
       } finally {
         setLoading(false);
@@ -57,7 +84,6 @@ export const PersonalityResult = () => {
     };
 
     fetchResult();
-    console.log(result);
   }, []);
 
   const handleRetake = () => {
@@ -69,6 +95,7 @@ export const PersonalityResult = () => {
       <main className="max-w-[1440px] mt-[70px] mb-[154px] mx-auto px-[120px] box-border text-center max-[900px]:px-6">
         <div className="flex flex-col items-center gap-4 mt-20">
           <div className="w-12 h-12 border-4 border-[#f2c200] border-t-transparent rounded-full animate-spin" />
+
           <p className="text-[18px] text-[#555]">Loading your result...</p>
         </div>
       </main>
@@ -81,16 +108,21 @@ export const PersonalityResult = () => {
         <h1 className="text-[32px] font-bold mb-6">
           {error ? "Error loading result" : "No result yet"}
         </h1>
+
         <p className="text-[18px] text-[#555] mb-8">
           {error || "Please take the personality test first."}
         </p>
+
         <button
           type="button"
           onClick={() => navigate("/tests/personality-intro")}
           className="
-            w-[230px] h-[58px] border-none rounded-[12px]
-            bg-[#F2B705] text-white text-[16px] font-bold
-            leading-[20px] cursor-pointer
+            w-[230px] h-[58px]
+            border-none rounded-[12px]
+            bg-[#F2B705]
+            text-white text-[16px] font-bold
+            leading-[20px]
+            cursor-pointer
             transition-opacity hover:opacity-90
           "
         >
@@ -101,211 +133,285 @@ export const PersonalityResult = () => {
   }
 
   return (
-    <></>
-    // <main className="max-w-[1440px] mt-[70px] mb-[154px] mx-auto px-[120px] box-border max-[1100px]:px-10 max-[640px]:px-5">
-    //   <p className="m-0 mb-5 text-[14px] font-normal leading-[18px] text-[#7a7a7a]">
-    //     YOUR RESULT:
-    //   </p>
+    <main className="max-w-[1440px] mt-[70px] mb-[154px] mx-auto px-[120px] box-border max-[1100px]:px-10 max-[640px]:px-5">
+      <p className="m-0 mb-5 text-[14px] font-normal leading-[18px] text-[#7a7a7a]">
+        YOUR RESULT:
+      </p>
 
-    //   <h1 className="m-0 mb-8 text-[40px] font-extrabold leading-[50px] text-[#111111] max-[640px]:text-[28px]">
-    //     {result.title}
-    //   </h1>
+      <h1 className="m-0 mb-3 text-[40px] font-extrabold leading-[50px] text-[#111111] max-[640px]:text-[28px]">
+        {result.title}
+      </h1>
 
-    //   <section className="flex items-start gap-10 max-[900px]:flex-col">
-    //     <div
-    //       className="
-    //         w-[360px] min-h-[470px]
-    //         border-2 border-[#ece7dd] rounded-[24px] bg-white
-    //         flex flex-col items-center
-    //         pt-[62px] px-[44px] pb-[41px]
-    //         box-border shrink-0
-    //         max-[900px]:w-full max-[900px]:max-w-[400px]
-    //       "
-    //     >
-    //       <img
-    //         src={result.imageSrc}
-    //         alt={result.imageAlt}
-    //         className="block mx-auto mb-[49px] max-w-[180px]"
-    //       />
+      <p className="mb-8 text-[18px] text-[#8b6c00] italic">{result.tagline}</p>
 
-    //       <h2 className="m-0 mb-[14px] text-center text-[22px] font-bold leading-[28px] text-[#111111]">
-    //         Core traits
-    //       </h2>
+      <section className="flex items-start gap-10 max-[900px]:flex-col">
+        {/* LEFT CARD */}
+        <div
+          className="
+            w-[360px]
+            min-h-[470px]
+            border-2 border-[#ece7dd]
+            rounded-[24px]
+            bg-white
+            flex flex-col items-center
+            pt-[62px]
+            px-[44px]
+            pb-[41px]
+            box-border
+            shrink-0
+            max-[900px]:w-full
+            max-[900px]:max-w-[400px]
+          "
+        >
+          <img
+            src={result.imageSrc}
+            alt={result.imageAlt}
+            className="block mx-auto mb-[49px] max-w-[180px]"
+          />
 
-    //       <ul className="m-0 pl-6 text-[18px] font-normal leading-[23px] text-[#555555]">
-    //         {result.topTraits.map((trait) => (
-    //           <li key={trait} className="mb-2">
-    //             {trait}
-    //           </li>
-    //         ))}
-    //       </ul>
+          <h2 className="m-0 mb-[14px] text-center text-[22px] font-bold leading-[28px] text-[#111111]">
+            Core traits
+          </h2>
 
-    //       <p className="mt-4 text-[14px] text-[#8b6c00] italic text-center">
-    //         {result.subtitle}
-    //       </p>
-    //     </div>
+          <ul className="m-0 pl-6 text-[18px] font-normal leading-[23px] text-[#555555]">
+            {result.topTraits.map((trait) => (
+              <li key={trait} className="mb-2">
+                {trait}
+              </li>
+            ))}
+          </ul>
 
-    //     <div className="flex-1 min-w-0 flex flex-col gap-[30px]">
-    //       <div
-    //         className="
-    //           w-full min-h-[210px]
-    //           border-2 border-[#ece7dd] rounded-[24px] bg-white
-    //           pt-5 pr-10 pb-10 pl-[41px] box-border
-    //           max-[640px]:px-5
-    //         "
-    //       >
-    //         <h2 className="m-0 mb-[22px] text-[28px] font-bold leading-[35px] text-[#111111]">
-    //           Description
-    //         </h2>
+          <p className="mt-6 text-[14px] text-[#8b6c00] italic text-center">
+            {result.subtitle}
+          </p>
+        </div>
 
-    //         <p className="m-0 w-full text-[18px] font-normal leading-[23px] text-[#555555]">
-    //           {result.description}
-    //         </p>
+        {/* RIGHT SIDE */}
+        <div className="flex-1 min-w-0 flex flex-col gap-[30px]">
+          {/* DESCRIPTION */}
+          <div
+            className="
+              w-full
+              border-2 border-[#ece7dd]
+              rounded-[24px]
+              bg-white
+              pt-5
+              pr-10
+              pb-10
+              pl-[41px]
+              box-border
+              max-[640px]:px-5
+            "
+          >
+            <h2 className="m-0 mb-[22px] text-[28px] font-bold leading-[35px] text-[#111111]">
+              Description
+            </h2>
 
-    //         {result.whyThisArchetype && (
-    //           <p className="mt-4 text-[16px] leading-[22px] text-[#6f6a60] italic">
-    //             {result.whyThisArchetype}
-    //           </p>
-    //         )}
-    //       </div>
+            <p className="m-0 text-[18px] font-normal leading-[30px] text-[#555555]">
+              {result.description}
+            </p>
 
-    //       <div className="flex gap-10 max-[640px]:flex-col">
-    //         <div
-    //           className="
-    //             flex-1 min-w-0 min-h-[230px]
-    //             rounded-[24px] bg-[#fff9e8]
-    //             border-2 border-[#eed892]
-    //             pt-5 pr-8 pb-8 pl-10 box-border
-    //             max-[640px]:pl-6
-    //           "
-    //         >
-    //           <h2 className="m-0 mb-[22px] text-[28px] font-bold leading-[35px] text-[#111111]">
-    //             Strengths
-    //           </h2>
+            {result.whyThisArchetype && (
+              <p className="mt-5 text-[16px] leading-[26px] text-[#6f6a60] italic">
+                {result.whyThisArchetype}
+              </p>
+            )}
+          </div>
 
-    //           <ul className="m-0 pl-6 text-[18px] font-normal leading-[23px] text-[#555555]">
-    //             {result.strengths.map((item, i) => (
-    //               <li key={i} className="mb-2">
-    //                 {item}
-    //               </li>
-    //             ))}
-    //           </ul>
-    //         </div>
+          {/* STRENGTHS + GROWTH */}
+          <div className="flex gap-10 max-[640px]:flex-col">
+            {/* STRENGTHS */}
+            <div
+              className="
+                flex-1
+                min-w-0
+                rounded-[24px]
+                bg-[#fff9e8]
+                border-2 border-[#eed892]
+                pt-5
+                pr-8
+                pb-8
+                pl-10
+                box-border
+                max-[640px]:pl-6
+              "
+            >
+              <h2 className="m-0 mb-[22px] text-[28px] font-bold leading-[35px] text-[#111111]">
+                Strengths
+              </h2>
 
-    //         <div
-    //           className="
-    //             flex-1 min-w-0 min-h-[230px]
-    //             rounded-[24px] bg-[#f7f4ff]
-    //             border-2 border-[#d8d1f2]
-    //             pt-5 pr-8 pb-8 pl-10 box-border
-    //             max-[640px]:pl-6
-    //           "
-    //         >
-    //           <h2 className="m-0 mb-[22px] text-[28px] font-bold leading-[35px] text-[#111111]">
-    //             Growth areas
-    //           </h2>
+              <ul className="m-0 pl-6 text-[18px] font-normal leading-[28px] text-[#555555]">
+                {result.strengths.map((item, i) => (
+                  <li key={i} className="mb-2">
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-    //           <ul className="m-0 pl-6 text-[18px] font-normal leading-[23px] text-[#555555]">
-    //             {result.growthAreas.map((item, i) => (
-    //               <li key={i} className="mb-2">
-    //                 {item}
-    //               </li>
-    //             ))}
-    //           </ul>
-    //         </div>
-    //       </div>
+            {/* GROWTH */}
+            <div
+              className="
+                flex-1
+                min-w-0
+                rounded-[24px]
+                bg-[#f7f4ff]
+                border-2 border-[#d8d1f2]
+                pt-5
+                pr-8
+                pb-8
+                pl-10
+                box-border
+                max-[640px]:pl-6
+              "
+            >
+              <h2 className="m-0 mb-[22px] text-[28px] font-bold leading-[35px] text-[#111111]">
+                Growth areas
+              </h2>
 
-    //       <div
-    //         className="
-    //           w-full border-2 border-[#ece7dd] rounded-[24px] bg-white
-    //           pt-5 pr-10 pb-10 pl-[41px] box-border
-    //           max-[640px]:px-5
-    //         "
-    //       >
-    //         <h2 className="m-0 mb-[22px] text-[28px] font-bold leading-[35px] text-[#111111]">
-    //           Big Five Breakdown
-    //         </h2>
+              <ul className="m-0 pl-6 text-[18px] font-normal leading-[28px] text-[#555555]">
+                {result.growthAreas.map((item, i) => (
+                  <li key={i} className="mb-2">
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
 
-    //         <div className="flex flex-col gap-5">
-    //           {result.bigFive.map((trait) => (
-    //             <div key={trait.key}>
-    //               <div className="flex justify-between items-center mb-1">
-    //                 <span className="text-[16px] font-semibold text-[#111]">
-    //                   {trait.label}
-    //                 </span>
-    //                 <span className="text-[14px] font-bold text-[#8b6c00]">
-    //                   {trait.score}%
-    //                 </span>
-    //               </div>
+          {/* BIG FIVE */}
+          <div
+            className="
+              w-full
+              border-2 border-[#ece7dd]
+              rounded-[24px]
+              bg-white
+              pt-5
+              pr-10
+              pb-10
+              pl-[41px]
+              box-border
+              max-[640px]:px-5
+            "
+          >
+            <h2 className="m-0 mb-[22px] text-[28px] font-bold leading-[35px] text-[#111111]">
+              Big Five Breakdown
+            </h2>
 
-    //               <div className="w-full h-[10px] rounded-full bg-[#efefef] overflow-hidden">
-    //                 <div
-    //                   className="h-full rounded-full bg-[#f2c200] transition-all duration-500"
-    //                   style={{ width: `${trait.score}%` }}
-    //                 />
-    //               </div>
+            <div className="flex flex-col gap-5">
+              {result.bigFive.map((trait) => (
+                <div key={trait.key}>
+                  <div className="flex justify-between items-center mb-2">
+                    <div>
+                      <span className="text-[16px] font-semibold text-[#111]">
+                        {trait.label}
+                      </span>
 
-    //               <p className="mt-1 mb-0 text-[14px] leading-[1.4] text-[#6f6a60]">
-    //                 {trait.narrative}
-    //               </p>
-    //             </div>
-    //           ))}
-    //         </div>
-    //       </div>
+                      <span className="ml-2 text-[13px] text-[#777]">
+                        ({trait.shortLabel})
+                      </span>
+                    </div>
 
-    //       <div className="flex gap-10 max-[640px]:flex-col">
-    //         <div
-    //           className="
-    //             flex-1 min-w-0
-    //             rounded-[24px] bg-[#eef8ff]
-    //             border-2 border-[#c4dff0]
-    //             pt-5 pr-8 pb-8 pl-10 box-border
-    //             max-[640px]:pl-6
-    //           "
-    //         >
-    //           <h2 className="m-0 mb-3 text-[22px] font-bold leading-[28px] text-[#111]">
-    //             Shadow archetype
-    //           </h2>
-    //           <p className="m-0 text-[18px] text-[#555]">
-    //             {result.shadowArchetype}
-    //           </p>
-    //         </div>
+                    <span className="text-[14px] font-bold text-[#8b6c00]">
+                      {trait.score}%
+                    </span>
+                  </div>
 
-    //         <div
-    //           className="
-    //             flex-1 min-w-0
-    //             rounded-[24px] bg-[#fff5f5]
-    //             border-2 border-[#f0c4c4]
-    //             pt-5 pr-8 pb-8 pl-10 box-border
-    //             max-[640px]:pl-6
-    //           "
-    //         >
-    //           <h2 className="m-0 mb-3 text-[22px] font-bold leading-[28px] text-[#111]">
-    //             Development focus
-    //           </h2>
-    //           <p className="m-0 text-[18px] text-[#555]">
-    //             {result.developmentFocus}
-    //           </p>
-    //         </div>
-    //       </div>
+                  <div className="w-full h-[10px] rounded-full bg-[#efefef] overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-[#f2c200] transition-all duration-500"
+                      style={{
+                        width: `${trait.score}%`,
+                      }}
+                    />
+                  </div>
 
-    //       <div className="flex justify-center mt-4">
-    //         <button
-    //           type="button"
-    //           onClick={handleRetake}
-    //           className="
-    //             w-[230px] h-[58px] border-2 border-[#f2c200]
-    //             rounded-[12px] bg-white
-    //             text-[#8b6c00] text-[16px] font-bold
-    //             cursor-pointer transition-all duration-200
-    //             hover:bg-[#fff9e8]
-    //           "
-    //         >
-    //           RETAKE TEST
-    //         </button>
-    //       </div>
-    //     </div>
-    //   </section>
-    // </main>
+                  <p className="mt-2 mb-0 text-[14px] leading-[1.6] text-[#6f6a60]">
+                    {trait.narrative}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* EXTRA */}
+          <div className="flex gap-10 max-[640px]:flex-col">
+            {/* SHADOW */}
+            <div
+              className="
+                flex-1
+                min-w-0
+                rounded-[24px]
+                bg-[#eef8ff]
+                border-2 border-[#c4dff0]
+                pt-5
+                pr-8
+                pb-8
+                pl-10
+                box-border
+                max-[640px]:pl-6
+              "
+            >
+              <h2 className="m-0 mb-3 text-[22px] font-bold leading-[28px] text-[#111]">
+                Shadow archetype
+              </h2>
+
+              <p className="m-0 text-[18px] text-[#555]">
+                {result.shadowArchetype}
+              </p>
+            </div>
+
+            {/* DEVELOPMENT */}
+            <div
+              className="
+                flex-1
+                min-w-0
+                rounded-[24px]
+                bg-[#fff5f5]
+                border-2 border-[#f0c4c4]
+                pt-5
+                pr-8
+                pb-8
+                pl-10
+                box-border
+                max-[640px]:pl-6
+              "
+            >
+              <h2 className="m-0 mb-3 text-[22px] font-bold leading-[28px] text-[#111]">
+                Development focus
+              </h2>
+
+              <p className="m-0 text-[18px] text-[#555]">
+                {result.developmentFocus}
+              </p>
+            </div>
+          </div>
+
+          {/* BUTTON */}
+          <div className="flex justify-center mt-4">
+            <button
+              type="button"
+              onClick={handleRetake}
+              className="
+                w-[230px]
+                h-[58px]
+                border-2 border-[#f2c200]
+                rounded-[12px]
+                bg-white
+                text-[#8b6c00]
+                text-[16px]
+                font-bold
+                cursor-pointer
+                transition-all
+                duration-200
+                hover:bg-[#fff9e8]
+              "
+            >
+              RETAKE TEST
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 };
