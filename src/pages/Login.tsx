@@ -19,12 +19,12 @@ export const Auth = () => {
 
     try {
       if (mode === "login") {
-        await login({ email: loginName, password });
+        await login({ email: email, password });
         navigate("/");
       } else {
         // 👉 тут твой register endpoint
         await fetch(
-          "https://diploma-back-a49a574c3cdb.herokuapp.com/api/v1/user/register",
+          "https://diploma-back-a49a574c3cdb.herokuapp.com/api/v1/register",
           {
             method: "POST",
             headers: {

@@ -2,7 +2,7 @@ import { tokenManager } from "./apiutils";
 
 export async function login(body: any) {
   const res = await fetch(
-    "https://diploma-back-a49a574c3cdb.herokuapp.com/api/v1/user/login",
+    "https://diploma-back-a49a574c3cdb.herokuapp.com/api/v1/login",
     {
       method: "POST",
       headers: {
