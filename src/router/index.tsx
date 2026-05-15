@@ -1,6 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
 import { Home } from "../pages/Home";
-import PrivateRoute from "./PrivateRoute";
 import { Header } from "../components/Header";
 import { Games } from "../pages/Games";
 import { Tests } from "../pages/Tests";

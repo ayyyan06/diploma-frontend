@@ -1,14 +1,11 @@
 // src/api/apiutils.ts
 
-import { useNavigate } from "react-router-dom";
-
 type TokenResponse = {
   token: string;
   refreshToken: string;
 };
 
 type RefreshResolve = (token: string) => void;
-let navigateFunction: ((path: string) => void) | null = null;
 const tokenManager = (() => {
   let token: string | null = localStorage.getItem("api_token");
   let refreshToken: string | null = localStorage.getItem("refresh_token");
