@@ -16,9 +16,9 @@ export async function login(body: any) {
     throw new Error("Неверный логин или пароль");
   }
 
+  // authService.ts
   const data = await res.json();
-  tokenManager.setTokens(data.accessToken, data.refreshToken);
-
+  tokenManager.setTokens(data.access_token, data.refreshToken); // ← исправить поле
   return data;
 }
 

@@ -1,61 +1,55 @@
-// src/api/apiutils.ts
-
 type TokenResponse = {
-  token: string;
-  refreshToken: string;
+  access_token: string; // ← snake_case как у сервера
+  refresh_token: string; // ← уточни точное имя у бэка
 };
 
 type RefreshResolve = (token: string) => void;
+
 const tokenManager = (() => {
   let token: string | null = localStorage.getItem("api_token");
   let refreshToken: string | null = localStorage.getItem("refresh_token");
   let isRefreshing = false;
   let refreshQueue: RefreshResolve[] = [];
 
-  const initializeTokens = (): void => {
-    if (!token || !refreshToken) {
-      console.log("okokok");
-      console.warn("Tokens not found, need to log in again.");
-      return;
-    }
-  };
-
   const refreshTokenFunction = async (
     currentToken: string,
     currentRefreshToken: string,
   ): Promise<TokenResponse> => {
-    const url = "/api/users/token/refresh";
-    const body = { token: currentToken, refreshToken: currentRefreshToken };
-    console.log("Attempting to refresh token with:", body);
-
-    const response = await fetch(url, {
+    const response = await fetch("/api/v1/token/refresh", {
+      // ← правильный URL
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify({
+        access_token: currentToken, // ← формат как ждёт сервер
+        refresh_token: currentRefreshToken,
+      }),
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      window.location.href = "/auth";
-
-      throw new Error(
-        `HTTP error! Status: ${response.status}, Details: ${errorText}`,
-      );
+      throw new Error(`Refresh failed: ${response.status}`);
     }
 
     return response.json();
   };
 
   return {
-    initializeTokens,
     getToken: (): string | null => token,
     getRefreshToken: (): string | null => refreshToken,
+
     setTokens: (newToken: string, newRefreshToken: string): void => {
       token = newToken;
       refreshToken = newRefreshToken;
       localStorage.setItem("api_token", newToken);
       localStorage.setItem("refresh_token", newRefreshToken);
     },
+
+    clearTokens: (): void => {
+      token = null;
+      refreshToken = null;
+      localStorage.removeItem("api_token");
+      localStorage.removeItem("refresh_token");
+    },
+
     refreshTokens: async (): Promise<string> => {
       if (isRefreshing) {
         return new Promise((resolve) => refreshQueue.push(resolve));
@@ -67,9 +61,10 @@ const tokenManager = (() => {
           throw new Error("Missing tokens");
         }
         const newTokens = await refreshTokenFunction(token, refreshToken);
-        tokenManager.setTokens(newTokens.token, newTokens.refreshToken);
-        refreshQueue.forEach((resolve) => resolve(newTokens.token));
-        return newTokens.token;
+        // ← читаем snake_case поля
+        tokenManager.setTokens(newTokens.access_token, newTokens.refresh_token);
+        refreshQueue.forEach((resolve) => resolve(newTokens.access_token));
+        return newTokens.access_token;
       } finally {
         isRefreshing = false;
         refreshQueue = [];
@@ -83,6 +78,12 @@ export async function fetchWithToken(
   options: RequestInit = {},
   body?: any,
 ): Promise<Response> {
+  // ← guard: нет токена — не делаем запрос
+  if (!tokenManager.getToken()) {
+    window.location.href = "/auth";
+    throw new Error("No token available");
+  }
+
   const headers: Record<string, string> = {
     ...(options.headers as Record<string, string>),
     Authorization: `Bearer ${tokenManager.getToken()}`,
@@ -90,12 +91,11 @@ export async function fetchWithToken(
   };
 
   const executeRequest = async (): Promise<Response> => {
-    const finalOptions: RequestInit = {
+    const response = await fetch(url, {
       ...options,
       headers,
       body: body ? JSON.stringify(body) : undefined,
-    };
-    const response = await fetch(url, finalOptions);
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -115,17 +115,15 @@ export async function fetchWithToken(
         const newToken = await tokenManager.refreshTokens();
         headers["Authorization"] = `Bearer ${newToken}`;
         return await executeRequest();
-      } catch (refreshError) {
+      } catch {
+        // ← раскомментировано: чистим токены и редиректим
+        tokenManager.clearTokens();
         window.location.href = "/auth";
-        if (refreshError instanceof Error) {
-          throw new Error(`Failed to refresh token: ${refreshError.message}`);
-        }
-        throw refreshError;
+        throw new Error("Session expired, please log in again");
       }
     }
     throw error;
   }
 }
 
-// tokenManager.initializeTokens();
 export { tokenManager };
