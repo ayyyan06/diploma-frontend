@@ -92,11 +92,13 @@ export function Header() {
             Start Test
           </NavLink>
 
-          <img
-            className="ml-[56px] h-[36px] w-[36px] shrink-0 object-contain"
-            src="/icons/profile-icon.svg"
-            alt="Profile"
-          />
+          <NavLink to="/profile">
+            <img
+              className="ml-[56px] h-[36px] w-[36px] shrink-0 object-contain"
+              src="/icons/profile-icon.svg"
+              alt="Profile"
+            />{" "}
+          </NavLink>
         </div>
       </header>
 

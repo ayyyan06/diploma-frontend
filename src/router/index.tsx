@@ -13,6 +13,13 @@ import { PersonalityResult } from "../pages/Personality/PersonalityResult";
 import { AnimalResult } from "../pages/AnimalTest/AnimalResult";
 import { AnimalQuestion } from "../pages/AnimalTest/AnimalQuestion";
 import { AnimalIntroPage } from "../pages/AnimalTest/AnimalIntroPage";
+import { WeaponIntroTestPage } from "../pages/Weapon/WeaponIntroPage";
+import WeaponQuestion from "../pages/Weapon/WeaponQuestion";
+import WeaponResult from "../pages/Weapon/WeaponResult";
+import { ColorIntroTestPage } from "../pages/Color/ColorIntroPage";
+import ColorQuestionPage from "../pages/Color/ColorQuestions";
+import ColorResultPage from "../pages/Color/ColorResult";
+import Profile from "../pages/ProfilePage";
 
 export const router = createBrowserRouter([
   {
@@ -70,6 +77,34 @@ export const router = createBrowserRouter([
       {
         path: "tests/animal-result",
         element: <AnimalResult />,
+      },
+      {
+        path: "tests/weapon-intro",
+        element: <WeaponIntroTestPage />,
+      },
+      {
+        path: "tests/weapon-questions",
+        element: <WeaponQuestion />,
+      },
+      {
+        path: "tests/weapon-result",
+        element: <WeaponResult />,
+      },
+      {
+        path: "tests/color-intro",
+        element: <ColorIntroTestPage />,
+      },
+      {
+        path: "tests/color-questions",
+        element: <ColorQuestionPage />,
+      },
+      {
+        path: "tests/color-result",
+        element: <ColorResultPage />,
+      },
+      {
+        path: "profile",
+        element: <Profile />,
       },
     ],
   },

@@ -110,7 +110,8 @@ export const COLOR_PALETTE = [
     id: "qonyrZher",
     label: "Qonyr Zher",
     title: "Need for Comfort and Stability",
-    culturalNote: "earth brown connected with soil, leather, felt, and home craft",
+    culturalNote:
+      "earth brown connected with soil, leather, felt, and home craft",
     shortMeaning: "comfort, groundedness, and bodily rest",
     keywords: ["comfort", "groundedness", "security"],
     coreNeed:
@@ -171,20 +172,20 @@ export const COLOR_PALETTE = [
   },
 ];
 
-const getColorById = (colorId) =>
+const getColorById = (colorId: any) =>
   COLOR_PALETTE.find((color) => color.id === colorId) || COLOR_PALETTE[0];
 
-const getWeightedScore = (ranking, colorId, multiplier = 1) => {
+const getWeightedScore = (ranking: any, colorId: any, multiplier = 1) => {
   const position = ranking.indexOf(colorId);
   const baseScore = COLOR_PALETTE.length - position;
 
   return baseScore * multiplier;
 };
 
-const buildTopPairText = (dominantColor, supportColor) =>
+const buildTopPairText = (dominantColor: any, supportColor: any) =>
   `Across both rankings, ${dominantColor.label} and ${supportColor.label} stayed strongest. In a Luscher-inspired reading, that usually means you are pulled toward ${dominantColor.shortMeaning} while also needing ${supportColor.shortMeaning}.`;
 
-export const buildColorTestResult = ({ firstRound, secondRound }) => {
+export const buildColorTestResult = ({ firstRound, secondRound }: any) => {
   const rankedColors = [...COLOR_PALETTE]
     .map((color) => ({
       ...color,
@@ -202,19 +203,18 @@ export const buildColorTestResult = ({ firstRound, secondRound }) => {
   const secondPassChoice = getColorById(secondRound[0]);
   const stablePreference = firstChoice.id === secondPassChoice.id;
 
-  const coreTraits = [
-    ...dominantColor.keywords,
-    ...supportColor.keywords,
-  ].filter((trait, index, traits) => traits.indexOf(trait) === index).slice(0, 3);
+  const coreTraits = [...dominantColor.keywords, ...supportColor.keywords]
+    .filter((trait, index, traits) => traits.indexOf(trait) === index)
+    .slice(0, 3);
 
   return {
     title: `${dominantColor.label} - ${dominantColor.title}`,
     note: "Psychological color ranking inspired by Luscher, adapted to a Kazakh cultural palette.",
     description: `${buildTopPairText(
       dominantColor,
-      supportColor
+      supportColor,
     )} ${dominantColor.culturalNote.charAt(0).toUpperCase()}${dominantColor.culturalNote.slice(
-      1
+      1,
     )} becomes your leading symbol right now. ${
       stablePreference
         ? `Your first choice stayed stable in both rounds, which suggests this preference is not random.`
@@ -238,7 +238,7 @@ export const buildColorTestResult = ({ firstRound, secondRound }) => {
   };
 };
 
-export const saveColorTestResult = (result) => {
+export const saveColorTestResult = (result: any) => {
   window.sessionStorage.setItem(COLOR_TEST_STORAGE_KEY, JSON.stringify(result));
 };
 

@@ -79,10 +79,10 @@ export async function fetchWithToken(
   body?: any,
 ): Promise<Response> {
   // ← guard: нет токена — не делаем запрос
-  // if (!tokenManager.getToken()) {
-  //   window.location.href = "/auth";
-  //   throw new Error("No token available");
-  // }
+  if (!tokenManager.getToken()) {
+    window.location.href = "/auth";
+    throw new Error("No token available");
+  }
 
   const headers: Record<string, string> = {
     ...(options.headers as Record<string, string>),
