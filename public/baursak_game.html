@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=no"
     />
-    <title>Баурсак — Прыгающий Герой</title>
+    <title>Baursak — The Jumping Hero</title>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
       * {
@@ -76,15 +76,15 @@
     </style>
   </head>
   <body>
-    <div id="title">🥟 БАУРСАК 🥟</div>
+    <div id="title">🥟 BAURSAK 🥟</div>
     <div id="gameContainer">
       <canvas id="c" width="400" height="560"></canvas>
       <div id="ui">
-        <div class="score-box">ОЧКИ: <span id="scoreEl">0</span></div>
+        <div class="score-box">SCORE: <span id="scoreEl">0</span></div>
         <div class="score-box">🪙 <span id="coinEl">0</span></div>
       </div>
     </div>
-    <div id="hint">ПРОБЕЛ / КЛИК / ТАП — ПРЫЖОК</div>
+    <div id="hint">SPACE / CLICK / TAP — JUMP</div>
 
     <script>
       const canvas = document.getElementById("c");
@@ -172,7 +172,6 @@
       }
 
       function drawBg() {
-        // Sky gradient (baked draw calls)
         const sky = ctx.createLinearGradient(0, 0, 0, H - 60);
         sky.addColorStop(0, "#1a3a6e");
         sky.addColorStop(0.5, "#c45c0a");
@@ -180,7 +179,6 @@
         ctx.fillStyle = sky;
         ctx.fillRect(0, 0, W, H - 60);
 
-        // Sun
         ctx.save();
         ctx.globalAlpha = 0.25;
         ctx.fillStyle = "#ffe066";
@@ -437,26 +435,26 @@
           ctx.fillStyle = "#f5c842";
           ctx.font = '14px "Press Start 2P"';
           ctx.textAlign = "center";
-          ctx.fillText("БАУРСАК", W / 2, 205);
+          ctx.fillText("BAURSAK", W / 2, 205);
 
           ctx.fillStyle = "#e09020";
           ctx.font = '7px "Press Start 2P"';
-          ctx.fillText("ПРЫГАЮЩИЙ ГЕРОЙ", W / 2, 225);
+          ctx.fillText("THE JUMPING HERO", W / 2, 225);
 
           ctx.fillStyle = "#fff";
           ctx.font = '7px "Press Start 2P"';
-          ctx.fillText("Собирай монеты", W / 2, 260);
-          ctx.fillText("Избегай препятствий", W / 2, 278);
+          ctx.fillText("Collect coins", W / 2, 260);
+          ctx.fillText("Avoid obstacles", W / 2, 278);
 
           ctx.fillStyle = "#f5c842";
           ctx.font = '8px "Press Start 2P"';
           const blink = Math.floor(frame / 25) % 2 === 0;
-          if (blink) ctx.fillText("НАЖМИ ДЛЯ СТАРТА", W / 2, 320);
+          if (blink) ctx.fillText("PRESS TO START", W / 2, 320);
 
           if (bestScore > 0) {
             ctx.fillStyle = "#c8860a";
             ctx.font = '7px "Press Start 2P"';
-            ctx.fillText("РЕКОРД: " + bestScore, W / 2, 348);
+            ctx.fillText("BEST: " + bestScore, W / 2, 348);
           }
         }
 
@@ -475,29 +473,29 @@
           ctx.fillStyle = "#e04010";
           ctx.font = '14px "Press Start 2P"';
           ctx.textAlign = "center";
-          ctx.fillText("ОЙ!", W / 2, 195);
+          ctx.fillText("OOPS!", W / 2, 195);
 
           ctx.fillStyle = "#fff";
           ctx.font = '8px "Press Start 2P"';
-          ctx.fillText("ОЧКИ: " + score, W / 2, 230);
+          ctx.fillText("SCORE: " + score, W / 2, 230);
           ctx.fillStyle = "#f5c842";
-          ctx.fillText("МОНЕТЫ: " + coins, W / 2, 255);
+          ctx.fillText("COINS: " + coins, W / 2, 255);
 
           if (score >= bestScore) {
             ctx.fillStyle = "#f5c842";
             ctx.font = '7px "Press Start 2P"';
-            ctx.fillText("🏆 НОВЫЙ РЕКОРД!", W / 2, 285);
+            ctx.fillText("🏆 NEW RECORD!", W / 2, 285);
           } else {
             ctx.fillStyle = "#aaa";
             ctx.font = '7px "Press Start 2P"';
-            ctx.fillText("РЕКОРД: " + bestScore, W / 2, 285);
+            ctx.fillText("BEST: " + bestScore, W / 2, 285);
           }
 
           const blink = Math.floor(frame / 25) % 2 === 0;
           if (blink) {
             ctx.fillStyle = "#f5c842";
             ctx.font = '7px "Press Start 2P"';
-            ctx.fillText("НАЖМИ ДЛЯ РЕСТАРТА", W / 2, 350);
+            ctx.fillText("PRESS TO RESTART", W / 2, 350);
           }
         }
       }

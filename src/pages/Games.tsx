@@ -4,21 +4,16 @@ const GAMES = [
   {
     title: "Bauyrsaq's adventure",
     desc: `A playful platformer where bauyrsaq jumps, rolls and avoids obstacles.`,
-    img: "/images/card1.svg",
+    img: "/images/baursak-img.png",
     to: "bauyrsaq",
+    disabled: false,
   },
   {
     title: "Tulpar Dash",
     desc: `A fast-paced steppe runner game inspired by legendary horses.`,
-    img: "/images/card2.svg",
+    img: "/images/tulpar-img.png",
     to: "tulpar",
-  },
-  {
-    title: "Coming soon",
-    desc: `Another mini-game is in development. Stay tuned.`,
-    img: "/images/card3.svg",
-    to: "#",
-    disabled: true,
+    disabled: false,
   },
 ];
 
@@ -31,12 +26,8 @@ export const Games = () => {
 
       <section
         className="
-        grid justify-center gap-y-10
-        sm:grid-cols-1
-        md:grid-cols-2
-        lg:grid-cols-4
-        gap-x-10 lg:gap-x-[120px]
-      "
+          flex flex-wrap justify-center gap-x-20 gap-y-10
+        "
       >
         {GAMES.map((game) =>
           game.disabled ? (
@@ -44,11 +35,13 @@ export const Games = () => {
               key={game.title}
               className="flex max-w-[260px] flex-col items-center text-center opacity-60"
             >
-              <img
-                src={game.img}
-                alt={game.title}
-                className="mb-2 w-full max-w-[250px]"
-              />
+              <div className="mb-3 h-[200px] w-[200px] overflow-hidden rounded-3xl bg-gray-100">
+                <img
+                  src={game.img}
+                  alt={game.title}
+                  className="h-full w-full object-cover"
+                />
+              </div>
 
               <h2 className="text-xl font-normal">{game.title}</h2>
 
@@ -62,11 +55,13 @@ export const Games = () => {
               to={game.to}
               className="group flex max-w-[260px] flex-col items-center text-center"
             >
-              <img
-                src={game.img}
-                alt={game.title}
-                className="mb-2 w-full max-w-[250px] transition-transform group-hover:-translate-y-1"
-              />
+              <div className="mb-3 h-[200px] w-[200px] overflow-hidden rounded-3xl bg-gray-100">
+                <img
+                  src={game.img}
+                  alt={game.title}
+                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+              </div>
 
               <h2 className="text-xl font-normal transition-colors group-hover:text-[#8b6c00]">
                 {game.title}
