@@ -16,10 +16,13 @@ import { AnimalIntroPage } from "../pages/AnimalTest/AnimalIntroPage";
 import { WeaponIntroTestPage } from "../pages/Weapon/WeaponIntroPage";
 import WeaponQuestion from "../pages/Weapon/WeaponQuestion";
 import WeaponResult from "../pages/Weapon/WeaponResult";
-import { ColorIntroTestPage } from "../pages/Color/ColorIntroPage";
-import ColorQuestionPage from "../pages/Color/ColorQuestions";
-import ColorResultPage from "../pages/Color/ColorResult";
 import Profile from "../pages/ProfilePage";
+import { SteppeRoadIntroPage } from "../pages/SteppeRoad/SteppeRoadIntroPage";
+import { SteppeRoadQuestion } from "../pages/SteppeRoad/SteppeRoadQuestion";
+import { SteppeRoadResult } from "../pages/SteppeRoad/SteppeRoadResult";
+import { EnemyIntroPage } from "../pages/Enemy/EnemyIntroPage";
+import { EnemyQuestion } from "../pages/Enemy/EnemyQuestion";
+import { EnemyResult } from "../pages/Enemy/EnemyResult";
 
 export const router = createBrowserRouter([
   {
@@ -91,16 +94,28 @@ export const router = createBrowserRouter([
         element: <WeaponResult />,
       },
       {
-        path: "tests/color-intro",
-        element: <ColorIntroTestPage />,
+        path: "tests/road-intro",
+        element: <SteppeRoadIntroPage />,
       },
       {
-        path: "tests/color-questions",
-        element: <ColorQuestionPage />,
+        path: "tests/road-questions",
+        element: <SteppeRoadQuestion />,
       },
       {
-        path: "tests/color-result",
-        element: <ColorResultPage />,
+        path: "tests/road-result",
+        element: <SteppeRoadResult />,
+      },
+      {
+        path: "tests/enemy-intro",
+        element: <EnemyIntroPage />,
+      },
+      {
+        path: "tests/enemy-questions",
+        element: <EnemyQuestion />,
+      },
+      {
+        path: "tests/enemy-result",
+        element: <EnemyResult />,
       },
       {
         path: "profile",

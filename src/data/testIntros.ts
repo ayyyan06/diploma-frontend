@@ -71,27 +71,51 @@ export const TEST_INTRO_CONTENT = {
       },
     ],
   },
-  color: {
-    title: "Which color is yours?",
+  road: {
+    title: "The Steppe Road",
     description:
-      "Rank the colors twice by immediate inner feeling. The reading is inspired by Luscher and retold through a Kazakh palette to reflect current needs, pressure points, and emotional orientation.",
-    imageSrc: "/images/card4.svg",
-    imageAlt: "Color test illustration",
+      "This scenario-based test follows one connected journey across the steppe. It explores how you respond to uncertainty, pressure, and changing conditions, then maps your pattern to one of four road roles.",
+    imageSrc: "/images/yurt.png",
+    imageAlt: "Steppe road test illustration",
     infoBoxes: [
       {
         tone: "duration",
-        value: "3-4 min",
+        value: "4-6 min",
         label: "Average duration",
       },
       {
         tone: "format",
-        value: "2 rounds",
-        label: "8 colors ranked twice",
+        value: "8 scenes",
+        label: "One connected scenario",
       },
       {
         tone: "result",
-        value: "1 reading",
-        label: "Psychological color interpretation",
+        value: "1 role",
+        label: "Your road style under pressure",
+      },
+    ],
+  },
+  enemy: {
+    title: "Who's Your Enemy?",
+    description:
+      "This scenario-based test is built around Klaus Grawe's four basic psychological needs. It explores whether betrayal, humiliation, chaos, or crushing power is most likely to overpower you.",
+    imageSrc: "/images/enemy-card.svg",
+    imageAlt: "Enemy test illustration",
+    infoBoxes: [
+      {
+        tone: "duration",
+        value: "5-7 min",
+        label: "Average duration",
+      },
+      {
+        tone: "format",
+        value: "8 scenes",
+        label: "One connected pressure story",
+      },
+      {
+        tone: "result",
+        value: "4 scales",
+        label: "One dominant enemy + spectrum",
       },
     ],
   },
