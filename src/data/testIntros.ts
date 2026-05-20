@@ -99,7 +99,7 @@ export const TEST_INTRO_CONTENT = {
     title: "Who's Your Enemy?",
     description:
       "This scenario-based test is built around Klaus Grawe's four basic psychological needs. It explores whether betrayal, humiliation, chaos, or crushing power is most likely to overpower you.",
-    imageSrc: "/images/enemy-card.svg",
+    imageSrc: "/images/enemy-intro.png",
     imageAlt: "Enemy test illustration",
     infoBoxes: [
       {

@@ -74,11 +74,19 @@ export const EnemyIntroPage = () => {
         </div>
 
         <div className="flex items-center justify-center">
-          <img
-            src={imageSrc}
-            alt={imageAlt}
-            className="block max-h-[420px] max-w-full object-contain"
-          />
+          <div
+            className="
+              h-[281px] w-[281px] shrink-0 overflow-hidden rounded-[44px] bg-[#f6f3eb]
+              max-[1280px]:h-[281px] max-[1280px]:w-[281px]
+              max-[768px]:h-auto max-[768px]:w-full max-[768px]:max-w-[281px] max-[768px]:aspect-square
+            "
+          >
+            <img
+              src={imageSrc}
+              alt={imageAlt}
+              className="block h-full w-full scale-[1.08] object-cover object-[46%_44%]"
+            />
+          </div>
         </div>
       </section>
     </main>
