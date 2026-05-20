@@ -12,6 +12,8 @@ type NeedWeights = Record<NeedKey, number>;
 interface EnemyProfile {
   title: string;
   subtitle: string;
+  imageSrc: string;
+  imageAlt: string;
   threatenedNeed: string;
   needDescription: string;
   tagline: string;
@@ -61,6 +63,8 @@ export interface EnemyResultData {
   enemyKey: EnemyKey;
   title: string;
   subtitle: string;
+  imageSrc: string;
+  imageAlt: string;
   threatenedNeed: string;
   needDescription: string;
   tagline: string;
@@ -83,6 +87,8 @@ const ENEMY_PROFILES: Record<EnemyKey, EnemyProfile> = {
   mystan: {
     title: "Mystan",
     subtitle: "Your dominant enemy is hidden motive and betrayal",
+    imageSrc: "/images/mystan.png",
+    imageAlt: "Mystan result illustration",
     threatenedNeed: "Attachment / Trust",
     needDescription:
       "In Grawe's model, this result points to Attachment under threat. What gets shaken first is trust: the feeling that people are reliable, readable, and emotionally safe to stand near.",
@@ -117,6 +123,8 @@ const ENEMY_PROFILES: Record<EnemyKey, EnemyProfile> = {
   zheztyrnak: {
     title: "Zheztyrnak",
     subtitle: "Your dominant enemy is humiliation and wounded status",
+    imageSrc: "/images/zheztyrnaq.png",
+    imageAlt: "Zheztyrnak result illustration",
     threatenedNeed: "Self-Esteem / Dignity",
     needDescription:
       "In Grawe's model, this result points to Self-Esteem under threat. What gets shaken first is dignity: the need to feel respected, valued, and not publicly reduced.",
@@ -151,6 +159,8 @@ const ENEMY_PROFILES: Record<EnemyKey, EnemyProfile> = {
   aydahar: {
     title: "Aydahar",
     subtitle: "Your dominant enemy is chaos and loss of control",
+    imageSrc: "/images/aidahar.png",
+    imageAlt: "Aydahar result illustration",
     threatenedNeed: "Orientation & Control",
     needDescription:
       "In Grawe's model, this result points to Orientation and Control under threat. What gets shaken first is the need to understand what is happening and feel that the situation can still be held together.",
@@ -185,6 +195,8 @@ const ENEMY_PROFILES: Record<EnemyKey, EnemyProfile> = {
   zhalgyzKozdiDau: {
     title: "Zhalgyz Kozdi Dau",
     subtitle: "Your dominant enemy is crushing power and entrapment",
+    imageSrc: "/images/dau.png",
+    imageAlt: "Zhalgyz Kozdi Dau result illustration",
     threatenedNeed: "Safety / Pain Avoidance",
     needDescription:
       "In Grawe's model, this result points to safety under threat. What gets shaken first is the need not to be crushed, sacrificed, or trapped inside a force that has stopped seeing people as people.",
@@ -650,6 +662,8 @@ export const buildEnemyTestResult = (
     enemyKey,
     title: profile.title,
     subtitle: profile.subtitle,
+    imageSrc: profile.imageSrc,
+    imageAlt: profile.imageAlt,
     threatenedNeed: profile.threatenedNeed,
     needDescription: profile.needDescription,
     tagline: profile.tagline,

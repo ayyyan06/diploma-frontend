@@ -3,21 +3,21 @@ import { NavLink } from "react-router-dom";
 const TESTS = [
   {
     title: "What's your personality?",
-    desc: `A psychological test based on Big Five, mapped to Kazakh archetypes.`,
+    desc: `A psychological test based on Big Five, mapped to Kazakh Jungian archetypes like Batyr, Zhyrau, Shanyraq Keeper, and Aldar Kose.`,
     img: "/images/card1.svg",
     to: "/tests/personality-intro",
     imageMode: "contain",
   },
   {
     title: "What's your animal?",
-    desc: `Eysenck temperament mapped to Kazakh animals.`,
+    desc: `A psychological test based on Eysenck temperament, retold through four Kazakh animals.`,
     img: "/images/card2.svg",
     to: "/tests/animal-intro",
     imageMode: "contain",
   },
   {
     title: "What's your weapon?",
-    desc: `Conflict style based on Thomas-Kilmann model.`,
+    desc: `A psychological test of conflict style based on Thomas-Kilmann, retold through Kazakh weapons.`,
     img: "/images/card3.svg",
     to: "/tests/weapon-intro",
     imageMode: "contain",
@@ -25,7 +25,7 @@ const TESTS = [
   {
     title: "Who's Your Enemy?",
     desc: `A scenario test based on Klaus Grawe's four basic psychological needs.`,
-    img: "/images/enemy-card.svg",
+    img: "/images/enemy-intro.png",
     to: "/tests/enemy-intro",
     imageMode: "cover",
   },
@@ -58,6 +58,10 @@ export const Tests = () => {
                 src={test.img}
                 alt={test.title}
                 className={`h-full w-full transition-transform group-hover:-translate-y-1 ${
+                  test.title === "Who's Your Enemy?"
+                    ? "scale-[1.08] object-[46%_44%]"
+                    : ""
+                } ${
                   test.imageMode === "cover" ? "object-cover" : "object-contain"
                 }`}
               />

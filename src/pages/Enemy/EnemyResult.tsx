@@ -158,6 +158,14 @@ export const EnemyResult = () => {
 
       <section className="grid grid-cols-[360px_1fr] gap-7 max-[1100px]:grid-cols-1">
         <div className="h-fit rounded-[28px] border-2 border-[#ece7dd] bg-white p-8 shadow-[0_8px_24px_rgba(24,24,24,0.04)]">
+          <div className="mb-6 overflow-hidden rounded-[28px] bg-[#f6f3eb]">
+            <img
+              src={result.imageSrc}
+              alt={result.imageAlt}
+              className="block aspect-square w-full object-cover"
+            />
+          </div>
+
           <div
             className="mb-6 flex h-[108px] w-[108px] items-center justify-center rounded-full border-2 text-center text-[16px] font-bold leading-[1.35]"
             style={{
