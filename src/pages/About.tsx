@@ -1,10 +1,10 @@
 import { NavLink } from "react-router-dom";
 const ABOUT_FEATURES = [
   {
-    value: "3",
-    label: "interactive games",
+    value: "5",
+    label: "test journeys",
     description:
-      "Personality, animal-temperament, and conflict-style journeys inspired by Kazakh motifs.",
+      "Personality, animal-temperament, conflict-style, scenario-road, and mythic-enemy journeys inspired by Kazakh motifs.",
   },
   {
     value: "5-10 min",
@@ -33,13 +33,22 @@ const ABOUT_PATHS = [
     title: "Weapon symbolism",
     description: "Bow, spear, saber, shield conflict styles.",
   },
+  {
+    title: "Steppe road scenario",
+    description: "A connected story about uncertainty, pressure, and road roles.",
+  },
+  {
+    title: "Mythic enemy reading",
+    description:
+      "A Grawe-based story-driven test about whether betrayal, humiliation, chaos, or crushing power is most likely to overpower you.",
+  },
 ];
 
 const ABOUT_STEPS = [
   {
     number: "01",
     title: "Choose a path",
-    description: "Pick personality, animal or weapon journey.",
+    description: "Pick personality, animal, weapon, road, or enemy journey.",
   },
   {
     number: "02",
@@ -49,7 +58,7 @@ const ABOUT_STEPS = [
   {
     number: "03",
     title: "Get result",
-    description: "Personal archetype card and insights.",
+    description: "A personal profile card, role reading, and insights.",
   },
 ];
 
