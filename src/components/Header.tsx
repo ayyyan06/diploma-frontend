@@ -52,12 +52,23 @@ export function Header() {
     <>
       <header className="mt-8 box-border flex items-center justify-between gap-6 px-[60px] font-sans max-[1100px]:flex-wrap max-[1100px]:justify-center max-[680px]:px-5">
         {/* LOGO */}
-        <NavLink to="/" className="p-0">
+        {/* LOGO */}
+        <NavLink to="/" className="flex items-center gap-4 p-0">
           <img
-            className="block w-full max-w-[236px]"
-            src="/icons/logo.svg"
+            className="h-[56px] w-[56px] rounded-full object-cover"
+            src="/images/logo.jpg"
             alt="Ruh Compass logo"
           />
+
+          <div className="flex flex-col leading-none">
+            <span className="text-[28px] font-black tracking-wide text-[#2b2b2b]">
+              Ruh Compass
+            </span>
+
+            <span className="mt-1 text-[12px] font-medium uppercase tracking-[4px] text-[#9a6e00]">
+              Discover Yourself
+            </span>
+          </div>
         </NavLink>
 
         {/* MENU */}
