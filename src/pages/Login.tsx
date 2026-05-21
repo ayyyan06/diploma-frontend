@@ -23,21 +23,18 @@ export const Auth = () => {
         navigate("/");
       } else {
         // 👉 тут твой register endpoint
-        await fetch(
-          "https://diploma-back-a49a574c3cdb.herokuapp.com/api/v1/register",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              username: loginName,
-              nickname: nickName,
-              password,
-              email,
-            }),
+        await fetch("http://localhost:8000/api/v1/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-        );
+          body: JSON.stringify({
+            username: loginName,
+            nickname: nickName,
+            password,
+            email,
+          }),
+        });
 
         // после регистрации можно сразу логинить или переключать
         setMode("login");

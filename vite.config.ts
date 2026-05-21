@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "https://diploma-back-a49a574c3cdb.herokuapp.com",
+        target: "http://localhost:8000",
         changeOrigin: true,
         secure: false,
       },

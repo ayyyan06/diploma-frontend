@@ -23,6 +23,9 @@ import { SteppeRoadResult } from "../pages/SteppeRoad/SteppeRoadResult";
 import { EnemyIntroPage } from "../pages/Enemy/EnemyIntroPage";
 import { EnemyQuestion } from "../pages/Enemy/EnemyQuestion";
 import { EnemyResult } from "../pages/Enemy/EnemyResult";
+import { TestIntroPage } from "../pages/Test/TestDetailIntro";
+import { TestQestionsPage } from "../pages/Test/TestQuestionsPage";
+import { TestResult } from "../pages/Test/TestResult";
 
 export const router = createBrowserRouter([
   {
@@ -120,6 +123,18 @@ export const router = createBrowserRouter([
       {
         path: "profile",
         element: <Profile />,
+      },
+      {
+        path: "tests/:id/intro",
+        element: <TestIntroPage />,
+      },
+      {
+        path: "tests/:id",
+        element: <TestQestionsPage />,
+      },
+      {
+        path: "tests/:id/result",
+        element: <TestResult />,
       },
     ],
   },
