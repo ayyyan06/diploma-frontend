@@ -67,7 +67,7 @@ export const TestIntroPage = () => {
     <main className="mt-[74px] mx-[110px] mb-[150px]">
       <section
         className="
-          w-[1220px]
+          
           min-h-[580px]
           box-border
           border-2

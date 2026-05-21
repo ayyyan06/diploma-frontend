@@ -74,12 +74,13 @@ export const Tests = () => {
 
       <section
         className="
-          grid justify-center gap-y-10
-          sm:grid-cols-1
-          md:grid-cols-2
-          lg:grid-cols-4
-          gap-x-10 lg:gap-x-[70px]
-        "
+    flex
+    justify-center
+    gap-x-[70px]
+    gap-y-10
+    flex-row
+    justify-evenly
+  "
       >
         {tests.map((test: any) => {
           const canAfford = coins === null || coins >= TEST_COST;

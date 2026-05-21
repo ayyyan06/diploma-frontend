@@ -4,13 +4,14 @@ import { fetchWithToken } from "../api/apiutils";
 
 const DEFAULT_MENU_ITEMS = [
   { label: "Home", path: "/" },
-  { label: "About", path: "/about" },
   { label: "Tests", path: "/tests" },
   { label: "Games", path: "/games" },
+  { label: "Community", path: "/community" },
 ];
 
 export function Header() {
   const [coins, setCoins] = useState<number | null>(null);
+  const [incomingCount, setIncomingCount] = useState(0);
 
   useEffect(() => {
     const loadCoins = async () => {
@@ -21,13 +22,27 @@ export function Header() {
       } catch {}
     };
 
+    const loadIncoming = async () => {
+      try {
+        const res = await fetchWithToken(
+          "/api/v1/community/friend-requests/incoming",
+        );
+        const data = await res.json();
+        setIncomingCount(data.count ?? 0);
+      } catch {}
+    };
+
     const handler = (event: MessageEvent) => {
       if (event.data?.type === "coins:updated") {
         loadCoins();
       }
+      if (event.data?.type === "friendRequests:updated") {
+        loadIncoming();
+      }
     };
 
     loadCoins();
+    loadIncoming();
 
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
@@ -65,14 +80,25 @@ export function Header() {
                 }`
               }
             >
-              {item.label}
+              {item.label === "Community" ? (
+                <span className="relative">
+                  Community
+                  {incomingCount > 0 && (
+                    <span className="absolute -right-4 -top-2 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-black text-white">
+                      {incomingCount}
+                    </span>
+                  )}
+                </span>
+              ) : (
+                item.label
+              )}
             </NavLink>
           ))}
         </nav>
 
         {/* ACTIONS */}
         <div className="flex items-center gap-[18px] max-[680px]:w-full max-[680px]:flex-wrap max-[680px]:justify-center">
-          {/* COIN BALANCE — показываем только если авторизован */}
+          {/* COIN BALANCE */}
           {coins !== null && (
             <div
               className="flex h-[44px] min-w-[130px] items-center justify-center gap-[8px]
@@ -81,7 +107,6 @@ export function Header() {
               text-[16px] font-bold text-[#9a6e00]
               select-none"
             >
-              {/* монета */}
               <span
                 className="flex h-[20px] w-[20px] shrink-0 items-center justify-center
                 rounded-full bg-[#f2c200] shadow-[inset_0_-2px_0_rgba(0,0,0,0.15)]

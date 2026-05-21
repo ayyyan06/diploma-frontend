@@ -1,75 +1,207 @@
 import { NavLink } from "react-router-dom";
+const ABOUT_FEATURES = [
+  {
+    value: "5",
+    label: "test journeys",
+    description:
+      "Personality, animal-temperament, conflict-style, scenario-road, and mythic-enemy journeys inspired by Kazakh motifs.",
+  },
+  {
+    value: "5-10 min",
+    label: "to complete",
+    description:
+      "Short, playful sessions built for curiosity, reflection, and shareable results.",
+  },
+  {
+    value: "100%",
+    label: "culture-centered",
+    description:
+      "Every path is shaped by symbols, stories, and emotional tones from the steppe.",
+  },
+];
 
+const ABOUT_PATHS = [
+  {
+    title: "Archetype stories",
+    description: "Batyr, Zhyrau, Aldar Kose, Shanyraq Keeper archetypes.",
+  },
+  {
+    title: "Animal temperament lens",
+    description: "Eagle, horse, wolf, snow leopard psychology mapping.",
+  },
+  {
+    title: "Weapon symbolism",
+    description: "Bow, spear, saber, shield conflict styles.",
+  },
+];
+
+const ABOUT_STEPS = [
+  {
+    number: "01",
+    title: "Choose a path",
+    description: "Pick personality, animal, weapon, road, or enemy journey.",
+  },
+  {
+    number: "02",
+    title: "Answer questions",
+    description: "Symbolic scenarios and choices.",
+  },
+  {
+    number: "03",
+    title: "Get result",
+    description: "A personal profile card, role reading, and insights.",
+  },
+];
 export const Home = () => {
   return (
-    <div>
-      <main className="mx-auto mt-[133px] flex w-full max-w-[1021px] items-center justify-between px-6">
-        {/* LEFT */}
-        <div className="flex w-[533px] flex-col items-start">
-          {/* TOP LINE */}
-          <div className="mb-[15px] flex items-center gap-[23px]">
-            <img
-              src="/images/kazakhstan-flag.svg"
-              alt="Kazakhstan flag"
-              className="h-[29px]"
-            />
+    <div className="min-h-screen w-full pb-20">
+      <main className="mx-auto mt-10 max-w-6xl px-6">
+        {/* HERO */}
+        <section className="grid gap-10 lg:grid-cols-2 items-center">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-[#8b6c00]">
+              About Ruh Compass
+            </p>
 
-            <span className="text-[13px] text-[#6a6a6a]">
-              JOIN THOUSANDS DISCOVERING THEIR CULTURAL ARCHETYPE
-            </span>
+            <h1 className="mt-4 text-4xl font-extrabold leading-tight md:text -5xl">
+              A cultural journey through Kazakh archetypes, symbols, and stories
+            </h1>
+
+            <p className="mt-6 text-gray-600 leading-relaxed">
+              Ruh Compass explores personality through steppe-inspired
+              storytelling instead of generic labels.
+            </p>
+
+            <div className="mt-6 flex flex-wrap gap-3">
+              {[
+                "Kazakh storytelling",
+                "Int  eractive experience",
+                "Personality insights",
+              ].map((t) => (
+                <span
+                  key={t}
+                  className="rounded-full border border-yellow-300 bg-white px-4 py-2 text-sm"
+                >
+                  {t}
+                </span>
+              ))}
+            </div>
+
+            <div className="mt-8 flex gap-4 flex-wrap">
+              {/* <button className="rounded-xl bg-yellow-400 px-6 py-3 font-bold text-white">
+                Start Test
+              </button> */}
+              <NavLink
+                to="/tests"
+                className="rounded-xl bg-yellow-400 px-6 py-3 font-bold text-white"
+              >
+                Start Test
+              </NavLink>
+
+              <NavLink
+                to="/games"
+                className="rounded-xl border px-6 py-3 font-semibold"
+              >
+                Explore Games
+              </NavLink>
+            </div>
           </div>
 
-          {/* TITLE */}
-          <h1 className="mb-[14px] text-[50px] font-extrabold leading-[63px]">
-            DISCOVER YOURSELF <br />
-            THROUGH KAZAKH <br />
-            ARCHETYPES
-          </h1>
+          <div className="relative rounded-3xl border bg-white p-6 shadow-xl">
+            <div className="absolute left-4 top-4 rounded-full bg-white px-4 py-2 text-sm font-semibold text-yellow-700 shadow">
+              Steppe spirit, modern play
+            </div>
 
-          {/* DESCRIPTION */}
-          <p className="mb-[10px] w-[445px] text-[17px] leading-[29px]">
-            A gamified personality journey inspired by the spirit of the steppe,
-            nomadic heritage, and Kazakh traditions.
-          </p>
+            <img
+              src="/images/reading-boy.svg"
+              alt=""
+              className="mx-auto mt-16 w-[320px]"
+            />
+          </div>
+        </section>
 
-          {/* POINTS */}
-          <div className="mb-[28px] flex flex-col gap-0">
-            {[
-              "5–10 minute interactive test",
-              "Archetypes inspired by Kazakh culture",
-              "Personal profile and insights",
-            ].map((text) => (
+        {/* FEATURES */}
+        <section className="mt-12 grid gap-6 md:grid-cols-3">
+          {ABOUT_FEATURES.map((f) => (
+            <div
+              key={f.label}
+              className="rounded-2xl border bg-white p-6 shadow"
+            >
+              <div className="text-3xl font-extrabold">{f.value}</div>
+              <div className="mt-2 text-xl font-semibold">{f.label}</div>
+              <p className="mt-3 text-gray-600">{f.description}</p>
+            </div>
+          ))}
+        </section>
+
+        {/* STORY */}
+        <section className="mt-12 grid gap-6 lg:grid-cols-2">
+          <div className="rounded-2xl border bg-white p-6 shadow">
+            <p className="text-xs font-bold uppercase text-yellow-700">
+              Why we made it
+            </p>
+
+            <h2 className="mt-2 text-2xl font-bold">
+              Personality feels richer when it is cultural
+            </h2>
+
+            <p className="mt-4 text-gray-600">
+              Built to make self-discovery warm, symbolic, and memorable.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {ABOUT_PATHS.map((p) => (
               <div
-                key={text}
-                className="flex items-center gap-[9px] text-[17px] text-[#6a6a6a]"
+                key={p.title}
+                className="rounded-2xl border bg-white p-6 shadow"
               >
-                <span className="h-[15px] w-[15px] rounded-full bg-[#ffd800]" />
-                {text}
+                <div className="text-xl font-bold">{p.title}</div>
+                <p className="mt-2 text-gray-600">{p.description}</p>
               </div>
             ))}
           </div>
+        </section>
 
-          {/* BUTTON */}
+        {/* STEPS */}
+        <section className="mt-12">
+          <h2 className="text-3xl font-bold">How it works</h2>
+
+          <div className="mt-6 grid gap-6 md:grid-cols-3">
+            {ABOUT_STEPS.map((s) => (
+              <div
+                key={s.number}
+                className="rounded-2xl border bg-white p-6 shadow"
+              >
+                <div className="text-yellow-600 font-bold text-xl">
+                  {s.number}
+                </div>
+                <div className="mt-2 text-xl font-bold">{s.title}</div>
+                <p className="mt-2 text-gray-600">{s.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="mt-12 flex flex-col justify-between gap-6 rounded-2xl border bg-white p-6 shadow lg:flex-row lg:items-center">
+          <div>
+            <p className="text-xs font-bold uppercase text-yellow-700">
+              Ready to try
+            </p>
+            <h2 className="mt-2 text-2xl font-bold">
+              Start your archetype journey today
+            </h2>
+          </div>
+
           <NavLink
             to="/tests"
-            className="flex h-[67px] w-[361px] items-center justify-center rounded-[10px] bg-[#ffd800] text-[20px] font-extrabold tracking-[2px] text-white"
+            className="rounded-xl bg-yellow-400 px-6 py-3 font-bold text-white"
           >
-            START TEST
+            Go To Tests
           </NavLink>
-        </div>
-
-        {/* RIGHT */}
-        <div className="flex items-center">
-          <img
-            src="/images/reading-boy.svg"
-            alt="Reading boy"
-            className="block"
-          />
-        </div>
+        </section>
       </main>
-
-      {/* BOTTOM LINE */}
-      <div className="mx-auto mt-[75px] h-[1px] w-[1176px] bg-black" />
     </div>
   );
 };
