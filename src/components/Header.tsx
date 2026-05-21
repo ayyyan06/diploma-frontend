@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
-// import { useAuth } from "../context/AuthContext";
+import { useEffect, useState } from "react";
+import { fetchWithToken } from "../api/apiutils";
 
 const DEFAULT_MENU_ITEMS = [
   { label: "Home", path: "/" },
@@ -9,7 +10,28 @@ const DEFAULT_MENU_ITEMS = [
 ];
 
 export function Header() {
-  //   const { isAuthenticated, coinBalance } = useAuth();
+  const [coins, setCoins] = useState<number | null>(null);
+
+  useEffect(() => {
+    const loadCoins = async () => {
+      try {
+        const res = await fetchWithToken("/api/v1/coins");
+        const data = await res.json();
+        setCoins(data.coins);
+      } catch {}
+    };
+
+    const handler = (event: MessageEvent) => {
+      if (event.data?.type === "coins:updated") {
+        loadCoins();
+      }
+    };
+
+    loadCoins();
+
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, []);
 
   return (
     <>
@@ -50,28 +72,27 @@ export function Header() {
 
         {/* ACTIONS */}
         <div className="flex items-center gap-[18px] max-[680px]:w-full max-[680px]:flex-wrap max-[680px]:justify-center">
-          {/* {isAuthenticated ? (
-            <button
-              type="button"
-              className="flex h-[44px] min-w-[130px] items-center justify-center gap-[10px]
+          {/* COIN BALANCE — показываем только если авторизован */}
+          {coins !== null && (
+            <div
+              className="flex h-[44px] min-w-[130px] items-center justify-center gap-[8px]
               rounded-[12px] border-[3px] border-[#f2c200]
               bg-[#fff8d9] px-[18px] py-[10px]
-              text-[16px] font-bold text-[#9a6e00]"
+              text-[16px] font-bold text-[#9a6e00]
+              select-none"
             >
-              <span className="h-[14px] w-[14px] rounded-full bg-[radial-gradient(circle_at_35%_35%,#fff7b0_0%,#f2c200_70%)]" />
-              {coinBalance} coins
-            </button>
-          ) : (
-            <NavLink
-              to="/auth"
-              className="flex h-[44px] w-[130px] items-center justify-center
-              rounded-[12px] border-[3px] border-[#f2c200]
-              text-[16px] font-semibold text-[#f2c200]
-              transition-opacity hover:opacity-80"
-            >
-              Sign in
-            </NavLink>
-          )} */}
+              {/* монета */}
+              <span
+                className="flex h-[20px] w-[20px] shrink-0 items-center justify-center
+                rounded-full bg-[#f2c200] shadow-[inset_0_-2px_0_rgba(0,0,0,0.15)]
+                text-[11px] font-black text-white"
+              >
+                ✦
+              </span>
+              <span>{coins.toLocaleString()}</span>
+            </div>
+          )}
+
           <NavLink
             to="/auth"
             className="flex h-[44px] w-[130px] items-center justify-center
@@ -97,7 +118,7 @@ export function Header() {
               className="ml-[56px] h-[36px] w-[36px] shrink-0 object-contain"
               src="/icons/profile-icon.svg"
               alt="Profile"
-            />{" "}
+            />
           </NavLink>
         </div>
       </header>

@@ -11,8 +11,8 @@ interface BigFiveTrait {
   narrative: string;
 }
 
-interface PersonalityResultData {
-  archetypeKey: string;
+interface PersonalityResult {
+  resultKey: string;
   title: string;
   subtitle: string;
   imageSrc: string;
@@ -21,23 +21,27 @@ interface PersonalityResultData {
   description: string;
   strengths: string[];
   growthAreas: string[];
-  whyThisArchetype: string;
-  shadowArchetype: string;
-  topTraits: string[];
   developmentFocus: string;
-  bigFive: BigFiveTrait[];
+  whyThisResult: string;
+
+  details: {
+    shadowArchetype: string;
+    topTraits: string[];
+    bigFive: BigFiveTrait[];
+  };
 }
 
 interface ResultApiResponse {
   test_id: number;
   test_type: string;
   test_title: string;
-  result: PersonalityResultData;
+  result: PersonalityResult;
   updated_at: string;
 }
 
 export const TestResult = () => {
   const navigate = useNavigate();
+
   const { id } = useParams();
 
   const [resultData, setResultData] = useState<ResultApiResponse | null>(null);
@@ -167,7 +171,7 @@ export const TestResult = () => {
           </h2>
 
           <ul className="m-0 pl-6 text-[18px] font-normal leading-[23px] text-[#555555]">
-            {result.topTraits.map((trait) => (
+            {result.details?.topTraits?.map((trait) => (
               <li key={trait} className="mb-2">
                 {trait}
               </li>
@@ -204,9 +208,9 @@ export const TestResult = () => {
               {result.description}
             </p>
 
-            {result.whyThisArchetype && (
+            {result.whyThisResult && (
               <p className="mt-5 text-[16px] leading-[26px] text-[#6f6a60] italic">
-                {result.whyThisArchetype}
+                {result.whyThisResult}
               </p>
             )}
           </div>
@@ -292,7 +296,7 @@ export const TestResult = () => {
             </h2>
 
             <div className="flex flex-col gap-5">
-              {result.bigFive.map((trait) => (
+              {result.details?.bigFive?.map((trait) => (
                 <div key={trait.key}>
                   <div className="flex justify-between items-center mb-2">
                     <div>
@@ -350,7 +354,7 @@ export const TestResult = () => {
               </h2>
 
               <p className="m-0 text-[18px] text-[#555]">
-                {result.shadowArchetype}
+                {result.details?.shadowArchetype}
               </p>
             </div>
 

@@ -7,11 +7,13 @@ export const TestQestionsPage = () => {
   const { id } = useParams();
 
   const [test, setTest] = useState<any>(null);
+
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
+  // questionId -> optionId
   const [selectedAnswers, setSelectedAnswers] = useState<
     Record<number, string>
   >({});
@@ -37,12 +39,17 @@ export const TestQestionsPage = () => {
     }
   }, [id]);
 
+  // QUESTIONS
   const questions = test?.questions || [];
-  const scaleOptions = test?.scale_options || [];
 
+  // CURRENT QUESTION
   const currentQuestion = questions[currentQuestionIndex];
 
   const currentQuestionNumber = currentQuestionIndex + 1;
+
+  // IMPORTANT:
+  // OPTIONS NOW COME INSIDE EACH QUESTION
+  const currentOptions = currentQuestion?.options || [];
 
   const selectedAnswer = currentQuestion
     ? selectedAnswers[currentQuestion.id]
@@ -68,9 +75,19 @@ export const TestQestionsPage = () => {
   const handleNextClick = async () => {
     if (!selectedAnswer) return;
 
+    // LAST QUESTION -> SUBMIT
     if (isLastQuestion) {
       try {
         setSubmitting(true);
+
+        // IMPORTANT:
+        // backend wants string -> string
+        // convert question ids to strings
+        const formattedAnswers: Record<string, string> = {};
+
+        Object.entries(selectedAnswers).forEach(([questionId, optionId]) => {
+          formattedAnswers[String(questionId)] = optionId;
+        });
 
         await fetchWithToken(
           `/api/v1/tests/${id}/submit`,
@@ -78,7 +95,7 @@ export const TestQestionsPage = () => {
             method: "POST",
           },
           {
-            answers: selectedAnswers,
+            answers: formattedAnswers,
           },
         );
 
@@ -166,13 +183,13 @@ export const TestQestionsPage = () => {
           </div>
         </div>
 
-        {/* Options */}
+        {/* OPTIONS */}
         <div
           className="grid grid-cols-2 gap-y-[22px] gap-x-[28px] mt-7 max-[900px]:grid-cols-1"
           role="group"
           aria-label="Answer options"
         >
-          {scaleOptions.map((answer: any) => {
+          {currentOptions.map((answer: any) => {
             const isSelected = answer.id === selectedAnswer;
 
             return (
