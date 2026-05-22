@@ -556,6 +556,32 @@
         handleInput();
       });
 
+      // ── Coin reward claim ──────────────────────────────────────────
+      async function claimCoins(finalScore) {
+        try {
+          const token = localStorage.getItem("api_token");
+          if (!token) return;
+          const res = await fetch("/api/v1/coins/claim-game-reward", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + token,
+            },
+            body: JSON.stringify({
+              game: "baursak_jump",
+              score: finalScore,
+              coins_earned: 0,
+            }),
+          });
+          if (res.ok) {
+            // сообщаем родительскому окну что монеты обновились
+            window.parent.postMessage({ type: "coins:updated" }, "*");
+          }
+        } catch (e) {
+          console.error("Coin claim failed:", e);
+        }
+      }
+
       function loop() {
         requestAnimationFrame(loop);
         frame++;
@@ -604,6 +630,7 @@
           if (checkCollisions()) {
             state = "DEAD";
             bestScore = Math.max(bestScore, score);
+            claimCoins(score);
             burst(baursak.x, baursak.y, "#e04010", 20);
             for (let i = 0; i < 5; i++)
               setTimeout(

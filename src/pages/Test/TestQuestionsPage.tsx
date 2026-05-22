@@ -1,31 +1,69 @@
-import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  PERSONALITY_ITEMS,
-  PERSONALITY_SCALE_OPTIONS,
-  buildPersonalityTestResult,
-} from "../../data/personalityTest";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { fetchWithToken } from "../../api/apiutils";
 
-export const PersonalityQuestion = () => {
+export const TestQestionsPage = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
+
+  const [test, setTest] = useState<any>(null);
+
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+
+  // questionId -> optionId
   const [selectedAnswers, setSelectedAnswers] = useState<
     Record<number, string>
   >({});
-  const [submitting, setSubmitting] = useState(false);
 
-  const currentQuestion = PERSONALITY_ITEMS[currentQuestionIndex];
+  useEffect(() => {
+    const loadTest = async () => {
+      try {
+        setLoading(true);
+
+        const res = await fetchWithToken(`/api/v1/tests/${id}`);
+        const resJson = await res.json();
+
+        setTest(resJson);
+      } catch (error) {
+        console.error("Ошибка загрузки теста:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      loadTest();
+    }
+  }, [id]);
+
+  // QUESTIONS
+  const questions = test?.questions || [];
+
+  // CURRENT QUESTION
+  const currentQuestion = questions[currentQuestionIndex];
+
   const currentQuestionNumber = currentQuestionIndex + 1;
-  const selectedAnswer = selectedAnswers[currentQuestion.id];
-  const isLastQuestion = currentQuestionNumber === PERSONALITY_ITEMS.length;
+
+  // IMPORTANT:
+  // OPTIONS NOW COME INSIDE EACH QUESTION
+  const currentOptions = currentQuestion?.options || [];
+
+  const selectedAnswer = currentQuestion
+    ? selectedAnswers[currentQuestion.id]
+    : null;
+
+  const isLastQuestion = currentQuestionNumber === questions.length;
+
   const isFirstQuestion = currentQuestionIndex === 0;
 
-  const progressValue = useMemo(
-    () => (currentQuestionNumber / PERSONALITY_ITEMS.length) * 100,
-    [currentQuestionNumber],
-  );
+  const progressValue = useMemo(() => {
+    if (!questions.length) return 0;
+
+    return (currentQuestionNumber / questions.length) * 100;
+  }, [currentQuestionNumber, questions.length]);
 
   const handleAnswerSelect = (answerId: string) => {
     setSelectedAnswers((prev) => ({
@@ -37,21 +75,37 @@ export const PersonalityQuestion = () => {
   const handleNextClick = async () => {
     if (!selectedAnswer) return;
 
+    // LAST QUESTION -> SUBMIT
     if (isLastQuestion) {
-      setSubmitting(true);
       try {
-        const result = buildPersonalityTestResult(selectedAnswers);
+        setSubmitting(true);
+
+        // IMPORTANT:
+        // backend wants string -> string
+        // convert question ids to strings
+        const formattedAnswers: Record<string, string> = {};
+
+        Object.entries(selectedAnswers).forEach(([questionId, optionId]) => {
+          formattedAnswers[String(questionId)] = optionId;
+        });
+
         await fetchWithToken(
-          "/api/v1/tests",
-          { method: "POST" },
-          { type: "personality", result },
+          `/api/v1/tests/${id}/submit`,
+          {
+            method: "POST",
+          },
+          {
+            answers: formattedAnswers,
+          },
         );
-        navigate("/tests/personality-result");
-      } catch (err) {
-        console.error("Failed to submit result:", err);
+
+        navigate(`/tests/${id}/result`);
+      } catch (error) {
+        console.error("Ошибка отправки теста:", error);
       } finally {
         setSubmitting(false);
       }
+
       return;
     }
 
@@ -64,12 +118,28 @@ export const PersonalityQuestion = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <main className="mt-[74px] mx-auto max-w-[1240px] px-[18px]">
+        <p className="text-[20px] font-medium">Loading...</p>
+      </main>
+    );
+  }
+
+  if (!test || !currentQuestion) {
+    return (
+      <main className="mt-[74px] mx-auto max-w-[1240px] px-[18px]">
+        <p className="text-[20px] font-medium">Test not found</p>
+      </main>
+    );
+  }
+
   return (
     <main className="w-full max-w-[1240px] mx-auto mt-[72px] px-[18px] pb-12 max-[900px]:mt-12">
       {/* Progress */}
-      <section className="grid gap-[14px] mb-9" aria-label="Question progress">
+      <section className="grid gap-[14px] mb-9">
         <p className="m-0 text-[20px] font-normal leading-[1.2] tracking-[0.02em] text-[#7a7a7a] max-[640px]:text-[16px]">
-          QUESTION {currentQuestionNumber} OF {PERSONALITY_ITEMS.length}
+          QUESTION {currentQuestionNumber} OF {questions.length}
         </p>
 
         <div className="w-full h-[14px] rounded-full bg-[#efefef] overflow-hidden">
@@ -86,7 +156,7 @@ export const PersonalityQuestion = () => {
         <div className="flex justify-between items-start gap-8 mb-[18px] max-[900px]:flex-col max-[900px]:items-start">
           <div className="max-w-[720px]">
             <p className="m-0 mb-3 text-[15px] font-bold tracking-[0.08em] uppercase text-[#8b6c00] max-[640px]:text-[13px]">
-              Big Five + Jungian archetype mapping
+              {test.type} test
             </p>
 
             <h1 className="m-0 mb-[34px] text-[37px] font-bold leading-[1.25] max-[640px]:text-[28px]">
@@ -99,29 +169,27 @@ export const PersonalityQuestion = () => {
             </p>
 
             <p className="mt-[14px] mb-0 text-[15px] leading-[1.5] text-[#6f6a60] max-[640px]:text-[14px]">
-              This test measures Big Five tendencies first and then maps the
-              profile to Jungian archetypes expressed through Kazakh figures:
-              Batyr, Zhyrau, Shanyraq Keeper, and Aldar Kose.
+              {test.description}
             </p>
           </div>
 
           {/* Badge */}
           <div className="w-[190px] aspect-square rounded-full bg-[#f7f2ea] flex items-center justify-center shrink-0 text-[#606060] text-center text-[18px] leading-[1.55] max-[640px]:w-[140px] max-[640px]:text-[16px]">
             <span>
-              Inner
+              Question
               <br />
-              Pattern
+              {currentQuestionNumber}
             </span>
           </div>
         </div>
 
-        {/* Options */}
+        {/* OPTIONS */}
         <div
           className="grid grid-cols-2 gap-y-[22px] gap-x-[28px] mt-7 max-[900px]:grid-cols-1"
           role="group"
-          aria-label="Agreement scale"
+          aria-label="Answer options"
         >
-          {PERSONALITY_SCALE_OPTIONS.map((answer: any) => {
+          {currentOptions.map((answer: any) => {
             const isSelected = answer.id === selectedAnswer;
 
             return (

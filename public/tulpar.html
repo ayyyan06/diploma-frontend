@@ -71,13 +71,11 @@
       canvas.height = H;
 
       // ─── PERSPECTIVE CONFIG ─────────────────────────────────────────
-      // Back-view: player horse at bottom, horizon at top-center
-      // 3 lanes side-by-side, converging to vanishing point at horizon
-      const HOR_Y = H * 0.355; // horizon y (ground begins)
-      const PLAY_Y = H * 0.895; // player ground level
-      const VP_X = W * 0.5; // vanishing point x (center)
-      const SPR_H = 34 * S; // half lane-spread at horizon
-      const SPR_P = 258 * S; // half lane-spread at player
+      const HOR_Y = H * 0.355;
+      const PLAY_Y = H * 0.895;
+      const VP_X = W * 0.5;
+      const SPR_H = 34 * S;
+      const SPR_P = 258 * S;
 
       function laneX(lane, t) {
         return VP_X + (lane - 1) * (SPR_H + (SPR_P - SPR_H) * t);
@@ -217,6 +215,31 @@
         };
       }
 
+      // ─── COIN REWARD CLAIM ──────────────────────────────────────────
+      async function claimCoins(finalScore) {
+        try {
+          const token = localStorage.getItem("api_token");
+          if (!token) return;
+          const res = await fetch("/api/v1/coins/claim-game-reward", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + token,
+            },
+            body: JSON.stringify({
+              game: "baursak_jump",
+              score: finalScore,
+              coins_earned: 0,
+            }),
+          });
+          if (res.ok) {
+            // сообщаем родительскому окну что монеты обновились
+            window.parent.postMessage({ type: "coins:updated" }, "*");
+          }
+        } catch (e) {
+          console.error("Coin claim failed:", e);
+        }
+      }
       // ─── UPDATE ─────────────────────────────────────────────────────
       function update() {
         if (STATE !== "playing") return;
@@ -293,7 +316,7 @@
             });
         }
 
-        // Advance depths (perspective acceleration: faster as objects get closer)
+        // Advance depths
         const DT = speed * 0.0012;
         for (let o of obs) {
           o.t += DT * (1 + o.t * 1.6);
@@ -346,6 +369,7 @@
             if (lives <= 0) {
               STATE = "gameover";
               hiScore = Math.max(hiScore, Math.floor(score));
+              claimCoins(Math.floor(score));
             }
             break;
           }
@@ -530,17 +554,7 @@
         g.addColorStop(1, "#8a6a38");
         ctx.fillStyle = g;
         ctx.fillRect(0, HOR_Y, W, H - HOR_Y);
-        // Edge vignette
         ["left", "right"].forEach((side, i) => {
-          const g2 = ctx.createLinearGradient(
-            i ? W * 0.72 : 0,
-            0,
-            i ? W : W * 0.28,
-            0,
-          );
-          g2.addColorStop(i ? 0 : 0, "rgba(0,0,0,0)");
-          g2.addColorStop(i ? 1 : 1, "rgba(0,0,0,0.28)");
-          if (i) g2.addColorStop(0, "rgba(0,0,0,0.28)");
           const vg = ctx.createLinearGradient(
             i ? W * 0.72 : 0,
             0,
@@ -554,7 +568,6 @@
         });
       }
       function drawLanes() {
-        // Dirt path strips
         for (let l = 0; l < 3; l++) {
           const hw = SPR_H * 0.55,
             pw = SPR_P * 0.52;
@@ -567,7 +580,6 @@
           ctx.closePath();
           ctx.fill();
         }
-        // Dashed dividers
         ctx.save();
         ctx.setLineDash([11 * S, 18 * S]);
         ctx.strokeStyle = "rgba(201,168,76,0.26)";
@@ -873,13 +885,11 @@
         }
         const g0 = Math.sin(gt);
 
-        // Shadow
         ctx.fillStyle = "rgba(0,0,0,0.25)";
         ctx.beginPath();
         ctx.ellipse(0, 8, 46, 10, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Tail (wavey, center-back)
         ctx.save();
         ctx.strokeStyle = "#3a2618";
         ctx.lineWidth = 5.5;
@@ -902,13 +912,11 @@
         ctx.stroke();
         ctx.restore();
 
-        // Legs (before body so body overlaps them)
         drawBackLeg(-24, 2, gt, false);
         drawBackLeg(24, 2, gt + Math.PI, false);
         drawBackLeg(-14, -4, gt + Math.PI * 0.55, true);
         drawBackLeg(14, -4, gt + Math.PI * 1.55, true);
 
-        // Rump / body (back view - wide rounded shape)
         const bg = ctx.createRadialGradient(-8, -32, 4, 0, -30, 46);
         bg.addColorStop(0, "#a06838");
         bg.addColorStop(0.6, "#7a5228");
@@ -921,13 +929,11 @@
         ctx.bezierCurveTo(38, 10, -38, 10, -44, -8);
         ctx.closePath();
         ctx.fill();
-        // Spine highlight
         ctx.fillStyle = "rgba(160,110,60,0.3)";
         ctx.beginPath();
         ctx.ellipse(0, -30, 10, 20, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Saddle
         const sg = ctx.createLinearGradient(0, -62, 0, -40);
         sg.addColorStop(0, "#d05a24");
         sg.addColorStop(1, "#a03818");
@@ -939,7 +945,6 @@
         ctx.bezierCurveTo(22, -36, -22, -36, -32, -42);
         ctx.closePath();
         ctx.fill();
-        // Saddle Kazakh trim
         ctx.strokeStyle = "#c9a84c";
         ctx.lineWidth = 1.8;
         ctx.beginPath();
@@ -955,7 +960,6 @@
           ctx.arc(i, -57, 1.5, 0, Math.PI * 2);
           ctx.fill();
         }
-        // Saddle straps
         ctx.strokeStyle = "#8a3010";
         ctx.lineWidth = 4.5;
         ctx.beginPath();
@@ -967,9 +971,7 @@
         ctx.quadraticCurveTo(35, -22, 30, 4);
         ctx.stroke();
 
-        // ─── RIDER ───
         const ry = -64;
-        // Legs
         ctx.fillStyle = "#1e1838";
         ctx.beginPath();
         ctx.ellipse(-18, ry + 26, 8, 15, 0.15, 0, Math.PI * 2);
@@ -977,7 +979,6 @@
         ctx.beginPath();
         ctx.ellipse(18, ry + 26, 8, 15, -0.15, 0, Math.PI * 2);
         ctx.fill();
-        // Boots
         ctx.fillStyle = "#1a1008";
         ctx.beginPath();
         ctx.ellipse(-20, ry + 37, 8, 5, 0.1, 0, Math.PI * 2);
@@ -994,7 +995,6 @@
         ctx.ellipse(20, ry + 33, 8, 4, -0.1, 0, Math.PI * 2);
         ctx.stroke();
 
-        // Chapan coat back
         const cg = ctx.createLinearGradient(-26, ry, -26, ry + 28);
         cg.addColorStop(0, "#c03820");
         cg.addColorStop(1, "#8a2812");
@@ -1010,14 +1010,12 @@
         ctx.lineTo(-24, ry + 8);
         ctx.closePath();
         ctx.fill();
-        // Gold center seam
         ctx.strokeStyle = "#c9a84c";
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(0, ry + 28);
         ctx.lineTo(0, ry - 3);
         ctx.stroke();
-        // Kazakh diamond ornaments on coat
         ctx.strokeStyle = "#c9a84c";
         ctx.lineWidth = 1.2;
         [
@@ -1036,7 +1034,6 @@
           ctx.closePath();
           ctx.stroke();
         });
-        // Collar gold trim
         ctx.strokeStyle = "#c9a84c";
         ctx.lineWidth = 2.5;
         ctx.beginPath();
@@ -1048,7 +1045,6 @@
         ctx.lineTo(24, ry + 4);
         ctx.stroke();
 
-        // Arms (holding reins going forward)
         ctx.strokeStyle = "#c03820";
         ctx.lineWidth = 7;
         ctx.lineCap = "round";
@@ -1067,7 +1063,6 @@
         ctx.beginPath();
         ctx.arc(30 - g0 * 3, ry - 14, 5.5, 0, Math.PI * 2);
         ctx.fill();
-        // Reins toward horizon
         ctx.strokeStyle = "#5a3820";
         ctx.lineWidth = 1.8;
         ctx.beginPath();
@@ -1079,12 +1074,10 @@
         ctx.lineTo(8, ry - 44);
         ctx.stroke();
 
-        // Neck
         ctx.fillStyle = "#c09060";
         ctx.beginPath();
         ctx.ellipse(0, ry - 9, 7.5, 9.5, 0, 0, Math.PI * 2);
         ctx.fill();
-        // Head from behind
         ctx.fillStyle = "#c09060";
         ctx.beginPath();
         ctx.arc(0, ry - 20, 11.5, 0, Math.PI * 2);
@@ -1094,7 +1087,6 @@
         ctx.ellipse(0, ry - 10, 6, 4, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Kalpak (Kazakh white felt hat) back view
         ctx.fillStyle = "#f0ebe0";
         ctx.beginPath();
         ctx.moveTo(-14, ry - 28);
@@ -1106,7 +1098,6 @@
         ctx.strokeStyle = "#c9a84c";
         ctx.lineWidth = 1.4;
         ctx.stroke();
-        // Brim splits
         ctx.strokeStyle = "#c9a84c";
         ctx.lineWidth = 1.6;
         ctx.beginPath();
@@ -1117,7 +1108,6 @@
         ctx.moveTo(14, ry - 28);
         ctx.lineTo(7, ry - 30);
         ctx.stroke();
-        // Back kalpak pattern
         ctx.strokeStyle = "rgba(201,168,76,0.55)";
         ctx.lineWidth = 1;
         ctx.beginPath();
@@ -1129,7 +1119,6 @@
         ctx.moveTo(-9, ry - 40);
         ctx.lineTo(9, ry - 40);
         ctx.stroke();
-        // Top jewel
         ctx.fillStyle = "#c9a84c";
         ctx.beginPath();
         ctx.arc(0, ry - 58, 3.5, 0, Math.PI * 2);

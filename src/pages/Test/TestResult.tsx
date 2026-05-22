@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { fetchWithToken } from "../../api/apiutils";
 
 interface BigFiveTrait {
@@ -11,8 +11,8 @@ interface BigFiveTrait {
   narrative: string;
 }
 
-interface PersonalityResultData {
-  archetypeKey: string;
+interface PersonalityResult {
+  resultKey: string;
   title: string;
   subtitle: string;
   imageSrc: string;
@@ -21,26 +21,33 @@ interface PersonalityResultData {
   description: string;
   strengths: string[];
   growthAreas: string[];
-  whyThisArchetype: string;
-  shadowArchetype: string;
-  topTraits: string[];
   developmentFocus: string;
-  bigFive: BigFiveTrait[];
+  whyThisResult: string;
+
+  details: {
+    shadowArchetype: string;
+    topTraits: string[];
+    bigFive: BigFiveTrait[];
+  };
 }
 
-interface PersonalityApiResponse {
-  results: {
-    id: number;
-    type: string;
-    result: PersonalityResultData;
-  }[];
+interface ResultApiResponse {
+  test_id: number;
+  test_type: string;
+  test_title: string;
+  result: PersonalityResult;
+  updated_at: string;
 }
 
-export const PersonalityResult = () => {
+export const TestResult = () => {
   const navigate = useNavigate();
 
-  const [result, setResult] = useState<PersonalityResultData | null>(null);
+  const { id } = useParams();
+
+  const [resultData, setResultData] = useState<ResultApiResponse | null>(null);
+
   const [loading, setLoading] = useState(true);
+
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -48,32 +55,13 @@ export const PersonalityResult = () => {
       try {
         setLoading(true);
 
-        const response = await fetchWithToken(
-          "/api/v1/tests?type=personality",
-          {
-            method: "GET",
-          },
-        );
+        const response = await fetchWithToken(`/api/v1/tests/${id}/result`, {
+          method: "GET",
+        });
 
-        const data: PersonalityApiResponse = await response.json();
+        const resJson = await response.json();
 
-        // берем только personality результаты
-        const personalityResults =
-          data.results?.filter(
-            (item) => item.type === "personality" && item.result,
-          ) || [];
-
-        if (personalityResults.length === 0) {
-          setResult(null);
-          return;
-        }
-
-        // сортируем по id DESC и берем самый новый
-        const latestResult = personalityResults.sort((a, b) => b.id - a.id)[0];
-
-        setResult(latestResult.result);
-
-        console.log("Latest result:", latestResult);
+        setResultData(resJson);
       } catch (err) {
         console.error(err);
 
@@ -83,11 +71,15 @@ export const PersonalityResult = () => {
       }
     };
 
-    fetchResult();
-  }, []);
+    if (id) {
+      fetchResult();
+    }
+  }, [id]);
+
+  const result = resultData?.result;
 
   const handleRetake = () => {
-    navigate("/tests/personality-questions");
+    navigate(`/tests/${id}`);
   };
 
   if (loading) {
@@ -110,20 +102,25 @@ export const PersonalityResult = () => {
         </h1>
 
         <p className="text-[18px] text-[#555] mb-8">
-          {error || "Please take the personality test first."}
+          {error || "Please take the test first."}
         </p>
 
         <button
           type="button"
-          onClick={() => navigate("/tests/personality-intro")}
+          onClick={() => navigate(`/tests/${id}/intro`)}
           className="
-            w-[230px] h-[58px]
-            border-none rounded-[12px]
+            w-[230px]
+            h-[58px]
+            border-none
+            rounded-[12px]
             bg-[#F2B705]
-            text-white text-[16px] font-bold
+            text-white
+            text-[16px]
+            font-bold
             leading-[20px]
             cursor-pointer
-            transition-opacity hover:opacity-90
+            transition-opacity
+            hover:opacity-90
           "
         >
           GO TO TEST
@@ -174,7 +171,7 @@ export const PersonalityResult = () => {
           </h2>
 
           <ul className="m-0 pl-6 text-[18px] font-normal leading-[23px] text-[#555555]">
-            {result.topTraits.map((trait) => (
+            {result.details?.topTraits?.map((trait) => (
               <li key={trait} className="mb-2">
                 {trait}
               </li>
@@ -211,9 +208,9 @@ export const PersonalityResult = () => {
               {result.description}
             </p>
 
-            {result.whyThisArchetype && (
+            {result.whyThisResult && (
               <p className="mt-5 text-[16px] leading-[26px] text-[#6f6a60] italic">
-                {result.whyThisArchetype}
+                {result.whyThisResult}
               </p>
             )}
           </div>
@@ -299,7 +296,7 @@ export const PersonalityResult = () => {
             </h2>
 
             <div className="flex flex-col gap-5">
-              {result.bigFive.map((trait) => (
+              {result.details?.bigFive?.map((trait) => (
                 <div key={trait.key}>
                   <div className="flex justify-between items-center mb-2">
                     <div>
@@ -357,7 +354,7 @@ export const PersonalityResult = () => {
               </h2>
 
               <p className="m-0 text-[18px] text-[#555]">
-                {result.shadowArchetype}
+                {result.details?.shadowArchetype}
               </p>
             </div>
 
