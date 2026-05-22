@@ -12,5 +12,5 @@ export default function PrivateRoute({ children }: PrivateRouteProps) {
 
   const isAuth = !!token && !!refreshToken;
 
-  return isAuth ? children : <Navigate to="/auth" replace />;
+  return isAuth ? children : <Navigate to="/login" replace />;
 }
