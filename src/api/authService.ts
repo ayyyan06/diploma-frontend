@@ -1,7 +1,8 @@
 import { tokenManager } from "./apiutils";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export async function login(body: any) {
-  const res = await fetch("http://localhost:8000/api/v1/login", {
+  const res = await fetch(`${API_URL}/api/v1/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json;charset=utf-8",

@@ -7,6 +7,7 @@ const DEFAULT_MENU_ITEMS = [
   { label: "Tests", path: "/tests" },
   { label: "Games", path: "/games" },
   { label: "Community", path: "/community" },
+  { label: "Chat", path: "/chat" },
 ];
 
 export function Header() {

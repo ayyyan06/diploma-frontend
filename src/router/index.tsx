@@ -11,6 +11,8 @@ import { TestQestionsPage } from "../pages/Test/TestQuestionsPage";
 import { TestResult } from "../pages/Test/TestResult";
 import { CommunityPage } from "../pages/CommunityPage";
 import { ProfilePage } from "../pages/ProfilePage";
+import { ChatPage } from "../pages/ChatPage";
+import PrivateRoute from "./PrivateRoute";
 
 export const router = createBrowserRouter([
   {
@@ -22,44 +24,98 @@ export const router = createBrowserRouter([
     element: <Header />,
     children: [
       {
-        index: true,
-        element: <Home />,
-      },
-      {
-        path: "games",
-        element: <Games />,
-      },
-      {
-        path: "games/bauyrsaq",
-        element: <BauyrsaqAdventurePage />,
-      },
-      {
-        path: "games/tulpar",
-        element: <TulparDash />,
-      },
-      {
-        path: "tests",
-        element: <Tests />,
-      },
-      {
-        path: "profile",
-        element: <ProfilePage />,
-      },
-      {
-        path: "tests/:id/intro",
-        element: <TestIntroPage />,
-      },
-      {
-        path: "tests/:id",
-        element: <TestQestionsPage />,
-      },
-      {
-        path: "tests/:id/result",
-        element: <TestResult />,
-      },
-      {
-        path: "community",
-        element: <CommunityPage />,
+        path: "/",
+        element: (
+          <PrivateRoute>
+            <Header />
+          </PrivateRoute>
+        ),
+        children: [
+          {
+            index: true,
+            element: <Home />,
+          },
+          {
+            path: "games",
+            element: (
+              <PrivateRoute>
+                <Games />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: "games/bauyrsaq",
+            element: (
+              <PrivateRoute>
+                <BauyrsaqAdventurePage />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: "games/tulpar",
+            element: (
+              <PrivateRoute>
+                <TulparDash />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: "tests",
+            element: (
+              <PrivateRoute>
+                <Tests />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: "profile",
+            element: (
+              <PrivateRoute>
+                <ProfilePage />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: "tests/:id/intro",
+            element: (
+              <PrivateRoute>
+                <TestIntroPage />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: "tests/:id",
+            element: (
+              <PrivateRoute>
+                <TestQestionsPage />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: "tests/:id/result",
+            element: (
+              <PrivateRoute>
+                <TestResult />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: "community",
+            element: (
+              <PrivateRoute>
+                <CommunityPage />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: "chat",
+            element: (
+              <PrivateRoute>
+                <ChatPage />
+              </PrivateRoute>
+            ),
+          },
+        ],
       },
     ],
   },

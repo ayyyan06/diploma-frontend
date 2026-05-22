@@ -1,9 +1,13 @@
+import { useEffect } from "react";
+
 type TokenResponse = {
   access_token: string; // ← snake_case как у сервера
   refresh_token: string; // ← уточни точное имя у бэка
 };
 
 type RefreshResolve = (token: string) => void;
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const tokenManager = (() => {
   let token: string | null = localStorage.getItem("api_token");
@@ -91,7 +95,8 @@ export async function fetchWithToken(
   };
 
   const executeRequest = async (): Promise<Response> => {
-    const response = await fetch(url, {
+    console.log(API_URL);
+    const response = await fetch(`${API_URL}${url}`, {
       ...options,
       headers,
       body: body ? JSON.stringify(body) : undefined,
