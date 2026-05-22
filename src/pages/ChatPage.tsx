@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { tokenManager } from "../api/apiutils";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -173,8 +173,6 @@ function SidebarItem({
 
 export const ChatPage = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-
   // current user
   const myId = useRef<number | null>(null);
   const [myNickname, setMyNickname] = useState<string>("");

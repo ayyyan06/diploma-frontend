@@ -1,5 +1,3 @@
-import { useEffect } from "react";
-
 type TokenResponse = {
   access_token: string; // ← snake_case как у сервера
   refresh_token: string; // ← уточни точное имя у бэка
