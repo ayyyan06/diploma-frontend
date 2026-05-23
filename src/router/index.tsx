@@ -19,103 +19,94 @@ export const router = createBrowserRouter([
     path: "/auth",
     element: <Auth />,
   },
+
   {
     path: "/",
     element: <Header />,
     children: [
       {
-        path: "/",
+        index: true,
+        element: <Home />,
+      },
+      {
+        path: "games",
         element: (
           <PrivateRoute>
-            <Header />
+            <Games />
           </PrivateRoute>
         ),
-        children: [
-          {
-            index: true,
-            element: <Home />,
-          },
-          {
-            path: "games",
-            element: (
-              <PrivateRoute>
-                <Games />
-              </PrivateRoute>
-            ),
-          },
-          {
-            path: "games/bauyrsaq",
-            element: (
-              <PrivateRoute>
-                <BauyrsaqAdventurePage />
-              </PrivateRoute>
-            ),
-          },
-          {
-            path: "games/tulpar",
-            element: (
-              <PrivateRoute>
-                <TulparDash />
-              </PrivateRoute>
-            ),
-          },
-          {
-            path: "tests",
-            element: (
-              <PrivateRoute>
-                <Tests />
-              </PrivateRoute>
-            ),
-          },
-          {
-            path: "profile",
-            element: (
-              <PrivateRoute>
-                <ProfilePage />
-              </PrivateRoute>
-            ),
-          },
-          {
-            path: "tests/:id/intro",
-            element: (
-              <PrivateRoute>
-                <TestIntroPage />
-              </PrivateRoute>
-            ),
-          },
-          {
-            path: "tests/:id",
-            element: (
-              <PrivateRoute>
-                <TestQestionsPage />
-              </PrivateRoute>
-            ),
-          },
-          {
-            path: "tests/:id/result",
-            element: (
-              <PrivateRoute>
-                <TestResult />
-              </PrivateRoute>
-            ),
-          },
-          {
-            path: "community",
-            element: (
-              <PrivateRoute>
-                <CommunityPage />
-              </PrivateRoute>
-            ),
-          },
-          {
-            path: "chat",
-            element: (
-              <PrivateRoute>
-                <ChatPage />
-              </PrivateRoute>
-            ),
-          },
-        ],
+      },
+      {
+        path: "games/bauyrsaq",
+        element: (
+          <PrivateRoute>
+            <BauyrsaqAdventurePage />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "games/tulpar",
+        element: (
+          <PrivateRoute>
+            <TulparDash />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "tests",
+        element: (
+          <PrivateRoute>
+            <Tests />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "profile",
+        element: (
+          <PrivateRoute>
+            <ProfilePage />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "tests/:id/intro",
+        element: (
+          <PrivateRoute>
+            <TestIntroPage />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "tests/:id",
+        element: (
+          <PrivateRoute>
+            <TestQestionsPage />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "tests/:id/result",
+        element: (
+          <PrivateRoute>
+            <TestResult />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "community",
+        element: (
+          <PrivateRoute>
+            <CommunityPage />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "chat",
+        element: (
+          <PrivateRoute>
+            <ChatPage />
+          </PrivateRoute>
+        ),
       },
     ],
   },

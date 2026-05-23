@@ -7,10 +7,10 @@ interface PrivateRouteProps {
 }
 
 export default function PrivateRoute({ children }: PrivateRouteProps) {
+  // Проверяем только access token
   const token = tokenManager.getToken();
-  const refreshToken = tokenManager.getRefreshToken();
 
-  const isAuth = !!token && !!refreshToken;
-
-  return isAuth ? children : <Navigate to="/auth" replace />;
+  // Если токен существует — пускаем
+  // Если нет — редирект на логин
+  return token ? children : <Navigate to="/auth" replace />;
 }
