@@ -1,48 +1,38 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../api/authService";
-
-const API_URL = import.meta.env.VITE_API_URL;
+import { login, register } from "../api/authService";
 
 export const Auth = () => {
   const navigate = useNavigate();
 
   const [mode, setMode] = useState<"login" | "register">("login");
-
   const [loginName, setLoginName] = useState("");
   const [password, setPassword] = useState("");
   const [nickName, setNickName] = useState("");
   const [email, setEmail] = useState("");
-
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
 
     try {
       if (mode === "login") {
         await login({ email, password });
         navigate("/");
       } else {
-        const res = await fetch(`${API_URL}/api/v1/register`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username: loginName,
-            nickname: nickName,
-            password,
-            email,
-          }),
+        await register({
+          username: loginName,
+          nickname: nickName,
+          password,
+          email,
         });
-
-        if (res.ok) {
-          setMode("login");
-          // Можно добавить уведомление об успехе
-        }
+        setMode("login");
       }
     } catch (err) {
-      console.error(err);
+      setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -51,7 +41,6 @@ export const Auth = () => {
   return (
     <main className="min-h-screen flex items-center justify-center bg-[#f8f6f0] pt-20 pb-12">
       <div className="w-full max-w-[480px] px-6">
-        {/* Card */}
         <div
           className="
             border-2 border-[#ece7dd] rounded-[28px] bg-white
@@ -59,19 +48,17 @@ export const Auth = () => {
             px-10 py-12
           "
         >
-          {/* Header */}
           <div className="text-center mb-10">
             <h1 className="text-[32px] font-bold text-[#111111] mb-2">
-              {mode === "login" ? "Добро пожаловать" : "Создать аккаунт"}
+              {mode === "login" ? "Welcome back" : "Create account"}
             </h1>
             <p className="text-[#7a7a7a] text-[17px]">
               {mode === "login"
-                ? "Войдите в свой аккаунт"
-                : "Заполните данные для регистрации"}
+                ? "Sign in to continue"
+                : "Fill in your details to register"}
             </p>
           </div>
 
-          {/* Mode Switch */}
           <div className="flex rounded-[16px] border border-[#e4e4e4] p-1 mb-10">
             <button
               onClick={() => setMode("login")}
@@ -81,7 +68,7 @@ export const Auth = () => {
                   : "text-[#555] hover:bg-[#f8f6f0]"
               }`}
             >
-              Вход
+              Sign in
             </button>
             <button
               onClick={() => setMode("register")}
@@ -91,17 +78,16 @@ export const Auth = () => {
                   : "text-[#555] hover:bg-[#f8f6f0]"
               }`}
             >
-              Регистрация
+              Register
             </button>
           </div>
 
-          {/* Form */}
           <form onSubmit={submit} className="space-y-6">
             {mode === "register" && (
               <>
                 <div>
                   <label className="block text-[14px] font-medium text-[#555] mb-2">
-                    Логин
+                    Username
                   </label>
                   <input
                     type="text"
@@ -114,7 +100,7 @@ export const Auth = () => {
 
                 <div>
                   <label className="block text-[14px] font-medium text-[#555] mb-2">
-                    Никнейм
+                    Nickname
                   </label>
                   <input
                     type="text"
@@ -142,7 +128,7 @@ export const Auth = () => {
 
             <div>
               <label className="block text-[14px] font-medium text-[#555] mb-2">
-                Пароль
+                Password
               </label>
               <input
                 type="password"
@@ -153,7 +139,12 @@ export const Auth = () => {
               />
             </div>
 
-            {/* Submit Button */}
+            {error ? (
+              <div className="rounded-[16px] border border-[#f3b1b1] bg-[#fff1f1] px-4 py-3 text-[14px] text-[#b42318]">
+                {error}
+              </div>
+            ) : null}
+
             <button
               type="submit"
               disabled={loading}
@@ -168,21 +159,22 @@ export const Auth = () => {
               `}
             >
               {loading
-                ? "Загрузка..."
+                ? "Loading..."
                 : mode === "login"
-                  ? "Войти"
-                  : "Зарегистрироваться"}
+                  ? "Sign in"
+                  : "Register"}
             </button>
           </form>
 
-          {/* Footer hint */}
           <p className="text-center text-[14px] text-[#7a7a7a] mt-8">
-            {mode === "login" ? "Нет аккаунта? " : "Уже есть аккаунт? "}
+            {mode === "login"
+              ? "Don't have an account? "
+              : "Already have an account? "}
             <button
               onClick={() => setMode(mode === "login" ? "register" : "login")}
               className="text-[#f2b705] font-medium hover:underline"
             >
-              {mode === "login" ? "Зарегистрироваться" : "Войти"}
+              {mode === "login" ? "Register" : "Sign in"}
             </button>
           </p>
         </div>

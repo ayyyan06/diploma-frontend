@@ -1,3 +1,9 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/" }]
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://diploma-back-a49a574c3cdb.herokuapp.com/api/:path*"
+    },
+    { "source": "/(.*)", "destination": "/" }
+  ]
 }

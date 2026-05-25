@@ -22,6 +22,8 @@ interface Friend {
 
 type ChatMode = "global" | number; // number = peer user_id
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function formatTime(iso: string): string {
@@ -77,9 +79,9 @@ function Avatar({
 
 function buildWsUrl(mode: ChatMode): string {
   const token = tokenManager.getToken();
-  const proto = window.location.protocol === "https:" ? "wss" : "ws";
-  const host = window.location.host;
-  const base = `${proto}://${host}`;
+  const apiBase = new URL(API_URL);
+  const proto = apiBase.protocol === "https:" ? "wss:" : "ws:";
+  const base = `${proto}//${apiBase.host}`;
   if (mode === "global") return `${base}/api/v1/ws/chat?token=${token}`;
   return `${base}/api/v1/ws/chat/${mode}?token=${token}`;
 }
@@ -201,8 +203,10 @@ export const ChatPage = () => {
     const headers = { Authorization: `Bearer ${token}` };
 
     Promise.all([
-      fetch("/api/v1/me", { headers }).then((r) => r.json()),
-      fetch("/api/v1/community/friends", { headers }).then((r) => r.json()),
+      fetch(`${API_URL}/api/v1/me`, { headers }).then((r) => r.json()),
+      fetch(`${API_URL}/api/v1/community/friends`, { headers }).then((r) =>
+        r.json(),
+      ),
     ]).then(([me, fr]) => {
       myId.current = me.id;
       setMyNickname(me.nickname ?? me.username);

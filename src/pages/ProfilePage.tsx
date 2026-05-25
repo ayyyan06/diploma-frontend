@@ -261,7 +261,7 @@ export const ProfilePage = () => {
   }, []);
 
   const handleLogout = () => {
-    tokenManager.clearTokens();
+    tokenManager.clearToken();
     navigate("/auth");
   };
 

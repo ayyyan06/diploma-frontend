@@ -1,7 +1,18 @@
-import { tokenManager } from "./apiutils";
-const API_URL = import.meta.env.VITE_API_URL;
+import { API_URL, tokenManager } from "./apiutils";
 
-export async function login(body: any) {
+type LoginPayload = {
+  email: string;
+  password: string;
+};
+
+type RegisterPayload = {
+  username: string;
+  nickname: string;
+  email: string;
+  password: string;
+};
+
+export async function login(body: LoginPayload) {
   const res = await fetch(`${API_URL}/api/v1/login`, {
     method: "POST",
     headers: {
@@ -11,17 +22,31 @@ export async function login(body: any) {
   });
 
   if (!res.ok) {
-    throw new Error("Неверный логин или пароль");
+    throw new Error("Incorrect email or password");
   }
 
-  // authService.ts
   const data = await res.json();
-  tokenManager.setTokens(data.access_token, data.refreshToken); // ← исправить поле
+  tokenManager.setToken(data.access_token);
   return data;
 }
 
+export async function register(body: RegisterPayload) {
+  const res = await fetch(`${API_URL}/api/v1/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json;charset=utf-8",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(errorText || "Registration failed");
+  }
+
+  return res.json();
+}
+
 export function logout() {
-  tokenManager.setTokens("", "");
-  localStorage.removeItem("api_token");
-  localStorage.removeItem("refresh_token");
+  tokenManager.clearToken();
 }
