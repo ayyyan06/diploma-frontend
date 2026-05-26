@@ -1,67 +1,60 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { fetchWithToken } from "../../api/apiutils";
+import {
+  localizeTestDetail,
+  localizeTestType,
+} from "../../content/testContentTranslations";
 
 export const TestQestionsPage = () => {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams();
 
   const [test, setTest] = useState<any>(null);
-
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-
-  // questionId -> optionId
-  const [selectedAnswers, setSelectedAnswers] = useState<
-    Record<number, string>
-  >({});
+  const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>(
+    {},
+  );
 
   useEffect(() => {
     const loadTest = async () => {
       try {
         setLoading(true);
-
-        const res = await fetchWithToken(`/api/v1/tests/${id}`);
-        const resJson = await res.json();
-
-        setTest(resJson);
+        const response = await fetchWithToken(`/api/v1/tests/${id}`);
+        setTest(await response.json());
       } catch (error) {
-        console.error("Ошибка загрузки теста:", error);
+        console.error("Test loading error:", error);
       } finally {
         setLoading(false);
       }
     };
 
     if (id) {
-      loadTest();
+      void loadTest();
     }
   }, [id]);
 
-  // QUESTIONS
-  const questions = test?.questions || [];
+  const localizedTest = useMemo(
+    () => (test ? localizeTestDetail(test, i18n.language) : null),
+    [test, i18n.language],
+  );
 
-  // CURRENT QUESTION
+  const questions = localizedTest?.questions || [];
   const currentQuestion = questions[currentQuestionIndex];
-
   const currentQuestionNumber = currentQuestionIndex + 1;
-
-  // IMPORTANT:
-  // OPTIONS NOW COME INSIDE EACH QUESTION
   const currentOptions = currentQuestion?.options || [];
-
   const selectedAnswer = currentQuestion
     ? selectedAnswers[currentQuestion.id]
     : null;
-
   const isLastQuestion = currentQuestionNumber === questions.length;
-
   const isFirstQuestion = currentQuestionIndex === 0;
 
   const progressValue = useMemo(() => {
     if (!questions.length) return 0;
-
     return (currentQuestionNumber / questions.length) * 100;
   }, [currentQuestionNumber, questions.length]);
 
@@ -75,14 +68,9 @@ export const TestQestionsPage = () => {
   const handleNextClick = async () => {
     if (!selectedAnswer) return;
 
-    // LAST QUESTION -> SUBMIT
     if (isLastQuestion) {
       try {
         setSubmitting(true);
-
-        // IMPORTANT:
-        // backend wants string -> string
-        // convert question ids to strings
         const formattedAnswers: Record<string, string> = {};
 
         Object.entries(selectedAnswers).forEach(([questionId, optionId]) => {
@@ -91,17 +79,13 @@ export const TestQestionsPage = () => {
 
         await fetchWithToken(
           `/api/v1/tests/${id}/submit`,
-          {
-            method: "POST",
-          },
-          {
-            answers: formattedAnswers,
-          },
+          { method: "POST" },
+          { answers: formattedAnswers },
         );
 
         navigate(`/tests/${id}/result`);
       } catch (error) {
-        console.error("Ошибка отправки теста:", error);
+        console.error("Test submit error:", error);
       } finally {
         setSubmitting(false);
       }
@@ -120,29 +104,31 @@ export const TestQestionsPage = () => {
 
   if (loading) {
     return (
-      <main className="mt-[74px] mx-auto max-w-[1240px] px-[18px]">
-        <p className="text-[20px] font-medium">Loading...</p>
+      <main className="mx-auto mt-[74px] max-w-[1240px] px-[18px]">
+        <p className="text-[20px] font-medium">{t("testQuestions.loading")}</p>
       </main>
     );
   }
 
-  if (!test || !currentQuestion) {
+  if (!localizedTest || !currentQuestion) {
     return (
-      <main className="mt-[74px] mx-auto max-w-[1240px] px-[18px]">
-        <p className="text-[20px] font-medium">Test not found</p>
+      <main className="mx-auto mt-[74px] max-w-[1240px] px-[18px]">
+        <p className="text-[20px] font-medium">{t("testQuestions.notFound")}</p>
       </main>
     );
   }
 
   return (
-    <main className="w-full max-w-[1240px] mx-auto mt-[72px] px-[18px] pb-12 max-[900px]:mt-12">
-      {/* Progress */}
-      <section className="grid gap-[14px] mb-9">
+    <main className="mx-auto mt-[72px] w-full max-w-[1240px] px-[18px] pb-12 max-[900px]:mt-12">
+      <section className="mb-9 grid gap-[14px]">
         <p className="m-0 text-[20px] font-normal leading-[1.2] tracking-[0.02em] text-[#7a7a7a] max-[640px]:text-[16px]">
-          QUESTION {currentQuestionNumber} OF {questions.length}
+          {t("testQuestions.questionOf", {
+            current: currentQuestionNumber,
+            total: questions.length,
+          })}
         </p>
 
-        <div className="w-full h-[14px] rounded-full bg-[#efefef] overflow-hidden">
+        <div className="h-[14px] w-full overflow-hidden rounded-full bg-[#efefef]">
           <div
             className="h-full rounded-full bg-[#f2c200] transition-all duration-300"
             style={{ width: `${progressValue}%` }}
@@ -150,13 +136,13 @@ export const TestQestionsPage = () => {
         </div>
       </section>
 
-      {/* Card */}
-      <section className="border-2 border-[#ece7dd] rounded-[28px] bg-white px-[38px] pt-10 pb-7 shadow-[0_8px_24px_rgba(24,24,24,0.04)] max-[900px]:px-[22px] max-[900px]:pt-7 max-[900px]:pb-6">
-        {/* Top */}
-        <div className="flex justify-between items-start gap-8 mb-[18px] max-[900px]:flex-col max-[900px]:items-start">
+      <section className="rounded-[28px] border-2 border-[#ece7dd] bg-white px-[38px] pb-7 pt-10 shadow-[0_8px_24px_rgba(24,24,24,0.04)] max-[900px]:px-[22px] max-[900px]:pb-6 max-[900px]:pt-7">
+        <div className="mb-[18px] flex items-start justify-between gap-8 max-[900px]:flex-col max-[900px]:items-start">
           <div className="max-w-[720px]">
-            <p className="m-0 mb-3 text-[15px] font-bold tracking-[0.08em] uppercase text-[#8b6c00] max-[640px]:text-[13px]">
-              {test.type} test
+            <p className="m-0 mb-3 text-[15px] font-bold uppercase tracking-[0.08em] text-[#8b6c00] max-[640px]:text-[13px]">
+              {t("testQuestions.typeTest", {
+                type: localizeTestType(localizedTest.type, i18n.language),
+              })}
             </p>
 
             <h1 className="m-0 mb-[34px] text-[37px] font-bold leading-[1.25] max-[640px]:text-[28px]">
@@ -164,30 +150,27 @@ export const TestQestionsPage = () => {
             </h1>
 
             <p className="m-0 text-[18px] leading-[1.4] text-[#555555]">
-              {currentQuestion.prompt ||
-                "Think about your usual pattern across time, not your ideal self."}
+              {currentQuestion.prompt || t("testQuestions.defaultPrompt")}
             </p>
 
-            <p className="mt-[14px] mb-0 text-[15px] leading-[1.5] text-[#6f6a60] max-[640px]:text-[14px]">
-              {test.description}
+            <p className="mb-0 mt-[14px] text-[15px] leading-[1.5] text-[#6f6a60] max-[640px]:text-[14px]">
+              {localizedTest.description}
             </p>
           </div>
 
-          {/* Badge */}
-          <div className="w-[190px] aspect-square rounded-full bg-[#f7f2ea] flex items-center justify-center shrink-0 text-[#606060] text-center text-[18px] leading-[1.55] max-[640px]:w-[140px] max-[640px]:text-[16px]">
+          <div className="flex aspect-square w-[190px] shrink-0 items-center justify-center rounded-full bg-[#f7f2ea] text-center text-[18px] leading-[1.55] text-[#606060] max-[640px]:w-[140px] max-[640px]:text-[16px]">
             <span>
-              Question
+              {t("testQuestions.question")}
               <br />
               {currentQuestionNumber}
             </span>
           </div>
         </div>
 
-        {/* OPTIONS */}
         <div
-          className="grid grid-cols-2 gap-y-[22px] gap-x-[28px] mt-7 max-[900px]:grid-cols-1"
+          className="mt-7 grid grid-cols-2 gap-x-[28px] gap-y-[22px] max-[900px]:grid-cols-1"
           role="group"
-          aria-label="Answer options"
+          aria-label={t("testQuestions.answerOptions")}
         >
           {currentOptions.map((answer: any) => {
             const isSelected = answer.id === selectedAnswer;
@@ -199,9 +182,9 @@ export const TestQestionsPage = () => {
                 onClick={() => handleAnswerSelect(answer.id)}
                 aria-pressed={isSelected}
                 className={`
-                  min-h-[78px] px-7 py-[18px] border-2 rounded-[18px]
+                  min-h-[78px] rounded-[18px] border-2 px-7 py-[18px]
                   text-left text-[17px] leading-[1.45]
-                  transition-all duration-200 cursor-pointer
+                  transition-all duration-200
                   ${
                     isSelected
                       ? "border-[#f2c200] bg-[#fff7de] shadow-[0_4px_16px_rgba(242,194,0,0.12)]"
@@ -215,22 +198,14 @@ export const TestQestionsPage = () => {
           })}
         </div>
 
-        {/* Footer */}
-        <div className="flex justify-between items-center mt-[42px] max-[640px]:flex-col gap-4">
+        <div className="mt-[42px] flex items-center justify-between gap-4 max-[640px]:flex-col">
           {!isFirstQuestion ? (
             <button
               type="button"
               onClick={handleBackClick}
-              className="
-                w-[200px] min-h-[56px] rounded-[16px]
-                border-2 border-[#e4e4e4] bg-white
-                text-[#555] text-[18px] font-bold tracking-[0.03em]
-                transition-all duration-200 cursor-pointer
-                hover:border-[#f2c200] hover:text-[#8b6c00]
-                max-[640px]:w-full
-              "
+              className="min-h-[56px] w-[200px] rounded-[16px] border-2 border-[#e4e4e4] bg-white text-[18px] font-bold tracking-[0.03em] text-[#555] transition-all duration-200 hover:border-[#f2c200] hover:text-[#8b6c00] max-[640px]:w-full"
             >
-              BACK
+              {t("testQuestions.back")}
             </button>
           ) : (
             <div />
@@ -240,20 +215,13 @@ export const TestQestionsPage = () => {
             type="button"
             onClick={handleNextClick}
             disabled={!selectedAnswer || submitting}
-            className="
-              w-[200px] min-h-[56px] rounded-[16px]
-              border-none bg-[#f2c200]
-              text-white text-[18px] font-bold tracking-[0.03em]
-              transition-opacity duration-200 cursor-pointer
-              disabled:opacity-55 disabled:cursor-not-allowed
-              max-[640px]:w-full
-            "
+            className="min-h-[56px] w-[200px] rounded-[16px] border-none bg-[#f2c200] text-[18px] font-bold tracking-[0.03em] text-white transition-opacity duration-200 disabled:cursor-not-allowed disabled:opacity-55 max-[640px]:w-full"
           >
             {submitting
-              ? "SUBMITTING..."
+              ? t("testQuestions.submitting")
               : isLastQuestion
-                ? "SEE RESULT"
-                : "NEXT"}
+                ? t("testQuestions.seeResult")
+                : t("testQuestions.next")}
           </button>
         </div>
       </section>

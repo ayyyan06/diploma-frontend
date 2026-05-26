@@ -1,115 +1,72 @@
 import { NavLink } from "react-router-dom";
-const ABOUT_FEATURES = [
-  {
-    value: "5",
-    label: "test journeys",
-    description:
-      "Personality, animal-temperament, conflict-style, scenario-road, and mythic-enemy journeys inspired by Kazakh motifs.",
-  },
-  {
-    value: "5-10 min",
-    label: "to complete",
-    description:
-      "Short, playful sessions built for curiosity, reflection, and shareable results.",
-  },
-  {
-    value: "100%",
-    label: "culture-centered",
-    description:
-      "Every path is shaped by symbols, stories, and emotional tones from the steppe.",
-  },
-];
+import { useTranslation } from "react-i18next";
 
-const ABOUT_PATHS = [
-  {
-    title: "Archetype stories",
-    description: "Batyr, Zhyrau, Aldar Kose, Shanyraq Keeper archetypes.",
-  },
-  {
-    title: "Animal temperament lens",
-    description: "Eagle, horse, wolf, snow leopard psychology mapping.",
-  },
-  {
-    title: "Weapon symbolism",
-    description: "Bow, spear, saber, shield conflict styles.",
-  },
-];
-
-const ABOUT_STEPS = [
-  {
-    number: "01",
-    title: "Choose a path",
-    description: "Pick personality, animal, weapon, road, or enemy journey.",
-  },
-  {
-    number: "02",
-    title: "Answer questions",
-    description: "Symbolic scenarios and choices.",
-  },
-  {
-    number: "03",
-    title: "Get result",
-    description: "A personal profile card, role reading, and insights.",
-  },
-];
 export const Home = () => {
+  const { t } = useTranslation();
+  const features = t("home.features", { returnObjects: true }) as Array<{
+    value: string;
+    label: string;
+    description: string;
+  }>;
+  const paths = t("home.paths", { returnObjects: true }) as Array<{
+    title: string;
+    description: string;
+  }>;
+  const steps = t("home.steps", { returnObjects: true }) as Array<{
+    number: string;
+    title: string;
+    description: string;
+  }>;
+  const heroTags = t("home.heroTags", { returnObjects: true }) as string[];
+
   return (
     <div className="min-h-screen w-full pb-20">
       <main className="mx-auto mt-10 max-w-6xl px-6">
-        {/* HERO */}
-        <section className="grid gap-10 lg:grid-cols-2 items-center">
+        <section className="grid items-center gap-10 lg:grid-cols-2">
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-[#8b6c00]">
-              About Ruh Compass
+              {t("home.eyebrow")}
             </p>
 
             <h1 className="mt-4 text-4xl font-extrabold leading-tight md:text -5xl">
-              A cultural journey through Kazakh archetypes, symbols, and stories
+              {t("home.title")}
             </h1>
 
-            <p className="mt-6 text-gray-600 leading-relaxed">
-              Ruh Compass explores personality through steppe-inspired
-              storytelling instead of generic labels.
+            <p className="mt-6 leading-relaxed text-gray-600">
+              {t("home.description")}
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
-              {[
-                "Kazakh storytelling",
-                "Int  eractive experience",
-                "Personality insights",
-              ].map((t) => (
+              {heroTags.map((tag) => (
                 <span
-                  key={t}
+                  key={tag}
                   className="rounded-full border border-yellow-300 bg-white px-4 py-2 text-sm"
                 >
-                  {t}
+                  {tag}
                 </span>
               ))}
             </div>
 
-            <div className="mt-8 flex gap-4 flex-wrap">
-              {/* <button className="rounded-xl bg-yellow-400 px-6 py-3 font-bold text-white">
-                Start Test
-              </button> */}
+            <div className="mt-8 flex flex-wrap gap-4">
               <NavLink
                 to="/tests"
                 className="rounded-xl bg-yellow-400 px-6 py-3 font-bold text-white"
               >
-                Start Test
+                {t("header.startTest")}
               </NavLink>
 
               <NavLink
                 to="/games"
                 className="rounded-xl border px-6 py-3 font-semibold"
               >
-                Explore Games
+                {t("home.exploreGames")}
               </NavLink>
             </div>
           </div>
 
           <div className="relative rounded-3xl border bg-white p-6 shadow-xl">
             <div className="absolute left-4 top-4 rounded-full bg-white px-4 py-2 text-sm font-semibold text-yellow-700 shadow">
-              Steppe spirit, modern play
+              {t("home.heroBadge")}
             </div>
 
             <img
@@ -120,85 +77,75 @@ export const Home = () => {
           </div>
         </section>
 
-        {/* FEATURES */}
         <section className="mt-12 grid gap-6 md:grid-cols-3">
-          {ABOUT_FEATURES.map((f) => (
+          {features.map((feature) => (
             <div
-              key={f.label}
+              key={feature.label}
               className="rounded-2xl border bg-white p-6 shadow"
             >
-              <div className="text-3xl font-extrabold">{f.value}</div>
-              <div className="mt-2 text-xl font-semibold">{f.label}</div>
-              <p className="mt-3 text-gray-600">{f.description}</p>
+              <div className="text-3xl font-extrabold">{feature.value}</div>
+              <div className="mt-2 text-xl font-semibold">{feature.label}</div>
+              <p className="mt-3 text-gray-600">{feature.description}</p>
             </div>
           ))}
         </section>
 
-        {/* STORY */}
         <section className="mt-12 grid gap-6 lg:grid-cols-2">
           <div className="rounded-2xl border bg-white p-6 shadow">
             <p className="text-xs font-bold uppercase text-yellow-700">
-              Why we made it
+              {t("home.storyEyebrow")}
             </p>
 
-            <h2 className="mt-2 text-2xl font-bold">
-              Personality feels richer when it is cultural
-            </h2>
+            <h2 className="mt-2 text-2xl font-bold">{t("home.storyTitle")}</h2>
 
-            <p className="mt-4 text-gray-600">
-              Built to make self-discovery warm, symbolic, and memorable.
-            </p>
+            <p className="mt-4 text-gray-600">{t("home.storyDescription")}</p>
           </div>
 
           <div className="space-y-4">
-            {ABOUT_PATHS.map((p) => (
+            {paths.map((path) => (
               <div
-                key={p.title}
+                key={path.title}
                 className="rounded-2xl border bg-white p-6 shadow"
               >
-                <div className="text-xl font-bold">{p.title}</div>
-                <p className="mt-2 text-gray-600">{p.description}</p>
+                <div className="text-xl font-bold">{path.title}</div>
+                <p className="mt-2 text-gray-600">{path.description}</p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* STEPS */}
         <section className="mt-12">
-          <h2 className="text-3xl font-bold">How it works</h2>
+          <h2 className="text-3xl font-bold">{t("home.stepsTitle")}</h2>
 
           <div className="mt-6 grid gap-6 md:grid-cols-3">
-            {ABOUT_STEPS.map((s) => (
+            {steps.map((step) => (
               <div
-                key={s.number}
+                key={step.number}
                 className="rounded-2xl border bg-white p-6 shadow"
               >
-                <div className="text-yellow-600 font-bold text-xl">
-                  {s.number}
+                <div className="text-xl font-bold text-yellow-600">
+                  {step.number}
                 </div>
-                <div className="mt-2 text-xl font-bold">{s.title}</div>
-                <p className="mt-2 text-gray-600">{s.description}</p>
+                <div className="mt-2 text-xl font-bold">{step.title}</div>
+                <p className="mt-2 text-gray-600">{step.description}</p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* CTA */}
         <section className="mt-12 flex flex-col justify-between gap-6 rounded-2xl border bg-white p-6 shadow lg:flex-row lg:items-center">
           <div>
             <p className="text-xs font-bold uppercase text-yellow-700">
-              Ready to try
+              {t("home.ctaEyebrow")}
             </p>
-            <h2 className="mt-2 text-2xl font-bold">
-              Start your archetype journey today
-            </h2>
+            <h2 className="mt-2 text-2xl font-bold">{t("home.ctaTitle")}</h2>
           </div>
 
           <NavLink
             to="/tests"
             className="rounded-xl bg-yellow-400 px-6 py-3 font-bold text-white"
           >
-            Go To Tests
+            {t("home.ctaButton")}
           </NavLink>
         </section>
       </main>

@@ -1,14 +1,17 @@
 import { NavLink } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { fetchWithToken } from "../api/apiutils";
+import { localizeTestSummary } from "../content/testContentTranslations";
 
 const TEST_COST = 100;
 
 export const Tests = () => {
+  const { t, i18n } = useTranslation();
   const [tests, setTests] = useState([]);
   const [coins, setCoins] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,13 +35,19 @@ export const Tests = () => {
       }
     };
 
-    fetchData();
+    void fetchData();
   }, []);
+
+  const localizedTests = useMemo(
+    () =>
+      tests.map((test: any) => localizeTestSummary(test, i18n.language)),
+    [tests, i18n.language],
+  );
 
   if (loading) {
     return (
       <div className="flex justify-center py-20 text-gray-500">
-        Loading tests...
+        {t("tests.loading")}
       </div>
     );
   }
@@ -46,7 +55,7 @@ export const Tests = () => {
   if (error) {
     return (
       <div className="flex justify-center py-20 text-red-500">
-        Error: {error}
+        {t("tests.errorPrefix")} {error}
       </div>
     );
   }
@@ -54,35 +63,25 @@ export const Tests = () => {
   return (
     <div className="mx-auto max-w-[1600px] px-6 py-10">
       <h1 className="mb-4 text-center text-3xl font-normal">
-        Choose which test you want to start
+        {t("tests.title")}
       </h1>
 
-      {/* баланс и подсказка */}
       {coins !== null && (
         <p className="mb-12 text-center text-[15px] text-[#888]">
-          Your balance:{" "}
+          {t("tests.balanceLabel")}{" "}
           <span className="font-bold text-[#9a6e00]">
-            ✦ {coins.toLocaleString()} coins
+            ✦ {coins.toLocaleString()} {t("common.coins")}
           </span>
           {coins < TEST_COST && (
             <span className="ml-2 text-[#c0392b]">
-              — not enough for a test. Play a game to earn more!
+              {t("tests.notEnoughHint")}
             </span>
           )}
         </p>
       )}
 
-      <section
-        className="
-    flex
-    justify-center
-    gap-x-[70px]
-    gap-y-10
-    flex-row
-    justify-evenly
-  "
-      >
-        {tests.map((test: any) => {
+      <section className="flex flex-row justify-center justify-evenly gap-x-[70px] gap-y-10">
+        {localizedTests.map((test: any) => {
           const canAfford = coins === null || coins >= TEST_COST;
 
           return (
@@ -91,7 +90,6 @@ export const Tests = () => {
               to={`/tests/${test.id}/intro`}
               className="group flex max-w-[260px] flex-col items-center text-center"
             >
-              {/* картинка */}
               <div className="relative w-full">
                 <img
                   src={test.image_src}
@@ -101,7 +99,6 @@ export const Tests = () => {
                   }`}
                 />
 
-                {/* бейдж стоимости */}
                 <div
                   className={`
                     absolute bottom-2 right-2
@@ -111,12 +108,13 @@ export const Tests = () => {
                     shadow-md backdrop-blur-sm
                     ${
                       canAfford
-                        ? "bg-[#fff8d9] text-[#9a6e00] border border-[#f2c200]"
-                        : "bg-[#fdecea] text-[#c0392b] border border-[#e74c3c]"
+                        ? "border border-[#f2c200] bg-[#fff8d9] text-[#9a6e00]"
+                        : "border border-[#e74c3c] bg-[#fdecea] text-[#c0392b]"
                     }
                   `}
                 >
                   <span
+                    aria-hidden="true"
                     className={`flex h-[15px] w-[15px] items-center justify-center rounded-full text-[9px] font-black text-white ${
                       canAfford ? "bg-[#f2c200]" : "bg-[#e74c3c]"
                     }`}

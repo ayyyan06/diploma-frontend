@@ -1,7 +1,7 @@
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { fetchWithToken } from "../api/apiutils";
-
-// ── Types ────────────────────────────────────────────────────────────────────
+import { localizeCommunityResult } from "../content/testContentTranslations";
 
 type FriendshipStatus =
   | "none"
@@ -35,46 +35,12 @@ interface UserResults {
   results: TestResult[];
 }
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
 const ARCHETYPE_COLORS: Record<string, string> = {
   personality: "#FFF9E8",
   animal: "#EEF8FF",
   weapon: "#F7F4FF",
   color: "#FFF0F0",
 };
-
-const STATUS_CONFIG: Record<
-  FriendshipStatus,
-  { label: string; color: string; bg: string; border: string }
-> = {
-  none: {
-    label: "Add Friend",
-    color: "#fff",
-    bg: "#F2C200",
-    border: "#F2C200",
-  },
-  pending_sent: {
-    label: "Pending…",
-    color: "#9a6e00",
-    bg: "#FFF8D9",
-    border: "#F2C200",
-  },
-  pending_received: {
-    label: "Accept",
-    color: "#fff",
-    bg: "#22c55e",
-    border: "#22c55e",
-  },
-  friends: {
-    label: "Friends ✓",
-    color: "#166534",
-    bg: "#dcfce7",
-    border: "#86efac",
-  },
-};
-
-// ── ResultsDrawer ─────────────────────────────────────────────────────────────
 
 function ResultsDrawer({
   userId,
@@ -85,11 +51,12 @@ function ResultsDrawer({
   nickname: string;
   onClose: () => void;
 }) {
+  const { t, i18n } = useTranslation();
   const [data, setData] = useState<UserResults | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    (async () => {
+    void (async () => {
       try {
         const res = await fetchWithToken(
           `/api/v1/community/users/${userId}/results`,
@@ -101,6 +68,14 @@ function ResultsDrawer({
     })();
   }, [userId]);
 
+  const localizedResults = useMemo(
+    () =>
+      data?.results.map((result) =>
+        localizeCommunityResult(result, i18n.language),
+      ) ?? [],
+    [data?.results, i18n.language],
+  );
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-end justify-center"
@@ -108,15 +83,14 @@ function ResultsDrawer({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-[640px] max-h-[80vh] overflow-y-auto rounded-t-[28px] bg-white p-8 pb-12"
+        className="max-h-[80vh] w-full max-w-[640px] overflow-y-auto rounded-t-[28px] bg-white p-8 pb-12"
         style={{ boxShadow: "0 -8px 40px rgba(0,0,0,0.12)" }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Handle */}
         <div className="mx-auto mb-6 h-[5px] w-[48px] rounded-full bg-[#e4e0d8]" />
 
         <p className="mb-1 text-[13px] font-semibold uppercase tracking-widest text-[#9a8c6e]">
-          Test Results
+          {t("community.testResults")}
         </p>
         <h2 className="mb-6 text-[24px] font-bold text-[#111]">{nickname}</h2>
 
@@ -126,43 +100,44 @@ function ResultsDrawer({
           </div>
         )}
 
-        {!loading && data && data.results.length === 0 && (
+        {!loading && data && localizedResults.length === 0 && (
           <p className="py-8 text-center text-[16px] text-[#999]">
-            No tests completed yet.
+            {t("community.noTestsCompletedYet")}
           </p>
         )}
 
         {!loading &&
           data &&
-          data.results.map((r) => (
+          localizedResults.map((result) => (
             <div
-              key={r.test_id}
+              key={result.test_id}
               className="mb-4 flex items-center gap-4 rounded-[18px] border-2 border-[#ece7dd] bg-white p-4"
             >
               <div
                 className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-[14px]"
                 style={{
-                  background: ARCHETYPE_COLORS[r.test_type] ?? "#f7f2ea",
+                  background:
+                    ARCHETYPE_COLORS[result.test_type] ?? "#f7f2ea",
                 }}
               >
                 <img
-                  src={r.image_src}
-                  alt={r.image_alt}
+                  src={result.image_src}
+                  alt={result.image_alt}
                   className="h-[52px] w-[52px] object-contain"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = "none";
+                  onError={(event) => {
+                    (event.target as HTMLImageElement).style.display = "none";
                   }}
                 />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="mb-0.5 text-[12px] font-semibold uppercase tracking-wider text-[#9a8c6e]">
-                  {r.test_title}
+                  {result.test_title}
                 </p>
                 <p className="mb-0.5 truncate text-[17px] font-bold text-[#111]">
-                  {r.title}
+                  {result.title}
                 </p>
-                {r.subtitle && (
-                  <p className="text-[13px] text-[#777]">{r.subtitle}</p>
+                {result.subtitle && (
+                  <p className="text-[13px] text-[#777]">{result.subtitle}</p>
                 )}
               </div>
             </div>
@@ -171,8 +146,6 @@ function ResultsDrawer({
     </div>
   );
 }
-
-// ── UserCard ──────────────────────────────────────────────────────────────────
 
 function UserCard({
   user,
@@ -183,17 +156,43 @@ function UserCard({
   onAction: (user: CommunityUser) => void;
   onViewResults: (user: CommunityUser) => void;
 }) {
-  const cfg = STATUS_CONFIG[user.friendship_status];
+  const { t } = useTranslation();
+  const cfg = {
+    none: {
+      label: t("community.addFriend"),
+      color: "#fff",
+      bg: "#F2C200",
+      border: "#F2C200",
+    },
+    pending_sent: {
+      label: t("community.pending"),
+      color: "#9a6e00",
+      bg: "#FFF8D9",
+      border: "#F2C200",
+    },
+    pending_received: {
+      label: t("community.accept"),
+      color: "#fff",
+      bg: "#22c55e",
+      border: "#22c55e",
+    },
+    friends: {
+      label: t("community.friends"),
+      color: "#166534",
+      bg: "#dcfce7",
+      border: "#86efac",
+    },
+  }[user.friendship_status];
+
   const initials = user.nickname
     .split(" ")
     .slice(0, 2)
-    .map((w) => w[0])
+    .map((word) => word[0])
     .join("")
     .toUpperCase();
 
   return (
     <article className="group relative flex flex-col rounded-[22px] border-2 border-[#ece7dd] bg-white p-6 transition-all duration-200 hover:border-[#f2c200] hover:shadow-[0_8px_32px_rgba(242,194,0,0.10)]">
-      {/* Avatar */}
       <div className="mb-4 flex items-center gap-4">
         <div
           className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full text-[18px] font-black text-white"
@@ -211,15 +210,13 @@ function UserCard({
         </div>
       </div>
 
-      {/* View Results */}
       <button
         onClick={() => onViewResults(user)}
         className="mb-3 w-full rounded-[12px] border-2 border-[#ece7dd] bg-[#faf8f4] py-2 text-[14px] font-semibold text-[#7a6e5a] transition-all hover:border-[#f2c200] hover:text-[#8b6c00]"
       >
-        View Results
+        {t("community.viewResults")}
       </button>
 
-      {/* Friend Action */}
       <button
         onClick={() => onAction(user)}
         disabled={
@@ -239,8 +236,6 @@ function UserCard({
   );
 }
 
-// ── IncomingRequestsBanner ────────────────────────────────────────────────────
-
 function IncomingBanner({
   requests,
   onRespond,
@@ -248,33 +243,35 @@ function IncomingBanner({
   requests: CommunityUser[];
   onRespond: (user: CommunityUser, action: "accepted" | "declined") => void;
 }) {
+  const { t } = useTranslation();
+
   if (requests.length === 0) return null;
 
   return (
     <div className="mb-8 rounded-[20px] border-2 border-[#f2c200] bg-[#fffbec] px-6 py-5">
       <p className="mb-4 text-[13px] font-bold uppercase tracking-widest text-[#9a6e00]">
-        Friend Requests · {requests.length}
+        {t("community.incomingRequests", { count: requests.length })}
       </p>
       <div className="flex flex-wrap gap-3">
-        {requests.map((u) => (
+        {requests.map((user) => (
           <div
-            key={u.id}
+            key={user.id}
             className="flex items-center gap-3 rounded-[14px] border border-[#f2c200] bg-white px-4 py-2"
           >
             <span className="text-[15px] font-semibold text-[#111]">
-              {u.nickname}
+              {user.nickname}
             </span>
             <button
-              onClick={() => onRespond(u, "accepted")}
+              onClick={() => onRespond(user, "accepted")}
               className="rounded-[8px] bg-[#22c55e] px-3 py-1 text-[13px] font-bold text-white"
             >
-              Accept
+              {t("community.accept")}
             </button>
             <button
-              onClick={() => onRespond(u, "declined")}
+              onClick={() => onRespond(user, "declined")}
               className="rounded-[8px] bg-[#f1f1f1] px-3 py-1 text-[13px] font-bold text-[#666]"
             >
-              Decline
+              {t("community.decline")}
             </button>
           </div>
         ))}
@@ -283,9 +280,8 @@ function IncomingBanner({
   );
 }
 
-// ── Main Page ─────────────────────────────────────────────────────────────────
-
 export const CommunityPage = () => {
+  const { t } = useTranslation();
   const [users, setUsers] = useState<CommunityUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -302,31 +298,31 @@ export const CommunityPage = () => {
   }, []);
 
   useEffect(() => {
-    loadUsers();
+    void loadUsers();
   }, [loadUsers]);
 
   const incomingRequests = users.filter(
-    (u) => u.friendship_status === "pending_received",
+    (user) => user.friendship_status === "pending_received",
   );
 
-  const filtered = users.filter((u) => {
-    const q = search.toLowerCase();
+  const filtered = users.filter((user) => {
+    const query = search.toLowerCase();
     return (
-      u.nickname.toLowerCase().includes(q) ||
-      u.username.toLowerCase().includes(q)
+      user.nickname.toLowerCase().includes(query) ||
+      user.username.toLowerCase().includes(query)
     );
   });
 
   const handleAction = async (user: CommunityUser) => {
     if (user.friendship_status === "none") {
-      // send request
-      await fetchWithToken(
-        `/api/v1/community/users/${user.id}/friend-request`,
-        { method: "POST" },
-      );
+      await fetchWithToken(`/api/v1/community/users/${user.id}/friend-request`, {
+        method: "POST",
+      });
       setUsers((prev) =>
-        prev.map((u) =>
-          u.id === user.id ? { ...u, friendship_status: "pending_sent" } : u,
+        prev.map((item) =>
+          item.id === user.id
+            ? { ...item, friendship_status: "pending_sent" }
+            : item,
         ),
       );
     }
@@ -337,25 +333,27 @@ export const CommunityPage = () => {
     action: "accepted" | "declined",
   ) => {
     if (!user.friendship_id) return;
+
     await fetchWithToken(
       `/api/v1/community/friend-requests/${user.friendship_id}`,
       { method: "PATCH" },
       { action },
     );
+
     setUsers((prev) =>
-      prev.map((u) =>
-        u.id === user.id
+      prev.map((item) =>
+        item.id === user.id
           ? {
-              ...u,
+              ...item,
               friendship_status: action === "accepted" ? "friends" : "none",
-              friendship_id: action === "accepted" ? u.friendship_id : null,
+              friendship_id:
+                action === "accepted" ? item.friendship_id : null,
             }
-          : u,
+          : item,
       ),
     );
   };
 
-  // For UserCard — action & respond combined
   const handleCardAction = async (user: CommunityUser) => {
     if (user.friendship_status === "pending_received") {
       await handleRespond(user, "accepted");
@@ -366,24 +364,18 @@ export const CommunityPage = () => {
 
   return (
     <main className="mx-auto mt-[60px] max-w-[1240px] px-[18px] pb-20">
-      {/* Header */}
       <div className="mb-10">
         <p className="mb-2 text-[13px] font-semibold uppercase tracking-widest text-[#9a8c6e]">
-          Community
+          {t("community.section")}
         </p>
         <h1 className="mb-1 text-[40px] font-bold leading-tight text-[#111]">
-          Meet the community
+          {t("community.title")}
         </h1>
-        <p className="text-[17px] text-[#777]">
-          See how others passed the tests, connect with people, build your
-          circle.
-        </p>
+        <p className="text-[17px] text-[#777]">{t("community.description")}</p>
       </div>
 
-      {/* Incoming requests banner */}
       <IncomingBanner requests={incomingRequests} onRespond={handleRespond} />
 
-      {/* Search */}
       <div className="mb-8 flex items-center gap-3 rounded-[16px] border-2 border-[#ece7dd] bg-white px-5 py-3 focus-within:border-[#f2c200]">
         <svg
           width="18"
@@ -398,7 +390,7 @@ export const CommunityPage = () => {
         </svg>
         <input
           type="text"
-          placeholder="Search by name or username…"
+          placeholder={t("community.searchPlaceholder")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="flex-1 bg-transparent text-[16px] outline-none placeholder:text-[#bbb]"
@@ -408,26 +400,25 @@ export const CommunityPage = () => {
             onClick={() => setSearch("")}
             className="text-[#bbb] hover:text-[#888]"
           >
-            ✕
+            ×
           </button>
         )}
       </div>
 
-      {/* Grid */}
       {loading ? (
         <div className="flex items-center justify-center py-24">
           <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-[#f2c200] border-t-transparent" />
         </div>
       ) : filtered.length === 0 ? (
         <div className="py-24 text-center">
-          <p className="text-[18px] text-[#aaa]">No users found.</p>
+          <p className="text-[18px] text-[#aaa]">{t("community.noUsersFound")}</p>
         </div>
       ) : (
         <div className="grid grid-cols-4 gap-5 max-[1100px]:grid-cols-3 max-[740px]:grid-cols-2 max-[480px]:grid-cols-1">
-          {filtered.map((u) => (
+          {filtered.map((user) => (
             <UserCard
-              key={u.id}
-              user={u}
+              key={user.id}
+              user={user}
               onAction={handleCardAction}
               onViewResults={setDrawerUser}
             />
@@ -435,7 +426,6 @@ export const CommunityPage = () => {
         </div>
       )}
 
-      {/* Drawer */}
       {drawerUser && (
         <ResultsDrawer
           userId={drawerUser.id}

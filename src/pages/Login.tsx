@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { login, register } from "../api/authService";
+import { LanguageSwitcher } from "../components/LanguageSwitcher";
 
 export const Auth = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [mode, setMode] = useState<"login" | "register">("login");
@@ -32,53 +35,53 @@ export const Auth = () => {
         setMode("login");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(err instanceof Error ? err.message : t("auth.somethingWrong"));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[#f8f6f0] pt-20 pb-12">
+    <main className="flex min-h-screen items-center justify-center bg-[#f8f6f0] pb-12 pt-20">
       <div className="w-full max-w-[480px] px-6">
-        <div
-          className="
-            border-2 border-[#ece7dd] rounded-[28px] bg-white
-            shadow-[0_8px_24px_rgba(24,24,24,0.06)]
-            px-10 py-12
-          "
-        >
-          <div className="text-center mb-10">
-            <h1 className="text-[32px] font-bold text-[#111111] mb-2">
-              {mode === "login" ? "Welcome back" : "Create account"}
-            </h1>
-            <p className="text-[#7a7a7a] text-[17px]">
+        <div className="rounded-[28px] border-2 border-[#ece7dd] bg-white px-10 py-12 shadow-[0_8px_24px_rgba(24,24,24,0.06)]">
+          <div className="mb-8 flex justify-end">
+            <LanguageSwitcher />
+          </div>
+
+          <div className="mb-10 text-center">
+            <h1 className="mb-2 text-[32px] font-bold text-[#111111]">
               {mode === "login"
-                ? "Sign in to continue"
-                : "Fill in your details to register"}
+                ? t("auth.welcomeBack")
+                : t("auth.createAccount")}
+            </h1>
+            <p className="text-[17px] text-[#7a7a7a]">
+              {mode === "login"
+                ? t("auth.signInToContinue")
+                : t("auth.fillDetails")}
             </p>
           </div>
 
-          <div className="flex rounded-[16px] border border-[#e4e4e4] p-1 mb-10">
+          <div className="mb-10 flex rounded-[16px] border border-[#e4e4e4] p-1">
             <button
               onClick={() => setMode("login")}
-              className={`flex-1 py-3 rounded-[14px] text-[16px] font-medium transition-all ${
+              className={`flex-1 rounded-[14px] py-3 text-[16px] font-medium transition-all ${
                 mode === "login"
                   ? "bg-[#f2c200] text-[#111] shadow-sm"
                   : "text-[#555] hover:bg-[#f8f6f0]"
               }`}
             >
-              Sign in
+              {t("auth.signIn")}
             </button>
             <button
               onClick={() => setMode("register")}
-              className={`flex-1 py-3 rounded-[14px] text-[16px] font-medium transition-all ${
+              className={`flex-1 rounded-[14px] py-3 text-[16px] font-medium transition-all ${
                 mode === "register"
                   ? "bg-[#f2c200] text-[#111] shadow-sm"
                   : "text-[#555] hover:bg-[#f8f6f0]"
               }`}
             >
-              Register
+              {t("auth.register")}
             </button>
           </div>
 
@@ -86,56 +89,56 @@ export const Auth = () => {
             {mode === "register" && (
               <>
                 <div>
-                  <label className="block text-[14px] font-medium text-[#555] mb-2">
-                    Username
+                  <label className="mb-2 block text-[14px] font-medium text-[#555]">
+                    {t("auth.username")}
                   </label>
                   <input
                     type="text"
                     value={loginName}
                     onChange={(e) => setLoginName(e.target.value)}
                     required
-                    className="w-full border-2 border-[#e4e4e4] focus:border-[#f2c200] rounded-[16px] px-5 py-4 text-[17px] outline-none transition-all"
+                    className="w-full rounded-[16px] border-2 border-[#e4e4e4] px-5 py-4 text-[17px] outline-none transition-all focus:border-[#f2c200]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[14px] font-medium text-[#555] mb-2">
-                    Nickname
+                  <label className="mb-2 block text-[14px] font-medium text-[#555]">
+                    {t("auth.nickname")}
                   </label>
                   <input
                     type="text"
                     value={nickName}
                     onChange={(e) => setNickName(e.target.value)}
                     required
-                    className="w-full border-2 border-[#e4e4e4] focus:border-[#f2c200] rounded-[16px] px-5 py-4 text-[17px] outline-none transition-all"
+                    className="w-full rounded-[16px] border-2 border-[#e4e4e4] px-5 py-4 text-[17px] outline-none transition-all focus:border-[#f2c200]"
                   />
                 </div>
               </>
             )}
 
             <div>
-              <label className="block text-[14px] font-medium text-[#555] mb-2">
-                Email
+              <label className="mb-2 block text-[14px] font-medium text-[#555]">
+                {t("auth.email")}
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full border-2 border-[#e4e4e4] focus:border-[#f2c200] rounded-[16px] px-5 py-4 text-[17px] outline-none transition-all"
+                className="w-full rounded-[16px] border-2 border-[#e4e4e4] px-5 py-4 text-[17px] outline-none transition-all focus:border-[#f2c200]"
               />
             </div>
 
             <div>
-              <label className="block text-[14px] font-medium text-[#555] mb-2">
-                Password
+              <label className="mb-2 block text-[14px] font-medium text-[#555]">
+                {t("auth.password")}
               </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full border-2 border-[#e4e4e4] focus:border-[#f2c200] rounded-[16px] px-5 py-4 text-[17px] outline-none transition-all"
+                className="w-full rounded-[16px] border-2 border-[#e4e4e4] px-5 py-4 text-[17px] outline-none transition-all focus:border-[#f2c200]"
               />
             </div>
 
@@ -148,33 +151,29 @@ export const Auth = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`
-                w-full h-[58px] mt-4 rounded-[16px] text-[17px] font-bold
-                transition-all duration-200
-                ${
-                  loading
-                    ? "bg-[#e4e4e4] text-[#888] cursor-not-allowed"
-                    : "bg-[#f2c200] hover:opacity-90 text-[#111]"
-                }
-              `}
+              className={`mt-4 h-[58px] w-full rounded-[16px] text-[17px] font-bold transition-all duration-200 ${
+                loading
+                  ? "cursor-not-allowed bg-[#e4e4e4] text-[#888]"
+                  : "bg-[#f2c200] text-[#111] hover:opacity-90"
+              }`}
             >
               {loading
-                ? "Loading..."
+                ? t("auth.loading")
                 : mode === "login"
-                  ? "Sign in"
-                  : "Register"}
+                  ? t("auth.signIn")
+                  : t("auth.register")}
             </button>
           </form>
 
-          <p className="text-center text-[14px] text-[#7a7a7a] mt-8">
+          <p className="mt-8 text-center text-[14px] text-[#7a7a7a]">
             {mode === "login"
-              ? "Don't have an account? "
-              : "Already have an account? "}
+              ? `${t("auth.noAccount")} `
+              : `${t("auth.haveAccount")} `}
             <button
               onClick={() => setMode(mode === "login" ? "register" : "login")}
-              className="text-[#f2b705] font-medium hover:underline"
+              className="font-medium text-[#f2b705] hover:underline"
             >
-              {mode === "login" ? "Register" : "Sign in"}
+              {mode === "login" ? t("auth.register") : t("auth.signIn")}
             </button>
           </p>
         </div>

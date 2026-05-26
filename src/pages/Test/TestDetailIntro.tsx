@@ -1,16 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { fetchWithToken } from "../../api/apiutils";
+import { localizeTestDetail } from "../../content/testContentTranslations";
 
 const TEST_COST = 100;
 
-const toneColors: any = {
+const toneColors: Record<string, string> = {
   duration: "bg-[#FFF9E8]",
   format: "bg-[#F7F4FF]",
   result: "bg-[#EEF8FF]",
 };
 
 export const TestIntroPage = () => {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -31,16 +34,22 @@ export const TestIntroPage = () => {
         setTest(testJson);
         setCoins(coinsJson.coins ?? null);
       } catch (error) {
-        console.error("Ошибка загрузки:", error);
+        console.error("Test intro loading error:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    if (id) loadData();
+    if (id) {
+      void loadData();
+    }
   }, [id]);
 
   const canAfford = coins === null || coins >= TEST_COST;
+  const localizedTest = useMemo(
+    () => (test ? localizeTestDetail(test, i18n.language) : null),
+    [test, i18n.language],
+  );
 
   const handleStart = () => {
     if (!canAfford) return;
@@ -49,87 +58,62 @@ export const TestIntroPage = () => {
 
   if (loading) {
     return (
-      <main className="mt-[74px] mx-[110px]">
-        <p className="text-[20px] font-medium">Loading...</p>
+      <main className="mx-[110px] mt-[74px]">
+        <p className="text-[20px] font-medium">{t("testIntro.loading")}</p>
       </main>
     );
   }
 
-  if (!test) {
+  if (!localizedTest) {
     return (
-      <main className="mt-[74px] mx-[110px]">
-        <p className="text-[20px] font-medium">Test not found</p>
+      <main className="mx-[110px] mt-[74px]">
+        <p className="text-[20px] font-medium">{t("testIntro.notFound")}</p>
       </main>
     );
   }
 
   return (
-    <main className="mt-[74px] mx-[110px] mb-[150px]">
-      <section
-        className="
-          
-          min-h-[580px]
-          box-border
-          border-2
-          border-[#ECE7DD]
-          rounded-[28px]
-          bg-white
-          flex
-          justify-between
-          items-center
-          pt-[62px]
-          pr-[103px]
-          pb-[68px]
-          pl-[50px]
-        "
-      >
+    <main className="mx-[110px] mb-[150px] mt-[74px]">
+      <section className="box-border flex min-h-[580px] items-center justify-between rounded-[28px] border-2 border-[#ECE7DD] bg-white pb-[68px] pl-[50px] pr-[103px] pt-[62px]">
         <div className="w-[580px]">
-          <p className="m-0 mb-[20px] text-[14px] font-normal leading-[18px] text-[#7A7A7A] uppercase">
-            Step 1 · Before you begin
+          <p className="m-0 mb-[20px] text-[14px] font-normal uppercase leading-[18px] text-[#7A7A7A]">
+            {t("testIntro.step")}
           </p>
 
           <h1 className="m-0 mb-[31px] text-[40px] font-bold leading-[50px] text-[#111111]">
-            {test.title}
+            {localizedTest.title}
           </h1>
 
           <p className="m-0 mb-[40px] w-[595px] text-[16px] font-normal leading-[26px] text-[#444444]">
-            {test.description}
+            {localizedTest.description}
           </p>
 
-          {/* ── Блок стоимости ── */}
           <div
-            className={`
-              mb-[32px] flex items-center gap-[14px]
-              rounded-[16px] border-2 px-[20px] py-[16px]
-              w-fit
-              ${
-                canAfford
-                  ? "border-[#f2c200] bg-[#fffbec]"
-                  : "border-[#e74c3c] bg-[#fef5f5]"
-              }
-            `}
+            className={`mb-[32px] flex w-fit items-center gap-[14px] rounded-[16px] border-2 px-[20px] py-[16px] ${
+              canAfford
+                ? "border-[#f2c200] bg-[#fffbec]"
+                : "border-[#e74c3c] bg-[#fef5f5]"
+            }`}
           >
-            {/* иконка монеты */}
             <span
-              className={`
-                flex h-[36px] w-[36px] shrink-0 items-center justify-center
-                rounded-full text-[16px] font-black text-white shadow-md
-                ${canAfford ? "bg-[#f2c200]" : "bg-[#e74c3c]"}
-              `}
+              aria-hidden="true"
+              className={`flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-full text-[16px] font-black text-white shadow-md ${
+                canAfford ? "bg-[#f2c200]" : "bg-[#e74c3c]"
+              }`}
             >
               ✦
             </span>
 
             <div>
               <p className="m-0 text-[13px] font-medium text-[#888]">
-                Test cost
+                {t("testIntro.testCost")}
               </p>
               <p
                 className={`m-0 text-[18px] font-bold ${
                   canAfford ? "text-[#9a6e00]" : "text-[#c0392b]"
                 }`}
               >
-                {TEST_COST} coins
+                {TEST_COST} {t("common.coins")}
               </p>
             </div>
 
@@ -137,63 +121,45 @@ export const TestIntroPage = () => {
 
             <div>
               <p className="m-0 text-[13px] font-medium text-[#888]">
-                Your balance
+                {t("testIntro.yourBalance")}
               </p>
               <p
                 className={`m-0 text-[18px] font-bold ${
                   canAfford ? "text-[#9a6e00]" : "text-[#c0392b]"
                 }`}
               >
-                {coins !== null ? `${coins} coins` : "—"}
+                {coins !== null ? `${coins} ${t("common.coins")}` : "—"}
               </p>
             </div>
           </div>
 
-          {/* предупреждение если не хватает */}
           {!canAfford && (
-            <div
-              className="
-                mb-[32px] flex items-start gap-[12px]
-                rounded-[14px] border border-[#fbc8c2]
-                bg-[#fff5f4] px-[18px] py-[14px]
-                w-[480px]
-              "
-            >
+            <div className="mb-[32px] flex w-[480px] items-start gap-[12px] rounded-[14px] border border-[#fbc8c2] bg-[#fff5f4] px-[18px] py-[14px]">
               <span className="mt-[1px] text-[18px]">🎮</span>
               <div>
                 <p className="m-0 text-[14px] font-bold text-[#c0392b]">
-                  Not enough coins
+                  {t("testIntro.notEnoughCoins")}
                 </p>
                 <p className="m-0 mt-[4px] text-[13px] leading-[20px] text-[#888]">
-                  You need {TEST_COST} coins to start this test. Play a game to
-                  earn more coins and come back!
+                  {t("testIntro.notEnoughDescription", { cost: TEST_COST })}
                 </p>
                 <button
                   onClick={() => navigate("/games")}
-                  className="
-                    mt-[10px]
-                    rounded-[9px] border-none
-                    bg-[#e74c3c] px-[16px] py-[8px]
-                    text-[13px] font-bold text-white
-                    cursor-pointer transition-opacity hover:opacity-85
-                  "
+                  className="mt-[10px] cursor-pointer rounded-[9px] border-none bg-[#e74c3c] px-[16px] py-[8px] text-[13px] font-bold text-white transition-opacity hover:opacity-85"
                 >
-                  Go to Games →
+                  {t("testIntro.goToGames")}
                 </button>
               </div>
             </div>
           )}
 
-          <div className="flex gap-[20px] mb-[54px]">
-            {test.info_boxes?.map((box: any, index: any) => (
+          <div className="mb-[54px] flex gap-[20px]">
+            {localizedTest.info_boxes?.map((box: any, index: number) => (
               <div
                 key={index}
-                className={`
-                  w-[180px] h-[116px] rounded-[18px]
-                  pt-[18px] pr-[17px] pb-[38px] pl-[16px]
-                  box-border
-                  ${toneColors[box.tone] || "bg-[#F5F5F5]"}
-                `}
+                className={`box-border h-[116px] w-[180px] rounded-[18px] pb-[38px] pl-[16px] pr-[17px] pt-[18px] ${
+                  toneColors[box.tone] || "bg-[#F5F5F5]"
+                }`}
               >
                 <h3 className="m-0 mb-[9px] text-[22px] font-bold leading-[28px] text-[#111111]">
                   {box.value}
@@ -205,35 +171,30 @@ export const TestIntroPage = () => {
             ))}
           </div>
 
-          {/* кнопка старта */}
           <button
             onClick={handleStart}
             disabled={!canAfford}
             title={
               !canAfford
-                ? `You need ${TEST_COST} coins to start`
-                : "Start the test"
+                ? t("testIntro.needTooltip", { cost: TEST_COST })
+                : t("testIntro.startTooltip")
             }
-            className={`
-              w-[230px] h-[58px]
-              border-none rounded-[12px]
-              text-white text-[16px] font-bold leading-[20px]
-              transition-all duration-200
-              ${
-                canAfford
-                  ? "bg-[#F2B705] cursor-pointer hover:opacity-90"
-                  : "bg-[#ccc] cursor-not-allowed opacity-60"
-              }
-            `}
+            className={`h-[58px] w-[230px] rounded-[12px] border-none text-[16px] font-bold leading-[20px] text-white transition-all duration-200 ${
+              canAfford
+                ? "cursor-pointer bg-[#F2B705] hover:opacity-90"
+                : "cursor-not-allowed bg-[#ccc] opacity-60"
+            }`}
           >
-            {canAfford ? "START TEST" : `NEED ${TEST_COST} COINS`}
+            {canAfford
+              ? t("testIntro.startTest")
+              : t("testIntro.needCoins", { cost: TEST_COST })}
           </button>
         </div>
 
         <div className="flex items-center justify-center">
           <img
-            src={test.image_src}
-            alt={test.image_alt}
+            src={localizedTest.image_src}
+            alt={localizedTest.image_alt}
             className={`block w-[420px] object-contain transition-all duration-300 ${
               !canAfford ? "opacity-40 grayscale" : ""
             }`}
