@@ -37,6 +37,16 @@ interface Friend {
   since: string;
 }
 
+interface Recommendation {
+  id: number;
+  title: string;
+  description: string;
+  type: string;
+  url?: string | null;
+  image_src?: string | null;
+  reason?: string | null;
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const ARCHETYPE_COLORS: Record<string, { bg: string; accent: string }> = {
@@ -181,6 +191,78 @@ function ResultCard({ sub }: { sub: Submission }) {
   );
 }
 
+// ── Recommendation Card ───────────────────────────────────────────────────────
+
+const REC_TYPE_COLORS: Record<string, { bg: string; accent: string }> = {
+  book: { bg: "#EFF6FF", accent: "#3b82f6" },
+  movie: { bg: "#FFF1F2", accent: "#f43f5e" },
+  activity: { bg: "#F0FDF4", accent: "#22c55e" },
+  game: { bg: "#F5F3FF", accent: "#8b5cf6" },
+  music: { bg: "#FFF7ED", accent: "#f97316" },
+};
+
+function RecommendationCard({ rec }: { rec: Recommendation }) {
+  const palette = REC_TYPE_COLORS[rec.type] ?? { bg: "#FFF9E8", accent: "#f2c200" };
+
+  return (
+    <article className="rounded-[22px] border-2 border-[#ece7dd] bg-white overflow-hidden transition-all duration-200 hover:border-[#f2c200] hover:shadow-[0_8px_32px_rgba(242,194,0,0.10)]">
+      <div className="flex gap-4 p-5">
+        {rec.image_src ? (
+          <img
+            src={rec.image_src}
+            alt={rec.title}
+            className="h-[72px] w-[72px] shrink-0 rounded-[16px] object-cover"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = "none";
+            }}
+          />
+        ) : (
+          <div
+            className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-[16px] text-[28px]"
+            style={{ background: palette.bg }}
+          >
+            {rec.type === "book" ? "📚" : rec.type === "movie" ? "🎬" : rec.type === "activity" ? "🏃" : rec.type === "game" ? "🎮" : rec.type === "music" ? "🎵" : "✨"}
+          </div>
+        )}
+
+        <div className="min-w-0 flex-1">
+          {rec.type && (
+            <div className="mb-1">
+              <span
+                className="rounded-[6px] px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide"
+                style={{ background: palette.bg, color: palette.accent }}
+              >
+                {rec.type}
+              </span>
+            </div>
+          )}
+          <p className="mb-0.5 text-[17px] font-bold text-[#111]">{rec.title}</p>
+          <p className="text-[13px] text-[#666] leading-snug">{rec.description}</p>
+          {rec.reason && (
+            <p className="mt-1 text-[12px] italic text-[#aaa]">Why: {rec.reason}</p>
+          )}
+        </div>
+
+        {rec.url && (
+          <a
+            href={rec.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-auto flex h-8 w-8 shrink-0 items-center justify-center self-start rounded-full border-2 border-[#ece7dd] text-[#bbb] transition-all hover:border-[#f2c200] hover:text-[#f2c200]"
+            aria-label="Open link"
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7" />
+              <path d="M8 1h3v3" />
+              <path d="M11 1L5.5 6.5" />
+            </svg>
+          </a>
+        )}
+      </div>
+    </article>
+  );
+}
+
 // ── Friend Card ───────────────────────────────────────────────────────────────
 
 function FriendCard({
@@ -231,22 +313,26 @@ export const ProfilePage = () => {
   const [me, setMe] = useState<Me | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [friends, setFriends] = useState<Friend[]>([]);
-  const [tab, setTab] = useState<"results" | "friends">("results");
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [tab, setTab] = useState<"results" | "friends" | "recommendations">("results");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
       try {
-        const [meRes, subRes, frRes] = await Promise.all([
+        const [meRes, subRes, frRes, recRes] = await Promise.all([
           fetchWithToken("/api/v1/me"),
           fetchWithToken("/api/v1/submissions"),
           fetchWithToken("/api/v1/community/friends"),
+          fetchWithToken("/api/v1/me/recommendations"),
         ]);
         setMe(await meRes.json());
         const subData = await subRes.json();
         setSubmissions(subData.submissions ?? []);
         const frData = await frRes.json();
         setFriends(frData.friends ?? []);
+        const recData = await recRes.json();
+        setRecommendations(recData.recommendations ?? []);
       } finally {
         setLoading(false);
       }
@@ -319,7 +405,7 @@ export const ProfilePage = () => {
 
       {/* Tabs */}
       <div className="mb-6 flex gap-2 rounded-[16px] border-2 border-[#ece7dd] bg-white p-1.5">
-        {(["results", "friends"] as const).map((t) => (
+        {(["results", "friends", "recommendations"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -331,8 +417,10 @@ export const ProfilePage = () => {
             }
           >
             {t === "results"
-              ? `Test Results${submissions.length ? ` (${submissions.length})` : ""}`
-              : `Friends${friends.length ? ` (${friends.length})` : ""}`}
+              ? `Results${submissions.length ? ` (${submissions.length})` : ""}`
+              : t === "friends"
+              ? `Friends${friends.length ? ` (${friends.length})` : ""}`
+              : `For You${recommendations.length ? ` (${recommendations.length})` : ""}`}
           </button>
         ))}
       </div>
@@ -355,6 +443,26 @@ export const ProfilePage = () => {
             <div className="space-y-4">
               {submissions.map((s) => (
                 <ResultCard key={s.test_id} sub={s} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === "recommendations" && (
+        <div>
+          <SectionTitle>Recommended For You</SectionTitle>
+          {recommendations.length === 0 ? (
+            <div className="rounded-[22px] border-2 border-dashed border-[#ece7dd] py-16 text-center">
+              <p className="text-[17px] text-[#bbb]">No recommendations yet.</p>
+              <p className="mt-2 text-[14px] text-[#ccc]">
+                Complete more tests to get personalized recommendations.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {recommendations.map((r, i) => (
+                <RecommendationCard key={r.id ?? i} rec={r} />
               ))}
             </div>
           )}
