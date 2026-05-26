@@ -1,6 +1,12 @@
+import {
+  getEnemyLocalization,
+  getEnemyResultImageByKey,
+  normalizeEnemyResultKey,
+} from "./enemyLocalization";
+
 type ContentLanguage = "en" | "ru" | "kk";
 type SupportedLocalizedLanguage = "ru" | "kk";
-type TestType = "personality" | "animal" | "weapon";
+type TestType = "personality" | "animal" | "weapon" | "enemy";
 type InfoTone = "duration" | "format" | "result";
 
 type InfoBoxTranslation = {
@@ -22,6 +28,15 @@ type ResultTranslation = {
   temperament?: string;
   quadrant?: string;
   coreTraits?: string[];
+  threatenedNeed?: string;
+  needDescription?: string;
+  psychologicalBasis?: string;
+  howItWins?: string;
+  hiddenTraitSummary?: string;
+  warningSign?: string;
+  resistance?: string;
+  distortionPatterns?: string[];
+  scoreNarrative?: string;
 };
 
 type QuestionTranslation = {
@@ -44,6 +59,7 @@ const TYPE_LABELS: Record<ContentLanguage, Record<string, string>> = {
     personality: "Personality",
     animal: "Animal",
     weapon: "Weapon",
+    enemy: "Enemy",
     color: "Color",
   },
   ru: {
@@ -243,7 +259,10 @@ const ANIMAL_AXIS_FIELDS: Record<
   },
 };
 
-const TEST_TRANSLATIONS: Record<SupportedLocalizedLanguage, Record<TestType, TestTranslation>> = {
+const TEST_TRANSLATIONS: Record<
+  SupportedLocalizedLanguage,
+  Partial<Record<TestType, TestTranslation>>
+> = {
   ru: {
     personality: {
       title: "Какая у тебя личность?",
@@ -1078,6 +1097,10 @@ function translateScaleOption(language: SupportedLocalizedLanguage, option: any)
 
 export function localizeTestType(type: string, language: string) {
   const normalized = normalizeLanguage(language);
+  if (type === "enemy") {
+    if (normalized === "ru") return "Враг";
+    if (normalized === "kk") return "Жау";
+  }
   return TYPE_LABELS[normalized][type] ?? type;
 }
 
@@ -1085,16 +1108,22 @@ export function localizeTestSummary<T extends { type: string; title: string; des
   test: T,
   language: string,
 ): T {
+  const normalized = normalizeLanguage(language);
+  const enemyLocalization =
+    test.type === "enemy" ? getEnemyLocalization(normalized) : null;
   const translation = getLocalizedTestTranslation(language, test.type);
-  if (!translation) return test;
+  if (!translation && !enemyLocalization) return test;
+
+  const infoBoxesSource = translation?.infoBoxes ?? enemyLocalization?.infoBoxes;
 
   return {
     ...test,
-    title: translation.title,
-    description: translation.description,
-    image_alt: translation.imageAlt,
+    title: translation?.title ?? enemyLocalization?.title ?? test.title,
+    description:
+      translation?.description ?? enemyLocalization?.description ?? test.description,
+    image_alt: translation?.imageAlt ?? enemyLocalization?.imageAlt ?? test.image_alt,
     info_boxes: test.info_boxes?.map((box: any) => {
-      const localizedBox = translation.infoBoxes[box.tone as InfoTone];
+      const localizedBox = infoBoxesSource?.[box.tone as InfoTone];
       return localizedBox ? { ...box, ...localizedBox } : box;
     }),
   };
@@ -1112,7 +1141,11 @@ export function localizeTestDetail<
 >(test: T, language: string): T {
   const normalized = normalizeLanguage(language);
   const translation = getLocalizedTestTranslation(language, test.type);
-  if (!translation || normalized === "en") return test;
+  if (normalized === "en") return test;
+
+  if (!translation) {
+    return localizeTestSummary(test, language);
+  }
 
   return {
     ...localizeTestSummary(test, language),
@@ -1140,7 +1173,7 @@ export function localizeTestDetail<
   };
 }
 
-export function localizeResultPayload<T extends { resultKey?: string; title?: string; subtitle?: string | null; tagline?: string; description?: string; strengths?: string[]; growthAreas?: string[]; developmentFocus?: string | null; whyThisResult?: string | null; imageAlt?: string; image_alt?: string; details?: any }>(
+export function localizeResultPayload<T extends { resultKey?: string; title?: string; subtitle?: string | null; tagline?: string; description?: string; strengths?: string[]; growthAreas?: string[]; developmentFocus?: string | null; whyThisResult?: string | null; imageSrc?: string; image_src?: string; imageAlt?: string; image_alt?: string; details?: any }>(
   testType: string,
   result: T,
   language: string,
@@ -1148,23 +1181,50 @@ export function localizeResultPayload<T extends { resultKey?: string; title?: st
   const normalized = normalizeLanguage(language);
   if (normalized === "en") return result;
 
+  const enemyLocalization =
+    testType === "enemy" ? getEnemyLocalization(normalized) : null;
+  const enemyKey =
+    testType === "enemy" ? normalizeEnemyResultKey(result.resultKey) : null;
+  const enemyResultTranslation =
+    enemyLocalization && enemyKey ? enemyLocalization.results[enemyKey] : null;
+  const enemyImage = getEnemyResultImageByKey(result.resultKey);
   const translation = getLocalizedTestTranslation(language, testType)?.results?.[result.resultKey ?? ""];
-  if (!translation) return result;
+  if (!translation && !enemyResultTranslation && !enemyImage) return result;
 
   const localized: T = {
     ...result,
-    title: translation.title ?? result.title,
-    subtitle: translation.subtitle ?? result.subtitle,
-    tagline: translation.tagline ?? result.tagline,
-    description: translation.description ?? result.description,
-    strengths: translation.strengths ?? result.strengths,
-    growthAreas: translation.growthAreas ?? result.growthAreas,
+    title:
+      enemyResultTranslation?.title ??
+      translation?.title ??
+      result.title,
+    subtitle:
+      enemyResultTranslation?.subtitle ??
+      translation?.subtitle ??
+      result.subtitle,
+    tagline:
+      enemyResultTranslation?.tagline ??
+      translation?.tagline ??
+      result.tagline,
+    description:
+      enemyResultTranslation?.description ??
+      translation?.description ??
+      result.description,
+    strengths:
+      enemyResultTranslation?.strengths ??
+      translation?.strengths ??
+      result.strengths,
+    growthAreas:
+      enemyResultTranslation?.growthAreas ??
+      translation?.growthAreas ??
+      result.growthAreas,
     developmentFocus:
-      translation.developmentFocus ??
+      translation?.developmentFocus ??
       localizeDevelopmentFocus(normalized, result.developmentFocus),
-    whyThisResult: translation.whyThisResult ?? result.whyThisResult,
-    imageAlt: result.imageAlt,
-    image_alt: result.image_alt,
+    whyThisResult: translation?.whyThisResult ?? result.whyThisResult,
+    imageSrc: enemyImage?.imageSrc ?? result.imageSrc,
+    image_src: enemyImage?.imageSrc ?? result.image_src,
+    imageAlt: enemyImage?.imageAlt ?? result.imageAlt,
+    image_alt: enemyImage?.imageAlt ?? result.image_alt,
   };
 
   if (localized.details) {
@@ -1172,7 +1232,7 @@ export function localizeResultPayload<T extends { resultKey?: string; title?: st
 
     if (typeof details.shadowArchetype === "string") {
       details.shadowArchetype =
-        translation.shadowArchetype ??
+        translation?.shadowArchetype ??
         RESULT_TITLE_LOOKUP[normalized][details.shadowArchetype] ??
         details.shadowArchetype;
     }
@@ -1194,15 +1254,15 @@ export function localizeResultPayload<T extends { resultKey?: string; title?: st
       });
     }
 
-    if (Array.isArray(details.coreTraits) && translation.coreTraits) {
+    if (Array.isArray(details.coreTraits) && translation?.coreTraits) {
       details.coreTraits = translation.coreTraits;
     }
 
-    if (translation.temperament) {
+    if (translation?.temperament) {
       details.temperament = translation.temperament;
     }
 
-    if (translation.quadrant) {
+    if (translation?.quadrant) {
       details.quadrant = translation.quadrant;
     }
 
@@ -1232,6 +1292,58 @@ export function localizeResultPayload<T extends { resultKey?: string; title?: st
           narrative: translateBigFiveNarrative(normalized, axis.narrative),
         };
       });
+    }
+
+    if (enemyResultTranslation) {
+      if (typeof details.threatenedNeed === "string") {
+        details.threatenedNeed = enemyResultTranslation.threatenedNeed;
+      }
+
+      if (typeof details.needDescription === "string") {
+        details.needDescription = enemyResultTranslation.needDescription;
+      }
+
+      if (typeof details.psychologicalBasis === "string") {
+        details.psychologicalBasis = enemyResultTranslation.psychologicalBasis;
+      }
+
+      if (typeof details.howItWins === "string") {
+        details.howItWins = enemyResultTranslation.howItWins;
+      }
+
+      if (typeof details.hiddenTraitSummary === "string") {
+        details.hiddenTraitSummary = enemyResultTranslation.hiddenTraitSummary;
+      }
+
+      if (typeof details.warningSign === "string") {
+        details.warningSign = enemyResultTranslation.warningSign;
+      }
+
+      if (typeof details.resistance === "string") {
+        details.resistance = enemyResultTranslation.resistance;
+      }
+
+      if (Array.isArray(details.distortionPatterns)) {
+        details.distortionPatterns = enemyResultTranslation.distortionPatterns;
+      }
+
+      if (Array.isArray(details.enemyScores)) {
+        details.enemyScores = details.enemyScores.map((score: any) => {
+          const scoreKey = normalizeEnemyResultKey(score.key);
+          const scoreTranslation =
+            scoreKey && enemyLocalization
+              ? enemyLocalization.results[scoreKey]
+              : null;
+
+          return {
+            ...score,
+            title: scoreTranslation?.title ?? score.title,
+            label: scoreTranslation?.title ?? score.label,
+            narrative:
+              scoreTranslation?.scoreNarrative ?? score.narrative,
+          };
+        });
+      }
     }
 
     localized.details = details;
@@ -1297,6 +1409,7 @@ export function localizeCommunityResult<
     title: string;
     subtitle?: string | null;
     description?: string;
+    image_src?: string;
     image_alt?: string;
     result_key: string;
   },
@@ -1308,6 +1421,7 @@ export function localizeCommunityResult<
       title: result.title,
       subtitle: result.subtitle,
       description: result.description,
+      image_src: result.image_src,
       image_alt: result.image_alt,
     },
     language,
@@ -1322,5 +1436,7 @@ export function localizeCommunityResult<
     title: translatedResult.title ?? result.title,
     subtitle: translatedResult.subtitle ?? result.subtitle,
     description: translatedResult.description ?? result.description,
+    image_src: translatedResult.image_src ?? result.image_src,
+    image_alt: translatedResult.image_alt ?? result.image_alt,
   };
 }

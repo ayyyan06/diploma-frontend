@@ -5,6 +5,10 @@ export const BauyrsaqAdventurePage = () => {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const apiBase = import.meta.env.VITE_API_URL?.trim() ?? "";
+  const gameSrc = apiBase
+    ? `/baursak_game.html?apiBase=${encodeURIComponent(apiBase)}`
+    : "/baursak_game.html";
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -84,7 +88,7 @@ export const BauyrsaqAdventurePage = () => {
           >
             <iframe
               ref={iframeRef}
-              src="/baursak_game.html"
+              src={gameSrc}
               title="Bauyrsaq Game"
               allowFullScreen
               className="

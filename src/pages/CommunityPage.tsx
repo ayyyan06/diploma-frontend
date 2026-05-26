@@ -39,6 +39,7 @@ const ARCHETYPE_COLORS: Record<string, string> = {
   personality: "#FFF9E8",
   animal: "#EEF8FF",
   weapon: "#F7F4FF",
+  enemy: "#FFF4EC",
   color: "#FFF0F0",
 };
 

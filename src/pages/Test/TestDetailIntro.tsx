@@ -3,6 +3,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { fetchWithToken } from "../../api/apiutils";
 import { localizeTestDetail } from "../../content/testContentTranslations";
+import {
+  getLocalEnemyTest,
+  isLocalEnemyTestId,
+} from "../../content/localEnemyTest";
 
 const TEST_COST = 100;
 
@@ -12,12 +16,42 @@ const toneColors: Record<string, string> = {
   result: "bg-[#EEF8FF]",
 };
 
+interface TestInfoBox {
+  tone: string;
+  value: string;
+  label: string;
+}
+
+interface TestOption {
+  id: string;
+  label: string;
+}
+
+interface TestQuestion {
+  id: number;
+  order: number;
+  title: string;
+  prompt?: string | null;
+  options?: TestOption[] | null;
+}
+
+interface TestDetail {
+  id: number;
+  type: string;
+  title: string;
+  description: string;
+  image_src: string;
+  image_alt: string;
+  info_boxes?: TestInfoBox[];
+  questions?: TestQuestion[];
+}
+
 export const TestIntroPage = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const [test, setTest] = useState<any>(null);
+  const [test, setTest] = useState<TestDetail | null>(null);
   const [coins, setCoins] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -25,13 +59,15 @@ export const TestIntroPage = () => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const [testRes, coinsRes] = await Promise.all([
-          fetchWithToken(`/api/v1/tests/${id}`),
-          fetchWithToken("/api/v1/coins"),
-        ]);
-        const testJson = await testRes.json();
+        const coinsResPromise = fetchWithToken("/api/v1/coins");
+        const testJson = isLocalEnemyTestId(id)
+          ? getLocalEnemyTest()
+          : await fetchWithToken(`/api/v1/tests/${id}`).then((response) =>
+              response.json(),
+            );
+        const coinsRes = await coinsResPromise;
         const coinsJson = await coinsRes.json();
-        setTest(testJson);
+        setTest(testJson as TestDetail);
         setCoins(coinsJson.coins ?? null);
       } catch (error) {
         console.error("Test intro loading error:", error);
@@ -50,6 +86,8 @@ export const TestIntroPage = () => {
     () => (test ? localizeTestDetail(test, i18n.language) : null),
     [test, i18n.language],
   );
+  const isEnemyTest = localizedTest?.type === "enemy";
+  const introImageSrc = localizedTest?.image_src;
 
   const handleStart = () => {
     if (!canAfford) return;
@@ -154,7 +192,7 @@ export const TestIntroPage = () => {
           )}
 
           <div className="mb-[54px] flex gap-[20px]">
-            {localizedTest.info_boxes?.map((box: any, index: number) => (
+            {localizedTest.info_boxes?.map((box, index: number) => (
               <div
                 key={index}
                 className={`box-border h-[116px] w-[180px] rounded-[18px] pb-[38px] pl-[16px] pr-[17px] pt-[18px] ${
@@ -192,13 +230,25 @@ export const TestIntroPage = () => {
         </div>
 
         <div className="flex items-center justify-center">
-          <img
-            src={localizedTest.image_src}
-            alt={localizedTest.image_alt}
-            className={`block w-[420px] object-contain transition-all duration-300 ${
-              !canAfford ? "opacity-40 grayscale" : ""
-            }`}
-          />
+          {isEnemyTest ? (
+            <div className="h-[281px] w-[281px] shrink-0 overflow-hidden rounded-[44px] bg-[#f6f3eb]">
+              <img
+                src={introImageSrc}
+                alt={localizedTest.image_alt}
+                className={`block h-full w-full scale-[1.08] object-cover object-[46%_44%] transition-all duration-300 ${
+                  !canAfford ? "opacity-40 grayscale" : ""
+                }`}
+              />
+            </div>
+          ) : (
+            <img
+              src={introImageSrc}
+              alt={localizedTest.image_alt}
+              className={`block w-[420px] object-contain transition-all duration-300 ${
+                !canAfford ? "opacity-40 grayscale" : ""
+              }`}
+            />
+          )}
         </div>
       </section>
     </main>

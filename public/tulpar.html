@@ -216,18 +216,27 @@
       }
 
       // ─── COIN REWARD CLAIM ──────────────────────────────────────────
+      function getApiBase() {
+        const value = new URLSearchParams(window.location.search).get("apiBase");
+        return value ? value.replace(/\/+$/, "") : "";
+      }
+
       async function claimCoins(finalScore) {
         try {
           const token = localStorage.getItem("api_token");
           if (!token) return;
-          const res = await fetch("/api/v1/coins/claim-game-reward", {
+          const apiBase = getApiBase();
+          const endpoint = apiBase
+            ? `${apiBase}/api/v1/coins/claim-game-reward`
+            : "/api/v1/coins/claim-game-reward";
+          const res = await fetch(endpoint, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
               Authorization: "Bearer " + token,
             },
             body: JSON.stringify({
-              game: "baursak_jump",
+              game: "tulpar_run",
               score: finalScore,
               coins_earned: 0,
             }),

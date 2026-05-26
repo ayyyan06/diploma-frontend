@@ -55,6 +55,7 @@ const ARCHETYPE_COLORS: Record<string, { bg: string; accent: string }> = {
   personality: { bg: "#FFF9E8", accent: "#F2C200" },
   animal: { bg: "#EEF8FF", accent: "#60a5fa" },
   weapon: { bg: "#F7F4FF", accent: "#a78bfa" },
+  enemy: { bg: "#FFF4EC", accent: "#d97706" },
   color: { bg: "#FFF0F0", accent: "#f87171" },
 };
 

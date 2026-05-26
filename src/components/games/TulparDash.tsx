@@ -5,6 +5,10 @@ export const TulparDash = () => {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const apiBase = import.meta.env.VITE_API_URL?.trim() ?? "";
+  const gameSrc = apiBase
+    ? `/tulpar.html?apiBase=${encodeURIComponent(apiBase)}`
+    : "/tulpar.html";
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -84,7 +88,7 @@ export const TulparDash = () => {
           >
             <iframe
               ref={iframeRef}
-              src="/tulpar.html"
+              src={gameSrc}
               title="Tulpar Dash"
               allowFullScreen
               className="

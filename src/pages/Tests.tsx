@@ -3,12 +3,22 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { fetchWithToken } from "../api/apiutils";
 import { localizeTestSummary } from "../content/testContentTranslations";
+import { getLocalEnemyTest } from "../content/localEnemyTest";
 
 const TEST_COST = 100;
 
+interface TestSummary {
+  id: number;
+  type: string;
+  title: string;
+  description: string;
+  image_src: string;
+  image_alt: string;
+}
+
 export const Tests = () => {
   const { t, i18n } = useTranslation();
-  const [tests, setTests] = useState([]);
+  const [tests, setTests] = useState<TestSummary[]>([]);
   const [coins, setCoins] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,21 +36,36 @@ export const Tests = () => {
         const testsData = await testsRes.json();
         const coinsData = await coinsRes.json();
 
-        setTests(testsData.tests || []);
+        setTests((testsData.tests as TestSummary[]) || []);
         setCoins(coinsData.coins ?? null);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : t("tests.errorPrefix"));
       } finally {
         setLoading(false);
       }
     };
 
     void fetchData();
-  }, []);
+  }, [t]);
 
   const localizedTests = useMemo(
-    () =>
-      tests.map((test: any) => localizeTestSummary(test, i18n.language)),
+    () => {
+      const remoteTests = tests
+        .map((test) => localizeTestSummary(test, i18n.language))
+        .filter(
+          (test) =>
+            test.type !== "road" &&
+            !/steppe road/i.test(test.title),
+        );
+
+      const hasEnemy = remoteTests.some((test) => test.type === "enemy");
+      if (hasEnemy) return remoteTests;
+
+      return [
+        ...remoteTests,
+        localizeTestSummary(getLocalEnemyTest(), i18n.language),
+      ];
+    },
     [tests, i18n.language],
   );
 
@@ -81,8 +106,9 @@ export const Tests = () => {
       )}
 
       <section className="flex flex-row justify-center justify-evenly gap-x-[70px] gap-y-10">
-        {localizedTests.map((test: any) => {
+        {localizedTests.map((test) => {
           const canAfford = coins === null || coins >= TEST_COST;
+          const isEnemyTest = test.type === "enemy";
 
           return (
             <NavLink
@@ -91,13 +117,25 @@ export const Tests = () => {
               className="group flex max-w-[260px] flex-col items-center text-center"
             >
               <div className="relative w-full">
-                <img
-                  src={test.image_src}
-                  alt={test.image_alt}
-                  className={`h-full w-full object-contain transition-transform group-hover:-translate-y-1 ${
-                    !canAfford ? "opacity-50 grayscale" : ""
-                  }`}
-                />
+                {isEnemyTest ? (
+                  <div className="aspect-square w-full overflow-hidden rounded-[56px] bg-[#f6f3eb]">
+                    <img
+                      src={test.image_src}
+                      alt={test.image_alt}
+                      className={`h-full w-full scale-[1.08] object-cover object-[46%_44%] transition-transform group-hover:-translate-y-1 ${
+                        !canAfford ? "opacity-50 grayscale" : ""
+                      }`}
+                    />
+                  </div>
+                ) : (
+                  <img
+                    src={test.image_src}
+                    alt={test.image_alt}
+                    className={`h-full w-full object-contain transition-transform group-hover:-translate-y-1 ${
+                      !canAfford ? "opacity-50 grayscale" : ""
+                    }`}
+                  />
+                )}
 
                 <div
                   className={`

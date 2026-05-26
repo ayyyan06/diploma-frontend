@@ -6,13 +6,40 @@ import {
   localizeTestDetail,
   localizeTestType,
 } from "../../content/testContentTranslations";
+import {
+  evaluateLocalEnemyTest,
+  getLocalEnemyTest,
+  isLocalEnemyTestId,
+  storeLocalEnemyResult,
+} from "../../content/localEnemyTest";
+
+interface TestOption {
+  id: string;
+  label: string;
+}
+
+interface TestQuestion {
+  id: number;
+  order: number;
+  title: string;
+  prompt?: string | null;
+  options?: TestOption[] | null;
+}
+
+interface TestDetail {
+  id: number | string;
+  type: string;
+  title: string;
+  description: string;
+  questions?: TestQuestion[];
+}
 
 export const TestQestionsPage = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const [test, setTest] = useState<any>(null);
+  const [test, setTest] = useState<TestDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -24,8 +51,13 @@ export const TestQestionsPage = () => {
     const loadTest = async () => {
       try {
         setLoading(true);
+        if (isLocalEnemyTestId(id)) {
+          setTest(getLocalEnemyTest());
+          return;
+        }
+
         const response = await fetchWithToken(`/api/v1/tests/${id}`);
-        setTest(await response.json());
+        setTest((await response.json()) as TestDetail);
       } catch (error) {
         console.error("Test loading error:", error);
       } finally {
@@ -77,11 +109,16 @@ export const TestQestionsPage = () => {
           formattedAnswers[String(questionId)] = optionId;
         });
 
-        await fetchWithToken(
-          `/api/v1/tests/${id}/submit`,
-          { method: "POST" },
-          { answers: formattedAnswers },
-        );
+        if (isLocalEnemyTestId(id)) {
+          const result = evaluateLocalEnemyTest(formattedAnswers);
+          storeLocalEnemyResult(result);
+        } else {
+          await fetchWithToken(
+            `/api/v1/tests/${id}/submit`,
+            { method: "POST" },
+            { answers: formattedAnswers },
+          );
+        }
 
         navigate(`/tests/${id}/result`);
       } catch (error) {
@@ -172,7 +209,7 @@ export const TestQestionsPage = () => {
           role="group"
           aria-label={t("testQuestions.answerOptions")}
         >
-          {currentOptions.map((answer: any) => {
+          {currentOptions.map((answer) => {
             const isSelected = answer.id === selectedAnswer;
 
             return (
