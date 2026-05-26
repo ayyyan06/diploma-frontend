@@ -130,7 +130,7 @@ export function Header() {
             </div>
           )}
 
-          <NavLink
+          {/* <NavLink
             to="/auth"
             className="flex h-[44px] w-[130px] items-center justify-center
               rounded-[12px] border-[3px] border-[#f2c200]
@@ -138,7 +138,7 @@ export function Header() {
               transition-opacity hover:opacity-80"
           >
             Sign in
-          </NavLink>
+          </NavLink> */}
 
           <NavLink
             to="/tests"
