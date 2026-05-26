@@ -6,12 +6,6 @@ import {
   localizeTestDetail,
   localizeTestType,
 } from "../../content/testContentTranslations";
-import {
-  evaluateLocalEnemyTest,
-  getLocalEnemyTest,
-  isLocalEnemyTestId,
-  storeLocalEnemyResult,
-} from "../../content/localEnemyTest";
 
 interface TestOption {
   id: string;
@@ -51,11 +45,6 @@ export const TestQestionsPage = () => {
     const loadTest = async () => {
       try {
         setLoading(true);
-        if (isLocalEnemyTestId(id)) {
-          setTest(getLocalEnemyTest());
-          return;
-        }
-
         const response = await fetchWithToken(`/api/v1/tests/${id}`);
         setTest((await response.json()) as TestDetail);
       } catch (error) {
@@ -90,6 +79,20 @@ export const TestQestionsPage = () => {
     return (currentQuestionNumber / questions.length) * 100;
   }, [currentQuestionNumber, questions.length]);
 
+  const typeBadgeLabel = useMemo(() => {
+    if (!localizedTest) return "";
+
+    if (localizedTest.type === "enemy") {
+      if (i18n.language.startsWith("ru")) return "Тест на врага";
+      if (i18n.language.startsWith("kk")) return "Жау тесті";
+      return "Enemy test";
+    }
+
+    return t("testQuestions.typeTest", {
+      type: localizeTestType(localizedTest.type, i18n.language),
+    });
+  }, [localizedTest, i18n.language, t]);
+
   const handleAnswerSelect = (answerId: string) => {
     setSelectedAnswers((prev) => ({
       ...prev,
@@ -109,16 +112,11 @@ export const TestQestionsPage = () => {
           formattedAnswers[String(questionId)] = optionId;
         });
 
-        if (isLocalEnemyTestId(id)) {
-          const result = evaluateLocalEnemyTest(formattedAnswers);
-          storeLocalEnemyResult(result);
-        } else {
-          await fetchWithToken(
-            `/api/v1/tests/${id}/submit`,
-            { method: "POST" },
-            { answers: formattedAnswers },
-          );
-        }
+        await fetchWithToken(
+          `/api/v1/tests/${id}/submit`,
+          { method: "POST" },
+          { answers: formattedAnswers },
+        );
 
         navigate(`/tests/${id}/result`);
       } catch (error) {
@@ -177,9 +175,7 @@ export const TestQestionsPage = () => {
         <div className="mb-[18px] flex items-start justify-between gap-8 max-[900px]:flex-col max-[900px]:items-start">
           <div className="max-w-[720px]">
             <p className="m-0 mb-3 text-[15px] font-bold uppercase tracking-[0.08em] text-[#8b6c00] max-[640px]:text-[13px]">
-              {t("testQuestions.typeTest", {
-                type: localizeTestType(localizedTest.type, i18n.language),
-              })}
+              {typeBadgeLabel}
             </p>
 
             <h1 className="m-0 mb-[34px] text-[37px] font-bold leading-[1.25] max-[640px]:text-[28px]">

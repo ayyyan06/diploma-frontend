@@ -3,10 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { fetchWithToken } from "../../api/apiutils";
 import { localizeResultPayload } from "../../content/testContentTranslations";
-import {
-  getStoredLocalEnemyResult,
-  isLocalEnemyTestId,
-} from "../../content/localEnemyTest";
+import { getEnemyUiCopy } from "../../content/enemyLocalization";
 
 interface BaseResult {
   resultKey: string;
@@ -336,14 +333,16 @@ function EnemySpectrumBar({ score }: { score: EnemyScore }) {
 }
 
 function EnemyLeftCard({ details }: { details: EnemyDetails }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const enemyUiCopy = getEnemyUiCopy(i18n.language);
 
   return (
     <>
       <h2 className="m-0 mb-[14px] text-center text-[22px] font-bold leading-[28px] text-[#111111]">
-        {t("testResult.threatenedNeed", {
-          defaultValue: "Threatened need",
-        })}
+        {enemyUiCopy?.threatenedNeed ??
+          t("testResult.threatenedNeed", {
+            defaultValue: "Threatened need",
+          })}
       </h2>
 
       <p className="m-0 mb-3 text-center text-[20px] font-bold text-[#8b6c00]">
@@ -491,16 +490,18 @@ function WeaponDetailsSection({ result }: { result: WeaponResult }) {
 }
 
 function EnemyDetailsSection({ result }: { result: EnemyResult }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { details } = result;
+  const enemyUiCopy = getEnemyUiCopy(i18n.language);
 
   return (
     <>
       <div className="box-border w-full rounded-[24px] border-2 border-[#ece7dd] bg-white pb-10 pl-[41px] pr-10 pt-5 max-[640px]:px-5">
         <h2 className="m-0 mb-[22px] text-[28px] font-bold leading-[35px] text-[#111111]">
-          {t("testResult.enemySpectrum", {
-            defaultValue: "Enemy spectrum",
-          })}
+          {enemyUiCopy?.enemySpectrum ??
+            t("testResult.enemySpectrum", {
+              defaultValue: "Enemy spectrum",
+            })}
         </h2>
 
         <div className="flex flex-col gap-5">
@@ -513,9 +514,10 @@ function EnemyDetailsSection({ result }: { result: EnemyResult }) {
       <div className="flex gap-10 max-[640px]:flex-col">
         <div className="box-border min-w-0 flex-1 rounded-[24px] border-2 border-[#f2dcc5] bg-[#fff7f0] pb-8 pl-10 pr-8 pt-5 max-[640px]:pl-6">
           <h2 className="m-0 mb-3 text-[22px] font-bold leading-[28px] text-[#111]">
-            {t("testResult.graweModel", {
-              defaultValue: "Grawe model",
-            })}
+            {enemyUiCopy?.graweModel ??
+              t("testResult.graweModel", {
+                defaultValue: "Grawe model",
+              })}
           </h2>
 
           <p className="m-0 mb-4 text-[18px] text-[#8b6c00]">
@@ -529,9 +531,10 @@ function EnemyDetailsSection({ result }: { result: EnemyResult }) {
 
         <div className="box-border min-w-0 flex-1 rounded-[24px] border-2 border-[#f0c4c4] bg-[#fff5f5] pb-8 pl-10 pr-8 pt-5 max-[640px]:pl-6">
           <h2 className="m-0 mb-3 text-[22px] font-bold leading-[28px] text-[#111]">
-            {t("testResult.earlySign", {
-              defaultValue: "Early sign",
-            })}
+            {enemyUiCopy?.earlySign ??
+              t("testResult.earlySign", {
+                defaultValue: "Early sign",
+              })}
           </h2>
 
           <p className="m-0 text-[16px] leading-[1.65] text-[#555]">
@@ -543,9 +546,10 @@ function EnemyDetailsSection({ result }: { result: EnemyResult }) {
       <div className="grid gap-6 md:grid-cols-2">
         <div className="box-border min-w-0 rounded-[24px] border-2 border-[#ece7dd] bg-white pb-8 pl-10 pr-8 pt-5 max-[640px]:pl-6">
           <h2 className="m-0 mb-4 text-[22px] font-bold leading-[28px] text-[#111]">
-            {t("testResult.howItWins", {
-              defaultValue: "How it wins",
-            })}
+            {enemyUiCopy?.howItWins ??
+              t("testResult.howItWins", {
+                defaultValue: "How it wins",
+              })}
           </h2>
 
           <p className="m-0 text-[16px] leading-[1.65] text-[#555]">
@@ -555,9 +559,10 @@ function EnemyDetailsSection({ result }: { result: EnemyResult }) {
 
         <div className="box-border min-w-0 rounded-[24px] border-2 border-[#ece7dd] bg-white pb-8 pl-10 pr-8 pt-5 max-[640px]:pl-6">
           <h2 className="m-0 mb-4 text-[22px] font-bold leading-[28px] text-[#111]">
-            {t("testResult.patternAcrossStory", {
-              defaultValue: "Pattern across the story",
-            })}
+            {enemyUiCopy?.patternAcrossStory ??
+              t("testResult.patternAcrossStory", {
+                defaultValue: "Pattern across the story",
+              })}
           </h2>
 
           <p className="m-0 text-[16px] leading-[1.65] text-[#555]">
@@ -568,9 +573,10 @@ function EnemyDetailsSection({ result }: { result: EnemyResult }) {
 
       <div className="box-border w-full rounded-[24px] border-2 border-[#ece7dd] bg-white pb-10 pl-[41px] pr-10 pt-5 max-[640px]:px-5">
         <h2 className="m-0 mb-[18px] text-[28px] font-bold leading-[35px] text-[#111111]">
-          {t("testResult.howToResist", {
-            defaultValue: "How to resist it",
-          })}
+          {enemyUiCopy?.howToResist ??
+            t("testResult.howToResist", {
+              defaultValue: "How to resist it",
+            })}
         </h2>
 
         <p className="m-0 mb-5 text-[16px] leading-[1.7] text-[#555555]">
@@ -578,9 +584,10 @@ function EnemyDetailsSection({ result }: { result: EnemyResult }) {
         </p>
 
         <h3 className="m-0 mb-3 text-[20px] font-bold text-[#111]">
-          {t("testResult.whatItCanMisread", {
-            defaultValue: "What it can make you misread",
-          })}
+          {enemyUiCopy?.whatItCanMisread ??
+            t("testResult.whatItCanMisread", {
+              defaultValue: "What it can make you misread",
+            })}
         </h3>
 
         <ul className="m-0 pl-6 text-[18px] font-normal leading-[28px] text-[#555555]">
@@ -608,11 +615,6 @@ export const TestResult = () => {
     const fetchResult = async () => {
       try {
         setLoading(true);
-        if (isLocalEnemyTestId(id)) {
-          setResultData(getStoredLocalEnemyResult());
-          return;
-        }
-
         const response = await fetchWithToken(`/api/v1/tests/${id}/result`, {
           method: "GET",
         });
@@ -649,6 +651,7 @@ export const TestResult = () => {
 
   const testType = localizedResultData?.test_type;
   const result = localizedResultData?.result;
+  const enemyUiCopy = getEnemyUiCopy(i18n.language);
 
   const handleRetake = () => navigate(`/tests/${id}`);
 
@@ -726,13 +729,15 @@ export const TestResult = () => {
   })();
 
   const strengthsHeading = isEnemy(testType, result.details)
-    ? t("testResult.whatThisSensitivityProtects", {
+    ? enemyUiCopy?.whatThisSensitivityProtects ??
+      t("testResult.whatThisSensitivityProtects", {
         defaultValue: "What this sensitivity protects",
       })
     : t("testResult.strengths");
 
   const growthAreasHeading = isEnemy(testType, result.details)
-    ? t("testResult.whereItCanMislead", {
+    ? enemyUiCopy?.whereItCanMislead ??
+      t("testResult.whereItCanMislead", {
         defaultValue: "Where it can mislead you",
       })
     : t("testResult.growthAreas");

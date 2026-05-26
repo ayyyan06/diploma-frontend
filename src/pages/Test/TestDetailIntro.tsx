@@ -3,10 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { fetchWithToken } from "../../api/apiutils";
 import { localizeTestDetail } from "../../content/testContentTranslations";
-import {
-  getLocalEnemyTest,
-  isLocalEnemyTestId,
-} from "../../content/localEnemyTest";
 
 const TEST_COST = 100;
 
@@ -60,11 +56,9 @@ export const TestIntroPage = () => {
       try {
         setLoading(true);
         const coinsResPromise = fetchWithToken("/api/v1/coins");
-        const testJson = isLocalEnemyTestId(id)
-          ? getLocalEnemyTest()
-          : await fetchWithToken(`/api/v1/tests/${id}`).then((response) =>
-              response.json(),
-            );
+        const testJson = await fetchWithToken(`/api/v1/tests/${id}`).then(
+          (response) => response.json(),
+        );
         const coinsRes = await coinsResPromise;
         const coinsJson = await coinsRes.json();
         setTest(testJson as TestDetail);

@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { fetchWithToken } from "../api/apiutils";
 import { localizeTestSummary } from "../content/testContentTranslations";
-import { getLocalEnemyTest } from "../content/localEnemyTest";
 
 const TEST_COST = 100;
 
@@ -50,21 +49,13 @@ export const Tests = () => {
 
   const localizedTests = useMemo(
     () => {
-      const remoteTests = tests
+      return tests
         .map((test) => localizeTestSummary(test, i18n.language))
         .filter(
           (test) =>
             test.type !== "road" &&
             !/steppe road/i.test(test.title),
         );
-
-      const hasEnemy = remoteTests.some((test) => test.type === "enemy");
-      if (hasEnemy) return remoteTests;
-
-      return [
-        ...remoteTests,
-        localizeTestSummary(getLocalEnemyTest(), i18n.language),
-      ];
     },
     [tests, i18n.language],
   );

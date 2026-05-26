@@ -1,5 +1,6 @@
 import {
   getEnemyLocalization,
+  getEnemyQuestionTranslation,
   getEnemyResultImageByKey,
   normalizeEnemyResultKey,
 } from "./enemyLocalization";
@@ -1144,7 +1145,36 @@ export function localizeTestDetail<
   if (normalized === "en") return test;
 
   if (!translation) {
-    return localizeTestSummary(test, language);
+    const localizedSummary = localizeTestSummary(test, language);
+
+    if (test.type !== "enemy") {
+      return localizedSummary;
+    }
+
+    return {
+      ...localizedSummary,
+      questions: test.questions?.map((question) => {
+        const localizedQuestion = getEnemyQuestionTranslation(
+          normalized,
+          question.order,
+        );
+
+        if (!localizedQuestion) return question;
+
+        return {
+          ...question,
+          title: localizedQuestion.title,
+          prompt: localizedQuestion.prompt ?? question.prompt,
+          options:
+            question.options?.map((option: any) => ({
+              ...option,
+              label:
+                localizedQuestion.options?.[option.id] ??
+                option.label,
+            })) ?? question.options,
+        };
+      }),
+    };
   }
 
   return {

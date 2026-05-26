@@ -8,7 +8,7 @@ const en = {
       label: "Language",
       en: "EN",
       ru: "RU",
-      kk: "KK",
+      kk: "KZ",
     },
   },
   header: {
