@@ -77,15 +77,15 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 
 function ResultCard({ sub }: { sub: Submission }) {
   const [expanded, setExpanded] = useState(false);
+
   const palette = ARCHETYPE_COLORS[sub.test_type] ?? {
     bg: "#f7f2ea",
     accent: "#F2C200",
   };
 
   return (
-    <article className="rounded-[22px] border-2 border-[#ece7dd] bg-white overflow-hidden transition-all duration-200 hover:border-[#f2c200] hover:shadow-[0_8px_32px_rgba(242,194,0,0.10)]">
+    <article className="overflow-hidden rounded-[22px] border-2 border-[#ece7dd] bg-white transition-all duration-200 hover:border-[#f2c200] hover:shadow-[0_8px_32px_rgba(242,194,0,0.10)]">
       <div className="flex gap-4 p-5">
-        {/* Icon */}
         <div
           className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-[16px]"
           style={{ background: palette.bg }}
@@ -100,7 +100,6 @@ function ResultCard({ sub }: { sub: Submission }) {
           />
         </div>
 
-        {/* Info */}
         <div className="min-w-0 flex-1">
           <div className="mb-1 flex items-center gap-2">
             <span
@@ -110,22 +109,23 @@ function ResultCard({ sub }: { sub: Submission }) {
               {typeLabel[sub.test_type] ?? sub.test_type}
             </span>
           </div>
+
           <p className="mb-0.5 truncate text-[17px] font-bold text-[#111]">
             {sub.result.title}
           </p>
+
           {sub.result.subtitle && (
             <p className="text-[13px] text-[#888]">{sub.result.subtitle}</p>
           )}
+
           <p className="mt-1 text-[13px] italic text-[#aaa]">
             {sub.result.tagline}
           </p>
         </div>
 
-        {/* Expand toggle */}
         <button
           onClick={() => setExpanded((v) => !v)}
           className="ml-auto flex h-8 w-8 shrink-0 items-center justify-center self-start rounded-full border-2 border-[#ece7dd] text-[#bbb] transition-all hover:border-[#f2c200] hover:text-[#f2c200]"
-          aria-label={expanded ? "Collapse" : "Expand"}
         >
           <svg
             width="12"
@@ -141,18 +141,19 @@ function ResultCard({ sub }: { sub: Submission }) {
         </button>
       </div>
 
-      {/* Expanded detail */}
       {expanded && (
         <div className="border-t-2 border-[#ece7dd] px-5 pb-5 pt-4">
           <p className="mb-4 text-[15px] leading-relaxed text-[#555]">
             {sub.result.description}
           </p>
+
           <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
             {sub.result.strengths && (
               <div>
                 <p className="mb-2 text-[12px] font-bold uppercase tracking-wide text-[#22c55e]">
                   Strengths
                 </p>
+
                 <ul className="space-y-1">
                   {sub.result.strengths.map((s, i) => (
                     <li
@@ -166,11 +167,13 @@ function ResultCard({ sub }: { sub: Submission }) {
                 </ul>
               </div>
             )}
+
             {sub.result.growthAreas && (
               <div>
                 <p className="mb-2 text-[12px] font-bold uppercase tracking-wide text-[#f59e0b]">
                   Growth Areas
                 </p>
+
                 <ul className="space-y-1">
                   {sub.result.growthAreas.map((g, i) => (
                     <li
@@ -202,62 +205,51 @@ const REC_TYPE_COLORS: Record<string, { bg: string; accent: string }> = {
 };
 
 function RecommendationCard({ rec }: { rec: Recommendation }) {
-  const palette = REC_TYPE_COLORS[rec.type] ?? { bg: "#FFF9E8", accent: "#f2c200" };
+  const palette = REC_TYPE_COLORS[rec.type] ?? {
+    bg: "#FFF9E8",
+    accent: "#f2c200",
+  };
 
   return (
-    <article className="rounded-[22px] border-2 border-[#ece7dd] bg-white overflow-hidden transition-all duration-200 hover:border-[#f2c200] hover:shadow-[0_8px_32px_rgba(242,194,0,0.10)]">
+    <article className="overflow-hidden rounded-[22px] border-2 border-[#ece7dd] bg-white transition-all duration-200 hover:border-[#f2c200] hover:shadow-[0_8px_32px_rgba(242,194,0,0.10)]">
       <div className="flex gap-4 p-5">
         {rec.image_src ? (
           <img
             src={rec.image_src}
             alt={rec.title}
             className="h-[72px] w-[72px] shrink-0 rounded-[16px] object-cover"
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = "none";
-            }}
           />
         ) : (
           <div
             className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-[16px] text-[28px]"
             style={{ background: palette.bg }}
           >
-            {rec.type === "book" ? "📚" : rec.type === "movie" ? "🎬" : rec.type === "activity" ? "🏃" : rec.type === "game" ? "🎮" : rec.type === "music" ? "🎵" : "✨"}
+            ✨
           </div>
         )}
 
         <div className="min-w-0 flex-1">
-          {rec.type && (
-            <div className="mb-1">
-              <span
-                className="rounded-[6px] px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide"
-                style={{ background: palette.bg, color: palette.accent }}
-              >
-                {rec.type}
-              </span>
-            </div>
-          )}
-          <p className="mb-0.5 text-[17px] font-bold text-[#111]">{rec.title}</p>
-          <p className="text-[13px] text-[#666] leading-snug">{rec.description}</p>
+          <div className="mb-1">
+            <span
+              className="rounded-[6px] px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide"
+              style={{ background: palette.bg, color: palette.accent }}
+            >
+              {rec.type}
+            </span>
+          </div>
+
+          <p className="mb-1 text-[17px] font-bold text-[#111]">{rec.title}</p>
+
+          <p className="text-[14px] leading-relaxed text-[#666]">
+            {rec.description}
+          </p>
+
           {rec.reason && (
-            <p className="mt-1 text-[12px] italic text-[#aaa]">Why: {rec.reason}</p>
+            <p className="mt-2 text-[12px] italic text-[#aaa]">
+              Why: {rec.reason}
+            </p>
           )}
         </div>
-
-        {rec.url && (
-          <a
-            href={rec.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-auto flex h-8 w-8 shrink-0 items-center justify-center self-start rounded-full border-2 border-[#ece7dd] text-[#bbb] transition-all hover:border-[#f2c200] hover:text-[#f2c200]"
-            aria-label="Open link"
-          >
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7" />
-              <path d="M8 1h3v3" />
-              <path d="M11 1L5.5 6.5" />
-            </svg>
-          </a>
-        )}
       </div>
     </article>
   );
@@ -289,16 +281,18 @@ function FriendCard({
       >
         {initials}
       </div>
+
       <div className="min-w-0 flex-1">
         <p className="truncate text-[16px] font-bold text-[#111]">
           {friend.user.nickname}
         </p>
+
         <p className="text-[12px] text-[#999]">@{friend.user.username}</p>
       </div>
+
       <button
         onClick={() => onRemove(friend.friendship_id)}
         className="rounded-[8px] border-2 border-[#ece7dd] px-3 py-1 text-[12px] text-[#bbb] transition-all hover:border-red-200 hover:text-red-400"
-        title="Remove friend"
       >
         Remove
       </button>
@@ -310,11 +304,12 @@ function FriendCard({
 
 export const ProfilePage = () => {
   const navigate = useNavigate();
+
   const [me, setMe] = useState<Me | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-  const [tab, setTab] = useState<"results" | "friends" | "recommendations">("results");
+  const [tab, setTab] = useState<"results" | "friends">("results");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -326,11 +321,15 @@ export const ProfilePage = () => {
           fetchWithToken("/api/v1/community/friends"),
           fetchWithToken("/api/v1/me/recommendations"),
         ]);
+
         setMe(await meRes.json());
+
         const subData = await subRes.json();
         setSubmissions(subData.submissions ?? []);
+
         const frData = await frRes.json();
         setFriends(frData.friends ?? []);
+
         const recData = await recRes.json();
         setRecommendations(recData.recommendations ?? []);
       } finally {
@@ -343,6 +342,7 @@ export const ProfilePage = () => {
     await fetchWithToken(`/api/v1/community/friend-requests/${friendshipId}`, {
       method: "DELETE",
     });
+
     setFriends((prev) => prev.filter((f) => f.friendship_id !== friendshipId));
   }, []);
 
@@ -370,7 +370,7 @@ export const ProfilePage = () => {
 
   return (
     <main className="mx-auto mt-[60px] max-w-[860px] px-[18px] pb-24">
-      {/* Profile card */}
+      {/* Profile */}
       <section className="mb-10 flex items-center gap-6 rounded-[28px] border-2 border-[#ece7dd] bg-white p-8 max-[640px]:flex-col max-[640px]:text-center">
         <div
           className="flex h-[80px] w-[80px] shrink-0 items-center justify-center rounded-full text-[28px] font-black text-white"
@@ -380,21 +380,21 @@ export const ProfilePage = () => {
         >
           {initials}
         </div>
-        <div className="flex-1 min-w-0">
+
+        <div className="min-w-0 flex-1">
           <h1 className="mb-0.5 text-[28px] font-bold text-[#111]">
             {me.nickname}
           </h1>
+
           <p className="text-[15px] text-[#999]">
             @{me.username} · {me.email}
           </p>
         </div>
-        {/* Coin balance */}
-        <div className="flex h-[44px] min-w-[130px] items-center justify-center gap-2 rounded-[12px] border-[3px] border-[#f2c200] bg-[#fff8d9] px-4 text-[16px] font-bold text-[#9a6e00] select-none">
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#f2c200] text-[10px] font-black text-white shadow-[inset_0_-2px_0_rgba(0,0,0,0.15)]">
-            ✦
-          </span>
-          {me.coins.toLocaleString()}
+
+        <div className="flex h-[44px] min-w-[130px] items-center justify-center gap-2 rounded-[12px] border-[3px] border-[#f2c200] bg-[#fff8d9] px-4 text-[16px] font-bold text-[#9a6e00]">
+          ✦ {me.coins.toLocaleString()}
         </div>
+
         <button
           onClick={handleLogout}
           className="rounded-[12px] border-2 border-[#ece7dd] px-5 py-2 text-[14px] font-semibold text-[#999] transition-all hover:border-red-200 hover:text-red-400"
@@ -405,7 +405,7 @@ export const ProfilePage = () => {
 
       {/* Tabs */}
       <div className="mb-6 flex gap-2 rounded-[16px] border-2 border-[#ece7dd] bg-white p-1.5">
-        {(["results", "friends", "recommendations"] as const).map((t) => (
+        {(["results", "friends"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -418,20 +418,20 @@ export const ProfilePage = () => {
           >
             {t === "results"
               ? `Results${submissions.length ? ` (${submissions.length})` : ""}`
-              : t === "friends"
-              ? `Friends${friends.length ? ` (${friends.length})` : ""}`
-              : `For You${recommendations.length ? ` (${recommendations.length})` : ""}`}
+              : `Friends${friends.length ? ` (${friends.length})` : ""}`}
           </button>
         ))}
       </div>
 
-      {/* Tab content */}
+      {/* Results */}
       {tab === "results" && (
         <div>
           <SectionTitle>My Test Results</SectionTitle>
+
           {submissions.length === 0 ? (
             <div className="rounded-[22px] border-2 border-dashed border-[#ece7dd] py-16 text-center">
               <p className="text-[17px] text-[#bbb]">No tests completed yet.</p>
+
               <button
                 onClick={() => navigate("/tests")}
                 className="mt-4 rounded-[12px] bg-[#f2c200] px-6 py-2.5 text-[15px] font-bold text-white"
@@ -440,41 +440,49 @@ export const ProfilePage = () => {
               </button>
             </div>
           ) : (
-            <div className="space-y-4">
-              {submissions.map((s) => (
-                <ResultCard key={s.test_id} sub={s} />
-              ))}
-            </div>
+            <>
+              <div className="space-y-4">
+                {submissions.map((s) => (
+                  <ResultCard key={s.test_id} sub={s} />
+                ))}
+              </div>
+
+              {/* AI Recommendations */}
+              <div className="mt-10">
+                <SectionTitle>Recommendations From AI</SectionTitle>
+
+                {recommendations.length === 0 ? (
+                  <div className="rounded-[22px] border-2 border-dashed border-[#ece7dd] py-12 text-center">
+                    <p className="text-[16px] text-[#bbb]">
+                      No recommendations yet.
+                    </p>
+
+                    <p className="mt-2 text-[14px] text-[#ccc]">
+                      Complete more tests to unlock personalized suggestions.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {recommendations.map((r, i) => (
+                      <RecommendationCard key={r.id ?? i} rec={r} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
           )}
         </div>
       )}
 
-      {tab === "recommendations" && (
-        <div>
-          <SectionTitle>Recommended For You</SectionTitle>
-          {recommendations.length === 0 ? (
-            <div className="rounded-[22px] border-2 border-dashed border-[#ece7dd] py-16 text-center">
-              <p className="text-[17px] text-[#bbb]">No recommendations yet.</p>
-              <p className="mt-2 text-[14px] text-[#ccc]">
-                Complete more tests to get personalized recommendations.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {recommendations.map((r, i) => (
-                <RecommendationCard key={r.id ?? i} rec={r} />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
+      {/* Friends */}
       {tab === "friends" && (
         <div>
           <SectionTitle>My Friends</SectionTitle>
+
           {friends.length === 0 ? (
             <div className="rounded-[22px] border-2 border-dashed border-[#ece7dd] py-16 text-center">
               <p className="text-[17px] text-[#bbb]">No friends yet.</p>
+
               <button
                 onClick={() => navigate("/community")}
                 className="mt-4 rounded-[12px] bg-[#f2c200] px-6 py-2.5 text-[15px] font-bold text-white"
