@@ -12,6 +12,7 @@ import { TestResult } from "../pages/Test/TestResult";
 import { CommunityPage } from "../pages/CommunityPage";
 import { ProfilePage } from "../pages/ProfilePage";
 import { ChatPage } from "../pages/ChatPage";
+import { AdaptiveFigureTestPage } from "../pages/AdaptiveFigureTestPage";
 import PrivateRoute from "./PrivateRoute";
 
 export const router = createBrowserRouter([
@@ -65,6 +66,14 @@ export const router = createBrowserRouter([
         element: (
           <PrivateRoute>
             <ProfilePage />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "tests/adaptive-figure",
+        element: (
+          <PrivateRoute>
+            <AdaptiveFigureTestPage />
           </PrivateRoute>
         ),
       },
