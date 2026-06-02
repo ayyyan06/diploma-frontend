@@ -2,6 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { fetchWithToken } from "../api/apiutils";
+import {
+  localizeAdaptiveQuestion,
+  localizeAdaptiveResult,
+} from "../content/adaptiveFigureContentTranslations";
 import { getAdaptiveFigureUiCopy } from "../content/adaptiveFigureUiCopy";
 
 const TEST_COST = 100;
@@ -181,6 +185,14 @@ export const AdaptiveFigureTestPage = () => {
       : 0;
   const question = session?.question;
   const result = session?.result;
+  const localizedQuestion = useMemo(
+    () => localizeAdaptiveQuestion(question, i18n.language),
+    [i18n.language, question],
+  );
+  const localizedResult = useMemo(
+    () => localizeAdaptiveResult(result, i18n.language),
+    [i18n.language, result],
+  );
 
   const syncSession = (nextSession: AdaptiveSessionPayload) => {
     setSession(nextSession);
@@ -384,7 +396,7 @@ export const AdaptiveFigureTestPage = () => {
             </div>
             <img
               src={MASCOT_IMAGES[mascotPose]}
-              alt="Altyn Adam host"
+              alt={copy.question.hostAlt}
               className="max-h-[420px] w-full max-w-[340px] object-contain"
             />
             <p className="m-0 max-w-[340px] text-[15px] leading-[1.7] text-[#6a6255]">
@@ -394,7 +406,7 @@ export const AdaptiveFigureTestPage = () => {
         </section>
       )}
 
-      {session?.status === "in_progress" && question && (
+      {session?.status === "in_progress" && question && localizedQuestion && (
         <>
           <section className="mb-8 grid gap-3">
             <p className="m-0 text-[18px] font-semibold tracking-[0.04em] text-[#8a7c64]">
@@ -422,7 +434,7 @@ export const AdaptiveFigureTestPage = () => {
                 </div>
 
                 <h1 className="m-0 text-[36px] font-bold leading-[1.22] text-[#171717] max-[640px]:text-[29px]">
-                  {question.text}
+                  {localizedQuestion.text}
                 </h1>
 
                 <p className="mb-0 mt-5 max-w-[720px] text-[16px] leading-[1.7] text-[#605d57]">
@@ -433,7 +445,7 @@ export const AdaptiveFigureTestPage = () => {
               <div
                 className="grid gap-4 md:grid-cols-3"
                 role="group"
-                aria-label="Adaptive answer choices"
+                aria-label={copy.question.answersAriaLabel}
               >
                 {([
                   { id: "yes", label: copy.question.yes },
@@ -468,7 +480,7 @@ export const AdaptiveFigureTestPage = () => {
             <div className="flex flex-col items-center justify-center rounded-[28px] bg-[linear-gradient(180deg,#fbf6ea_0%,#f4ede0_100%)] px-6 py-8 text-center">
               <img
                 src={MASCOT_IMAGES[mascotPose]}
-                alt="Altyn Adam host"
+                alt={copy.question.hostAlt}
                 className="max-h-[420px] w-full max-w-[340px] object-contain"
               />
               <p className="mt-5 max-w-[320px] text-[15px] leading-[1.7] text-[#6a6255]">
@@ -481,12 +493,12 @@ export const AdaptiveFigureTestPage = () => {
         </>
       )}
 
-      {session?.status === "completed" && result && (
+      {session?.status === "completed" && localizedResult && (
         <section className="grid gap-8 rounded-[32px] border-2 border-[#ece7dd] bg-white px-8 py-8 shadow-[0_10px_30px_rgba(24,24,24,0.04)] lg:grid-cols-[0.78fr_1.22fr] lg:px-10">
           <div className="flex flex-col items-center justify-center rounded-[28px] bg-[linear-gradient(180deg,#fff8df_0%,#f5e9c6_100%)] px-6 py-8 text-center">
             <img
               src={MASCOT_IMAGES.success}
-              alt="Altyn Adam success"
+              alt={copy.result.successAlt}
               className="max-h-[420px] w-full max-w-[340px] object-contain"
             />
           </div>
@@ -497,7 +509,7 @@ export const AdaptiveFigureTestPage = () => {
             </p>
 
             <h1 className="m-0 text-[42px] font-bold leading-[1.14] text-[#171717] max-[640px]:text-[32px]">
-              {result.figure.name}
+              {localizedResult.figure.name}
             </h1>
 
             <p className="m-0 text-[15px] leading-[1.7] text-[#6b675f]">
@@ -506,18 +518,18 @@ export const AdaptiveFigureTestPage = () => {
 
             <div className="flex flex-wrap gap-3">
               <span className="rounded-full border border-[#e6cf88] bg-[#fff6d8] px-4 py-2 text-[14px] font-bold text-[#8b6c00]">
-                {copy.result.matchingPercentage}: {result.matchingPercentage}%
+                {copy.result.matchingPercentage}: {localizedResult.matchingPercentage}%
               </span>
               <span className="rounded-full border border-[#e4e4e4] bg-[#f8f8f8] px-4 py-2 text-[14px] font-semibold capitalize text-[#656565]">
-                {result.figure.category}
+                {localizedResult.figure.category}
               </span>
               <span className="rounded-full border border-[#e4e4e4] bg-[#f8f8f8] px-4 py-2 text-[14px] font-semibold capitalize text-[#656565]">
-                {result.figure.gender}
+                {localizedResult.figure.gender}
               </span>
             </div>
 
             <p className="m-0 text-[17px] leading-[1.8] text-[#5d5a55]">
-              {result.figure.description}
+              {localizedResult.figure.description}
             </p>
 
             <div className="rounded-[24px] border border-[#ece7dd] bg-[#fcfaf6] px-5 py-5">
@@ -526,8 +538,8 @@ export const AdaptiveFigureTestPage = () => {
               </h2>
 
               <div className="mt-4 flex flex-wrap gap-3">
-                {(result.matchedTraits.length > 0
-                  ? result.matchedTraits
+                {(localizedResult.matchedTraits.length > 0
+                  ? localizedResult.matchedTraits
                   : [copy.result.fallbackTrait]
                 ).map((trait) => (
                   <span
