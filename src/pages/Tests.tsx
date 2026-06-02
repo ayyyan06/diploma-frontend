@@ -83,7 +83,7 @@ export const Tests = () => {
   }
 
   return (
-    <div className="mx-auto max-w-[1600px] px-6 py-10">
+    <div className="mx-auto max-w-[1400px] px-6 py-10">
       <h1 className="mb-4 text-center text-3xl font-normal">
         {t("tests.title")}
       </h1>
