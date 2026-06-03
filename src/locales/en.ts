@@ -251,6 +251,23 @@ const en = {
     retake: "RETAKE TEST",
     failedToLoad: "Failed to load result",
   },
+  altynAdam: {
+    name: "Altyn Adam",
+    actions: {
+      continue: "Continue",
+      goToProfile: "Go to Profile",
+    },
+    welcome: {
+      imageAlt: "Altyn Adam welcomes the user",
+      message:
+        "Welcome back! Shall we continue the journey through Kazakh culture?",
+    },
+    reminder: {
+      imageAlt: "Altyn Adam suggests visiting the profile",
+      message:
+        "I prepared personal book and movie recommendations for you. Take a look at your profile — there may be works there that you will enjoy.",
+    },
+  },
 };
 
 export default en;

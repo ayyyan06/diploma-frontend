@@ -6,6 +6,7 @@ import {
   localizeTestDetail,
   localizeTestType,
 } from "../../content/testContentTranslations";
+import { registerCompletedTest } from "../../utils/altynAdamReminder";
 
 interface TestOption {
   id: string;
@@ -118,7 +119,15 @@ export const TestQestionsPage = () => {
           { answers: formattedAnswers },
         );
 
-        navigate(`/tests/${id}/result`);
+        const completionState = registerCompletedTest();
+
+        navigate(`/tests/${id}/result`, {
+          state: completionState.shouldShowReminder
+            ? {
+                altynAdamReminderCount: completionState.completedTestCount,
+              }
+            : undefined,
+        });
       } catch (error) {
         console.error("Test submit error:", error);
       } finally {

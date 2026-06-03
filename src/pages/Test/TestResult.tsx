@@ -1,9 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { fetchWithToken } from "../../api/apiutils";
+import { AltynAdamDialog } from "../../components/AltynAdamDialog";
 import { localizeResultPayload } from "../../content/testContentTranslations";
 import { getEnemyUiCopy } from "../../content/enemyLocalization";
+import {
+  markAltynAdamReminderDismissed,
+  shouldShowAltynAdamReminder,
+} from "../../utils/altynAdamReminder";
 
 interface BaseResult {
   resultKey: string;
@@ -105,6 +110,10 @@ interface ResultApiResponse {
   test_title: string;
   result: TestResultData;
   updated_at: string;
+}
+
+interface TestResultLocationState {
+  altynAdamReminderCount?: number;
 }
 
 function isPersonality(
@@ -605,11 +614,13 @@ function EnemyDetailsSection({ result }: { result: EnemyResult }) {
 export const TestResult = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams();
 
   const [resultData, setResultData] = useState<ResultApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isReminderDialogOpen, setIsReminderDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchResult = async () => {
@@ -634,6 +645,23 @@ export const TestResult = () => {
     }
   }, [id, t]);
 
+  const reminderState = location.state as TestResultLocationState | null;
+  const reminderCount =
+    typeof reminderState?.altynAdamReminderCount === "number"
+      ? reminderState.altynAdamReminderCount
+      : null;
+
+  useEffect(() => {
+    if (
+      !loading &&
+      !error &&
+      reminderCount !== null &&
+      shouldShowAltynAdamReminder(reminderCount)
+    ) {
+      setIsReminderDialogOpen(true);
+    }
+  }, [error, loading, reminderCount]);
+
   const localizedResultData = useMemo(
     () =>
       resultData
@@ -654,6 +682,22 @@ export const TestResult = () => {
   const enemyUiCopy = getEnemyUiCopy(i18n.language);
 
   const handleRetake = () => navigate(`/tests/${id}`);
+  const closeReminderDialog = () => {
+    if (reminderCount !== null) {
+      markAltynAdamReminderDismissed(reminderCount);
+    }
+
+    setIsReminderDialogOpen(false);
+  };
+
+  const handleReminderProfileClick = () => {
+    if (reminderCount !== null) {
+      markAltynAdamReminderDismissed(reminderCount);
+    }
+
+    setIsReminderDialogOpen(false);
+    navigate("/profile");
+  };
 
   if (loading) {
     return (
@@ -743,94 +787,117 @@ export const TestResult = () => {
     : t("testResult.growthAreas");
 
   return (
-    <main className="mx-auto mb-[154px] mt-[70px] box-border max-w-[1440px] px-[120px] max-[1100px]:px-10 max-[640px]:px-5">
-      <p className="m-0 mb-5 text-[14px] font-normal leading-[18px] text-[#7a7a7a]">
-        {t("testResult.yourResult")}
-      </p>
+    <>
+      <main className="mx-auto mb-[154px] mt-[70px] box-border max-w-[1440px] px-[120px] max-[1100px]:px-10 max-[640px]:px-5">
+        <p className="m-0 mb-5 text-[14px] font-normal leading-[18px] text-[#7a7a7a]">
+          {t("testResult.yourResult")}
+        </p>
 
-      <h1 className="m-0 mb-3 text-[40px] font-extrabold leading-[50px] text-[#111111] max-[640px]:text-[28px]">
-        {result.title}
-      </h1>
+        <h1 className="m-0 mb-3 text-[40px] font-extrabold leading-[50px] text-[#111111] max-[640px]:text-[28px]">
+          {result.title}
+        </h1>
 
-      <p className="mb-8 text-[18px] italic text-[#8b6c00]">
-        {result.tagline}
-      </p>
+        <p className="mb-8 text-[18px] italic text-[#8b6c00]">
+          {result.tagline}
+        </p>
 
-      <section className="flex items-start gap-10 max-[900px]:flex-col">
-        <div className="box-border flex min-h-[470px] w-[360px] shrink-0 flex-col items-center rounded-[24px] border-2 border-[#ece7dd] bg-white px-[44px] pb-[41px] pt-[62px] max-[900px]:w-full max-[900px]:max-w-[400px]">
-          <img
-            src={result.imageSrc}
-            alt={result.imageAlt}
-            className="mx-auto mb-[49px] block max-w-[180px]"
-          />
+        <section className="flex items-start gap-10 max-[900px]:flex-col">
+          <div className="box-border flex min-h-[470px] w-[360px] shrink-0 flex-col items-center rounded-[24px] border-2 border-[#ece7dd] bg-white px-[44px] pb-[41px] pt-[62px] max-[900px]:w-full max-[900px]:max-w-[400px]">
+            <img
+              src={result.imageSrc}
+              alt={result.imageAlt}
+              className="mx-auto mb-[49px] block max-w-[180px]"
+            />
 
-          {leftCardContent}
+            {leftCardContent}
 
-          <p className="mt-6 text-center text-[14px] italic text-[#8b6c00]">
-            {result.subtitle}
-          </p>
-        </div>
-
-        <div className="flex min-w-0 flex-1 flex-col gap-[30px]">
-          <div className="box-border w-full rounded-[24px] border-2 border-[#ece7dd] bg-white pb-10 pl-[41px] pr-10 pt-5 max-[640px]:px-5">
-            <h2 className="m-0 mb-[22px] text-[28px] font-bold leading-[35px] text-[#111111]">
-              {t("testResult.description")}
-            </h2>
-
-            <p className="m-0 text-[18px] font-normal leading-[30px] text-[#555555]">
-              {result.description}
+            <p className="mt-6 text-center text-[14px] italic text-[#8b6c00]">
+              {result.subtitle}
             </p>
+          </div>
 
-            {result.whyThisResult && (
-              <p className="mt-5 text-[16px] italic leading-[26px] text-[#6f6a60]">
-                {result.whyThisResult}
+          <div className="flex min-w-0 flex-1 flex-col gap-[30px]">
+            <div className="box-border w-full rounded-[24px] border-2 border-[#ece7dd] bg-white pb-10 pl-[41px] pr-10 pt-5 max-[640px]:px-5">
+              <h2 className="m-0 mb-[22px] text-[28px] font-bold leading-[35px] text-[#111111]">
+                {t("testResult.description")}
+              </h2>
+
+              <p className="m-0 text-[18px] font-normal leading-[30px] text-[#555555]">
+                {result.description}
               </p>
-            )}
-          </div>
 
-          <div className="flex gap-10 max-[640px]:flex-col">
-            <div className="box-border min-w-0 flex-1 rounded-[24px] border-2 border-[#eed892] bg-[#fff9e8] pb-8 pl-10 pr-8 pt-5 max-[640px]:pl-6">
-              <h2 className="m-0 mb-[22px] text-[28px] font-bold leading-[35px] text-[#111111]">
-                {strengthsHeading}
-              </h2>
-
-              <ul className="m-0 pl-6 text-[18px] font-normal leading-[28px] text-[#555555]">
-                {result.strengths.map((item, index) => (
-                  <li key={index} className="mb-2">
-                    {item}
-                  </li>
-                ))}
-              </ul>
+              {result.whyThisResult && (
+                <p className="mt-5 text-[16px] italic leading-[26px] text-[#6f6a60]">
+                  {result.whyThisResult}
+                </p>
+              )}
             </div>
 
-            <div className="box-border min-w-0 flex-1 rounded-[24px] border-2 border-[#d8d1f2] bg-[#f7f4ff] pb-8 pl-10 pr-8 pt-5 max-[640px]:pl-6">
-              <h2 className="m-0 mb-[22px] text-[28px] font-bold leading-[35px] text-[#111111]">
-                {growthAreasHeading}
-              </h2>
+            <div className="flex gap-10 max-[640px]:flex-col">
+              <div className="box-border min-w-0 flex-1 rounded-[24px] border-2 border-[#eed892] bg-[#fff9e8] pb-8 pl-10 pr-8 pt-5 max-[640px]:pl-6">
+                <h2 className="m-0 mb-[22px] text-[28px] font-bold leading-[35px] text-[#111111]">
+                  {strengthsHeading}
+                </h2>
 
-              <ul className="m-0 pl-6 text-[18px] font-normal leading-[28px] text-[#555555]">
-                {result.growthAreas.map((item, index) => (
-                  <li key={index} className="mb-2">
-                    {item}
-                  </li>
-                ))}
-              </ul>
+                <ul className="m-0 pl-6 text-[18px] font-normal leading-[28px] text-[#555555]">
+                  {result.strengths.map((item, index) => (
+                    <li key={index} className="mb-2">
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="box-border min-w-0 flex-1 rounded-[24px] border-2 border-[#d8d1f2] bg-[#f7f4ff] pb-8 pl-10 pr-8 pt-5 max-[640px]:pl-6">
+                <h2 className="m-0 mb-[22px] text-[28px] font-bold leading-[35px] text-[#111111]">
+                  {growthAreasHeading}
+                </h2>
+
+                <ul className="m-0 pl-6 text-[18px] font-normal leading-[28px] text-[#555555]">
+                  {result.growthAreas.map((item, index) => (
+                    <li key={index} className="mb-2">
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {detailsSection}
+
+            <div className="mt-4 flex justify-center">
+              <button
+                type="button"
+                onClick={handleRetake}
+                className="h-[58px] w-[230px] cursor-pointer rounded-[12px] border-2 border-[#f2c200] bg-white text-[16px] font-bold text-[#8b6c00] transition-all duration-200 hover:bg-[#fff9e8]"
+              >
+                {t("testResult.retake")}
+              </button>
             </div>
           </div>
+        </section>
+      </main>
 
-          {detailsSection}
-
-          <div className="mt-4 flex justify-center">
-            <button
-              type="button"
-              onClick={handleRetake}
-              className="h-[58px] w-[230px] cursor-pointer rounded-[12px] border-2 border-[#f2c200] bg-white text-[16px] font-bold text-[#8b6c00] transition-all duration-200 hover:bg-[#fff9e8]"
-            >
-              {t("testResult.retake")}
-            </button>
-          </div>
-        </div>
-      </section>
-    </main>
+      <AltynAdamDialog
+        open={isReminderDialogOpen}
+        imageSrc="/images/altyn-adam-explaining-half.png"
+        imageAlt="Алтын Адам советует заглянуть в профиль"
+        message="Я подготовил для тебя персональные рекомендации книг и фильмов. Загляни в профиль — там могут быть произведения, которые тебе понравятся."
+        onClose={closeReminderDialog}
+        actions={[
+          {
+            id: "result-reminder-profile",
+            label: "Перейти в профиль",
+            onClick: handleReminderProfileClick,
+          },
+          {
+            id: "result-reminder-continue",
+            label: "Продолжить",
+            onClick: closeReminderDialog,
+            variant: "secondary",
+          },
+        ]}
+      />
+    </>
   );
 };

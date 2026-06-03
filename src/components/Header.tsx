@@ -1,13 +1,21 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { fetchWithToken } from "../api/apiutils";
+import { AltynAdamDialog } from "./AltynAdamDialog";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+
+interface HeaderLocationState {
+  showAltynAdamWelcome?: boolean;
+}
 
 export function Header() {
   const { t } = useTranslation();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [coins, setCoins] = useState<number | null>(null);
   const [incomingCount, setIncomingCount] = useState(0);
+  const [isWelcomeDialogOpen, setIsWelcomeDialogOpen] = useState(false);
 
   const menuItems = [
     { label: t("header.nav.home"), path: "/" },
@@ -56,6 +64,25 @@ export function Header() {
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
   }, []);
+
+  useEffect(() => {
+    const locationState = location.state as HeaderLocationState | null;
+
+    if (locationState?.showAltynAdamWelcome) {
+      setIsWelcomeDialogOpen(true);
+    }
+  }, [location.state]);
+
+  const closeWelcomeDialog = () => {
+    setIsWelcomeDialogOpen(false);
+
+    if ((location.state as HeaderLocationState | null)?.showAltynAdamWelcome) {
+      navigate(location.pathname, {
+        replace: true,
+        state: null,
+      });
+    }
+  };
 
   return (
     <>
@@ -157,6 +184,21 @@ export function Header() {
       </header>
 
       <Outlet />
+
+      <AltynAdamDialog
+        open={isWelcomeDialogOpen}
+        imageSrc="/images/altyn-adam-welcome-half.png"
+        imageAlt="Алтын Адам приветствует пользователя"
+        message="С возвращением! Продолжим путешествие по казахской культуре?"
+        onClose={closeWelcomeDialog}
+        actions={[
+          {
+            id: "login-welcome-continue",
+            label: "Продолжить",
+            onClick: closeWelcomeDialog,
+          },
+        ]}
+      />
     </>
   );
 }

@@ -2,11 +2,16 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { fetchWithToken } from "../api/apiutils";
+import { AltynAdamDialog } from "../components/AltynAdamDialog";
 import {
   localizeAdaptiveQuestion,
   localizeAdaptiveResult,
 } from "../content/adaptiveFigureContentTranslations";
 import { getAdaptiveFigureUiCopy } from "../content/adaptiveFigureUiCopy";
+import {
+  markAltynAdamReminderDismissed,
+  registerCompletedTest,
+} from "../utils/altynAdamReminder";
 
 const TEST_COST = 100;
 const SESSION_STORAGE_KEY = "adaptive_figure_session_id";
@@ -84,6 +89,8 @@ export const AdaptiveFigureTestPage = () => {
   const [selectedAnswer, setSelectedAnswer] = useState<AdaptiveAnswerId | null>(
     null,
   );
+  const [isReminderDialogOpen, setIsReminderDialogOpen] = useState(false);
+  const [reminderCount, setReminderCount] = useState<number | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -203,12 +210,31 @@ export const AdaptiveFigureTestPage = () => {
     }
   };
 
+  const closeReminderDialog = () => {
+    if (reminderCount !== null) {
+      markAltynAdamReminderDismissed(reminderCount);
+    }
+
+    setIsReminderDialogOpen(false);
+  };
+
+  const handleReminderProfileClick = () => {
+    if (reminderCount !== null) {
+      markAltynAdamReminderDismissed(reminderCount);
+    }
+
+    setIsReminderDialogOpen(false);
+    navigate("/profile");
+  };
+
   const handleStart = async () => {
     try {
       setStarting(true);
       setError(null);
       setSelectedAnswer(null);
       setQuestionPoseIndex(0);
+      setIsReminderDialogOpen(false);
+      setReminderCount(null);
 
       const response = await fetchWithToken("/api/v1/adaptive-figure/sessions", {
         method: "POST",
@@ -244,12 +270,26 @@ export const AdaptiveFigureTestPage = () => {
       );
       const nextSession = (await response.json()) as AdaptiveSessionPayload;
       const elapsed = Date.now() - requestStartedAt;
+      let nextReminderCount: number | null = null;
+
+      if (nextSession.status === "completed") {
+        const completionState = registerCompletedTest();
+
+        if (completionState.shouldShowReminder) {
+          nextReminderCount = completionState.completedTestCount;
+        }
+      }
 
       if (elapsed < MIN_THINKING_MS) {
         await wait(MIN_THINKING_MS - elapsed);
       }
 
       syncSession(nextSession);
+
+      if (nextReminderCount !== null) {
+        setReminderCount(nextReminderCount);
+        setIsReminderDialogOpen(true);
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : copy.errors.answer);
     } finally {
@@ -270,7 +310,8 @@ export const AdaptiveFigureTestPage = () => {
   }
 
   return (
-    <main className="mx-auto mt-[72px] max-w-[1320px] px-6 pb-16 max-[900px]:mt-10 max-[640px]:px-4">
+    <>
+      <main className="mx-auto mt-[72px] max-w-[1320px] px-6 pb-16 max-[900px]:mt-10 max-[640px]:px-4">
       {error && (
         <div className="mb-6 rounded-[18px] border border-[#f3c2c2] bg-[#fff5f5] px-5 py-4 text-[15px] leading-[1.5] text-[#b94a48]">
           {error}
@@ -577,6 +618,28 @@ export const AdaptiveFigureTestPage = () => {
           </div>
         </section>
       )}
-    </main>
+      </main>
+
+      <AltynAdamDialog
+        open={isReminderDialogOpen}
+        imageSrc="/images/altyn-adam-explaining-half.png"
+        imageAlt="Алтын Адам советует заглянуть в профиль"
+        message="Я подготовил для тебя персональные рекомендации книг и фильмов. Загляни в профиль — там могут быть произведения, которые тебе понравятся."
+        onClose={closeReminderDialog}
+        actions={[
+          {
+            id: "adaptive-reminder-profile",
+            label: "Перейти в профиль",
+            onClick: handleReminderProfileClick,
+          },
+          {
+            id: "adaptive-reminder-continue",
+            label: "Продолжить",
+            onClick: closeReminderDialog,
+            variant: "secondary",
+          },
+        ]}
+      />
+    </>
   );
 };

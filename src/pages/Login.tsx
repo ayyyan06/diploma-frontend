@@ -24,7 +24,11 @@ export const Auth = () => {
     try {
       if (mode === "login") {
         await login({ email, password });
-        navigate("/");
+        navigate("/", {
+          state: {
+            showAltynAdamWelcome: true,
+          },
+        });
       } else {
         await register({
           username: loginName,
