@@ -172,16 +172,15 @@ export const Tests = () => {
 
         <article className="col-span-full overflow-hidden rounded-[36px] border border-[#e4e0d8] bg-white shadow-[0_12px_30px_rgba(24,24,24,0.04)]">
           <div className="grid gap-0 lg:grid-cols-[0.92fr_1.08fr]">
-            <div className="bg-[linear-gradient(135deg,#e3e3e3_0%,#c9c9c9_100%)] p-6 sm:p-8">
-              <div
-                className={`flex min-h-[220px] items-center justify-center rounded-[28px] border border-dashed border-white/70 bg-white/20 px-6 text-center text-[15px] font-semibold uppercase tracking-[0.14em] text-white ${
+            <div className="bg-[#f3efe6] p-6 sm:p-8">
+              <img
+                src="/images/altyn-adam-oblozhka.png"
+                alt={adaptiveFigureCopy.card.title}
+                className={`h-full min-h-[220px] w-full rounded-[28px] object-cover ${
                   !canAfford ? "opacity-60 grayscale" : ""
                 }`}
-              >
-                {adaptiveFigureCopy.card.coverPlaceholder}
-              </div>
+              />
             </div>
-
             <div className="flex flex-col justify-between gap-7 px-6 py-7 sm:px-8 sm:py-8 lg:px-10">
               <div className="flex flex-col gap-5">
                 <div className="flex flex-wrap items-start justify-between gap-4">
