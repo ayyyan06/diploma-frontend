@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { fetchWithToken, tokenManager } from "../api/apiutils";
+import { RecommendationsSection } from "../components/profile/RecommendationsSection";
 import {
   localizeSubmission,
   localizeTestType,
@@ -487,6 +488,8 @@ export const ProfilePage = () => {
                   </div>
                 )}
               </div>
+
+              <RecommendationsSection testResults={submissions} />
             </>
           )}
         </div>
