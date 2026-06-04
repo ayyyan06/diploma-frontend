@@ -249,6 +249,7 @@ const en = {
     temperamentQuadrant: "Temperament quadrant",
     weaponScores: "Weapon scores",
     retake: "RETAKE TEST",
+    close: "CLOSE",
     failedToLoad: "Failed to load result",
   },
   altynAdam: {

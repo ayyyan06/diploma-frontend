@@ -3,11 +3,20 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { fetchWithToken, tokenManager } from "../api/apiutils";
+import { AchievementsGrid } from "../components/AchievementsGrid";
+import { FriendshipProgress } from "../components/FriendshipProgress";
 import { RecommendationsSection } from "../components/profile/RecommendationsSection";
+import { normalizeAltynAdamLanguage } from "../data/altynAdamCulturalDialogues";
 import {
   localizeSubmission,
   localizeTestType,
 } from "../content/testContentTranslations";
+import {
+  getAltynAdamProgress,
+  normalizeCompletedTestKey,
+  syncCompletedUniqueTests,
+} from "../utils/altynAdamProgress";
+import type { CompletedTestKey } from "../types/altynAdam";
 
 interface Me {
   id: number;
@@ -52,6 +61,10 @@ interface Recommendation {
   reason?: string | null;
 }
 
+interface AdaptiveFigureSessionSummary {
+  status: "in_progress" | "completed" | "abandoned";
+}
+
 const ARCHETYPE_COLORS: Record<string, { bg: string; accent: string }> = {
   personality: { bg: "#FFF9E8", accent: "#F2C200" },
   animal: { bg: "#EEF8FF", accent: "#60a5fa" },
@@ -67,6 +80,7 @@ const REC_TYPE_COLORS: Record<string, { bg: string; accent: string }> = {
   game: { bg: "#F5F3FF", accent: "#8b5cf6" },
   music: { bg: "#FFF7ED", accent: "#f97316" },
 };
+const ADAPTIVE_FIGURE_SESSION_STORAGE_KEY = "adaptive_figure_session_id";
 
 function SectionTitle({ children }: { children: ReactNode }) {
   return (
@@ -315,10 +329,26 @@ export const ProfilePage = () => {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [tab, setTab] = useState<"results" | "friends">("results");
   const [loading, setLoading] = useState(true);
+  const [hasCompletedAdaptiveFigure, setHasCompletedAdaptiveFigure] =
+    useState(false);
+  const [altynAdamProgress, setAltynAdamProgress] = useState(() =>
+    getAltynAdamProgress(),
+  );
 
   useEffect(() => {
     void (async () => {
       try {
+        const storedAdaptiveSessionId = localStorage.getItem(
+          ADAPTIVE_FIGURE_SESSION_STORAGE_KEY,
+        );
+        const adaptiveSessionPromise = storedAdaptiveSessionId
+          ? fetchWithToken(
+              `/api/v1/adaptive-figure/sessions/${storedAdaptiveSessionId}`,
+            )
+              .then((response) => response.json() as Promise<AdaptiveFigureSessionSummary>)
+              .catch(() => null)
+          : Promise.resolve<AdaptiveFigureSessionSummary | null>(null);
+
         const [meRes, subRes, frRes, recRes] = await Promise.all([
           fetchWithToken("/api/v1/me"),
           fetchWithToken("/api/v1/submissions"),
@@ -330,11 +360,13 @@ export const ProfilePage = () => {
         const submissionsData = await subRes.json();
         const friendsData = await frRes.json();
         const recommendationsData = await recRes.json();
+        const adaptiveSessionData = await adaptiveSessionPromise;
 
         setMe(meData);
         setSubmissions(submissionsData.submissions ?? []);
         setFriends(friendsData.friends ?? []);
         setRecommendations(recommendationsData.recommendations ?? []);
+        setHasCompletedAdaptiveFigure(adaptiveSessionData?.status === "completed");
       } catch (error) {
         console.error(error);
       } finally {
@@ -342,6 +374,23 @@ export const ProfilePage = () => {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    const completedTestKeys = Array.from(
+      new Set<CompletedTestKey>(
+        [
+          ...submissions.map((submission) =>
+            normalizeCompletedTestKey(submission.test_type),
+          ),
+          hasCompletedAdaptiveFigure ? "adaptive-figure" : null,
+        ].filter((testKey): testKey is CompletedTestKey => testKey !== null),
+      ),
+    );
+
+    const { progress } = syncCompletedUniqueTests(completedTestKeys);
+
+    setAltynAdamProgress(progress);
+  }, [hasCompletedAdaptiveFigure, submissions]);
 
   const handleRemoveFriend = useCallback(async (friendshipId: number) => {
     await fetchWithToken(`/api/v1/community/friend-requests/${friendshipId}`, {
@@ -364,6 +413,10 @@ export const ProfilePage = () => {
         localizeSubmission(submission, i18n.language),
       ),
     [submissions, i18n.language],
+  );
+  const altynAdamLanguage = useMemo(
+    () => normalizeAltynAdamLanguage(i18n.language),
+    [i18n.language],
   );
 
   if (loading) {
@@ -442,6 +495,17 @@ export const ProfilePage = () => {
       {tab === "results" && (
         <div>
           <SectionTitle>{t("profile.myResults")}</SectionTitle>
+
+          <div className="mb-6 space-y-6">
+            <FriendshipProgress
+              progress={altynAdamProgress}
+              language={altynAdamLanguage}
+            />
+            <AchievementsGrid
+              unlockedAchievementIds={altynAdamProgress.unlockedAchievements}
+              language={altynAdamLanguage}
+            />
+          </div>
 
           {localizedSubmissions.length === 0 ? (
             <div className="rounded-[22px] border-2 border-dashed border-[#ece7dd] py-16 text-center">

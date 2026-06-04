@@ -116,6 +116,13 @@ interface TestResultLocationState {
   altynAdamReminderCount?: number;
 }
 
+interface CulturalDialogueRouteState {
+  altynAdamCulturalDialogue: {
+    testType: "personality" | "animal" | "weapon" | "enemy";
+    resultKey: string;
+  };
+}
+
 function isPersonality(
   type: string,
   details: unknown,
@@ -682,6 +689,29 @@ export const TestResult = () => {
   const enemyUiCopy = getEnemyUiCopy(i18n.language);
 
   const handleRetake = () => navigate(`/tests/${id}`);
+  const handleCloseResult = () => {
+    if (!result || !testType) {
+      navigate("/tests");
+      return;
+    }
+
+    const resultKey = result.resultKey;
+
+    if (!resultKey) {
+      navigate("/tests");
+      return;
+    }
+
+    navigate("/tests", {
+      state: {
+        altynAdamCulturalDialogue: {
+          testType,
+          resultKey,
+        },
+      } satisfies CulturalDialogueRouteState,
+    });
+  };
+
   const closeReminderDialog = () => {
     if (reminderCount !== null) {
       markAltynAdamReminderDismissed(reminderCount);
@@ -865,13 +895,21 @@ export const TestResult = () => {
 
             {detailsSection}
 
-            <div className="mt-4 flex justify-center">
+            <div className="mt-4 flex flex-wrap justify-center gap-4">
               <button
                 type="button"
                 onClick={handleRetake}
                 className="h-[58px] w-[230px] cursor-pointer rounded-[12px] border-2 border-[#f2c200] bg-white text-[16px] font-bold text-[#8b6c00] transition-all duration-200 hover:bg-[#fff9e8]"
               >
                 {t("testResult.retake")}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleCloseResult}
+                className="h-[58px] w-[230px] cursor-pointer rounded-[12px] border-none bg-[#f2c200] text-[16px] font-bold text-white transition-opacity duration-200 hover:opacity-90"
+              >
+                {t("testResult.close")}
               </button>
             </div>
           </div>

@@ -10,8 +10,8 @@ import {
 import { getAdaptiveFigureUiCopy } from "../content/adaptiveFigureUiCopy";
 import {
   markAltynAdamReminderDismissed,
-  registerCompletedTest,
 } from "../utils/altynAdamReminder";
+import { registerTestCompletion } from "../utils/altynAdamProgress";
 
 const TEST_COST = 100;
 const SESSION_STORAGE_KEY = "adaptive_figure_session_id";
@@ -273,7 +273,7 @@ export const AdaptiveFigureTestPage = () => {
       let nextReminderCount: number | null = null;
 
       if (nextSession.status === "completed") {
-        const completionState = registerCompletedTest();
+        const completionState = registerTestCompletion("adaptive-figure");
 
         if (completionState.shouldShowReminder) {
           nextReminderCount = completionState.completedTestCount;
@@ -603,6 +603,14 @@ export const AdaptiveFigureTestPage = () => {
                 className="min-h-[56px] rounded-[16px] border-none bg-[#f2b705] px-6 text-[16px] font-bold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {starting ? copy.question.thinking : copy.result.restart}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate("/tests")}
+                className="min-h-[56px] rounded-[16px] border-2 border-[#f2c200] bg-white px-6 text-[16px] font-bold text-[#8b6c00] transition-all hover:bg-[#fff9e8]"
+              >
+                {t("testResult.close")}
               </button>
 
               {!canAfford && (

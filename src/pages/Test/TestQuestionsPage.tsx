@@ -6,7 +6,7 @@ import {
   localizeTestDetail,
   localizeTestType,
 } from "../../content/testContentTranslations";
-import { registerCompletedTest } from "../../utils/altynAdamReminder";
+import { registerTestCompletion } from "../../utils/altynAdamProgress";
 
 interface TestOption {
   id: string;
@@ -119,7 +119,14 @@ export const TestQestionsPage = () => {
           { answers: formattedAnswers },
         );
 
-        const completionState = registerCompletedTest();
+        const completionState = registerTestCompletion(
+          (test?.type as
+            | "personality"
+            | "animal"
+            | "weapon"
+            | "enemy"
+            | undefined) ?? "personality",
+        );
 
         navigate(`/tests/${id}/result`, {
           state: completionState.shouldShowReminder

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { fetchWithToken } from "../api/apiutils";
 import { AltynAdamDialog } from "./AltynAdamDialog";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { registerDailyVisit } from "../utils/altynAdamProgress";
 
 interface HeaderLocationState {
   showAltynAdamWelcome?: boolean;
@@ -26,6 +27,8 @@ export function Header() {
   ];
 
   useEffect(() => {
+    registerDailyVisit();
+
     const loadCoins = async () => {
       try {
         const response = await fetchWithToken("/api/v1/coins");

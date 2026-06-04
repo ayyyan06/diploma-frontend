@@ -250,6 +250,7 @@ const ru = {
     temperamentQuadrant: "Квадрант темперамента",
     weaponScores: "Баллы оружия",
     retake: "ПРОЙТИ ЕЩЁ РАЗ",
+    close: "ЗАКРЫТЬ",
     failedToLoad: "Не удалось загрузить результат",
   },
   altynAdam: {

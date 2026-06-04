@@ -252,6 +252,7 @@ const kk = {
     temperamentQuadrant: "Темперамент квадранты",
     weaponScores: "Қару ұпайлары",
     retake: "ТЕСТТІ ҚАЙТА ӨТУ",
+    close: "ЖАБУ",
     failedToLoad: "Нәтижені жүктеу мүмкін болмады",
   },
   altynAdam: {

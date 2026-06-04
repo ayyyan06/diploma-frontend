@@ -1,9 +1,18 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { fetchWithToken } from "../api/apiutils";
+import { AltynAdamCulturalDialogueFlow } from "../components/AltynAdamCulturalDialogueFlow";
 import { localizeTestSummary } from "../content/testContentTranslations";
+import {
+  getCulturalDialogueDefinition,
+  normalizeAltynAdamLanguage,
+} from "../data/altynAdamCulturalDialogues";
 import { getAdaptiveFigureUiCopy } from "../content/adaptiveFigureUiCopy";
+import type {
+  AltynAdamCulturalDialogueDefinition,
+  StandardTestType,
+} from "../types/altynAdam";
 
 const TEST_COST = 100;
 
@@ -16,12 +25,24 @@ interface TestSummary {
   image_alt: string;
 }
 
+interface TestsLocationState {
+  altynAdamCulturalDialogue?: {
+    testType: StandardTestType;
+    resultKey: string;
+  };
+}
+
 export const Tests = () => {
   const { t, i18n } = useTranslation();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [tests, setTests] = useState<TestSummary[]>([]);
   const [coins, setCoins] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeDialogue, setActiveDialogue] =
+    useState<AltynAdamCulturalDialogueDefinition | null>(null);
+  const [isDialogueOpen, setIsDialogueOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -64,7 +85,35 @@ export const Tests = () => {
     () => getAdaptiveFigureUiCopy(i18n.language),
     [i18n.language],
   );
+  const dialogueLanguage = useMemo(
+    () => normalizeAltynAdamLanguage(i18n.language),
+    [i18n.language],
+  );
   const canAfford = coins === null || coins >= TEST_COST;
+
+  useEffect(() => {
+    const locationState = location.state as TestsLocationState | null;
+    const pendingDialogue = locationState?.altynAdamCulturalDialogue;
+
+    if (!pendingDialogue) {
+      return;
+    }
+
+    const dialogueDefinition = getCulturalDialogueDefinition(
+      pendingDialogue.testType,
+      pendingDialogue.resultKey,
+    );
+
+    if (dialogueDefinition) {
+      setActiveDialogue(dialogueDefinition);
+      setIsDialogueOpen(true);
+    }
+
+    navigate(location.pathname, {
+      replace: true,
+      state: null,
+    });
+  }, [location.pathname, location.state, navigate]);
 
   if (loading) {
     return (
@@ -83,7 +132,8 @@ export const Tests = () => {
   }
 
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-10">
+    <>
+      <div className="mx-auto max-w-[1400px] px-6 py-10">
       <h1 className="mb-4 text-center text-3xl font-normal">
         {t("tests.title")}
       </h1>
@@ -244,6 +294,17 @@ export const Tests = () => {
           </div>
         </article>
       </section>
-    </div>
+      </div>
+
+      <AltynAdamCulturalDialogueFlow
+        open={isDialogueOpen}
+        dialogue={activeDialogue}
+        language={dialogueLanguage}
+        onClose={() => {
+          setIsDialogueOpen(false);
+          setActiveDialogue(null);
+        }}
+      />
+    </>
   );
 };
