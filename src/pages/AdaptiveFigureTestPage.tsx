@@ -70,6 +70,24 @@ const wait = (ms: number) =>
     window.setTimeout(resolve, ms);
   });
 
+function AdaptiveMascot({
+  pose,
+  alt,
+}: {
+  pose: MascotPose;
+  alt: string;
+}) {
+  return (
+    <div className="flex h-[420px] w-full max-w-[340px] items-end justify-center max-[640px]:h-[320px]">
+      <img
+        src={MASCOT_IMAGES[pose]}
+        alt={alt}
+        className="h-full w-auto max-w-none object-contain"
+      />
+    </div>
+  );
+}
+
 export const AdaptiveFigureTestPage = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -435,11 +453,7 @@ export const AdaptiveFigureTestPage = () => {
             <div className="rounded-full bg-white/60 px-4 py-2 text-[13px] font-semibold uppercase tracking-[0.12em] text-[#7a6a45]">
               Altyn Adam
             </div>
-            <img
-              src={MASCOT_IMAGES[mascotPose]}
-              alt={copy.question.hostAlt}
-              className="max-h-[420px] w-full max-w-[340px] object-contain"
-            />
+            <AdaptiveMascot pose={mascotPose} alt={copy.question.hostAlt} />
             <p className="m-0 max-w-[340px] text-[15px] leading-[1.7] text-[#6a6255]">
               {copy.question.hostHint}
             </p>
@@ -519,11 +533,7 @@ export const AdaptiveFigureTestPage = () => {
             </div>
 
             <div className="flex flex-col items-center justify-center rounded-[28px] bg-[linear-gradient(180deg,#fbf6ea_0%,#f4ede0_100%)] px-6 py-8 text-center">
-              <img
-                src={MASCOT_IMAGES[mascotPose]}
-                alt={copy.question.hostAlt}
-                className="max-h-[420px] w-full max-w-[340px] object-contain"
-              />
+              <AdaptiveMascot pose={mascotPose} alt={copy.question.hostAlt} />
               <p className="mt-5 max-w-[320px] text-[15px] leading-[1.7] text-[#6a6255]">
                 {submitting
                   ? copy.question.thinking
@@ -537,11 +547,7 @@ export const AdaptiveFigureTestPage = () => {
       {session?.status === "completed" && localizedResult && (
         <section className="grid gap-8 rounded-[32px] border-2 border-[#ece7dd] bg-white px-8 py-8 shadow-[0_10px_30px_rgba(24,24,24,0.04)] lg:grid-cols-[0.78fr_1.22fr] lg:px-10">
           <div className="flex flex-col items-center justify-center rounded-[28px] bg-[linear-gradient(180deg,#fff8df_0%,#f5e9c6_100%)] px-6 py-8 text-center">
-            <img
-              src={MASCOT_IMAGES.success}
-              alt={copy.result.successAlt}
-              className="max-h-[420px] w-full max-w-[340px] object-contain"
-            />
+            <AdaptiveMascot pose="success" alt={copy.result.successAlt} />
           </div>
 
           <div className="flex flex-col gap-6">

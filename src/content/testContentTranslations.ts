@@ -415,7 +415,7 @@ const TEST_TRANSLATIONS: Record<
           coreTraits: ["сдержанность", "устойчивость", "терпение"],
         },
         wolf: {
-          title: "Волк — Холерик",
+          title: "Көк бөрі — Холерик",
           subtitle: "Темперамент Айзенка: Холерик",
           tagline: "Интенсивность, напор и эмоционально заряженное действие.",
           description:
@@ -435,7 +435,7 @@ const TEST_TRANSLATIONS: Record<
           coreTraits: ["интенсивность", "драйв", "реактивность"],
         },
         horse: {
-          title: "Лошадь — Сангвиник",
+          title: "Тұлпар — Сангвиник",
           subtitle: "Темперамент Айзенка: Сангвиник",
           tagline: "Тёплый импульс, общительность и устойчивое движение вовне.",
           description:
@@ -1011,8 +1011,8 @@ const RESULT_TITLE_LOOKUP: Record<SupportedLocalizedLanguage, Record<string, str
     "Shanyraq Keeper - The Mother": "Хранитель Шанырака — Мать",
     "Aldar Kose - The Trickster": "Алдар Косе — Трикстер",
     "Snow Leopard - The Phlegmatic": "Снежный барс — Флегматик",
-    "Wolf - The Choleric": "Волк — Холерик",
-    "Horse - The Sanguine": "Лошадь — Сангвиник",
+    "Wolf - The Choleric": "Көк бөрі — Холерик",
+    "Horse - The Sanguine": "Тұлпар — Сангвиник",
     "Eagle - The Melancholic": "Беркут — Меланхолик",
     "Bow - The Strategist": "Лук — Стратег",
     "Spear - The Asserter": "Копьё — Напористый",
@@ -1025,8 +1025,8 @@ const RESULT_TITLE_LOOKUP: Record<SupportedLocalizedLanguage, Record<string, str
     "Shanyraq Keeper - The Mother": "Шаңырақ сақтаушысы — Ана",
     "Aldar Kose - The Trickster": "Алдар Көсе — Трикстер",
     "Snow Leopard - The Phlegmatic": "Қар барысы — Флегматик",
-    "Wolf - The Choleric": "Қасқыр — Холерик",
-    "Horse - The Sanguine": "Жылқы — Сангвиник",
+    "Wolf - The Choleric": "Көк бөрі — Холерик",
+    "Horse - The Sanguine": "Тұлпар — Сангвиник",
     "Eagle - The Melancholic": "Бүркіт — Меланхолик",
     "Bow - The Strategist": "Садақ — Стратег",
     "Spear - The Asserter": "Найза — Тура айтушы",
