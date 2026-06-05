@@ -1203,58 +1203,80 @@ export function localizeTestDetail<
   };
 }
 
-export function localizeResultPayload<T extends { resultKey?: string; title?: string; subtitle?: string | null; tagline?: string; description?: string; strengths?: string[]; growthAreas?: string[]; developmentFocus?: string | null; whyThisResult?: string | null; imageSrc?: string; image_src?: string; imageAlt?: string; image_alt?: string; details?: any }>(
+export function localizeResultPayload<T extends { resultKey?: string; result_key?: string; title?: string; subtitle?: string | null; tagline?: string; description?: string; strengths?: string[]; growthAreas?: string[]; developmentFocus?: string | null; whyThisResult?: string | null; imageSrc?: string; image_src?: string; imageAlt?: string; image_alt?: string; details?: any }>(
   testType: string,
   result: T,
   language: string,
 ): T {
+  const normalizedResult: T = {
+    ...result,
+    resultKey: result.resultKey ?? result.result_key,
+    subtitle: result.subtitle ?? null,
+    tagline: result.tagline ?? "",
+    description: result.description ?? "",
+    strengths: Array.isArray(result.strengths) ? result.strengths : [],
+    growthAreas: Array.isArray(result.growthAreas) ? result.growthAreas : [],
+    imageSrc: result.imageSrc ?? result.image_src ?? "",
+    image_src: result.image_src ?? result.imageSrc ?? "",
+    imageAlt: result.imageAlt ?? result.image_alt ?? "",
+    image_alt: result.image_alt ?? result.imageAlt ?? "",
+  };
+
   const normalized = normalizeLanguage(language);
-  if (normalized === "en") return result;
+  if (normalized === "en") return normalizedResult;
 
   const enemyLocalization =
     testType === "enemy" ? getEnemyLocalization(normalized) : null;
   const enemyKey =
-    testType === "enemy" ? normalizeEnemyResultKey(result.resultKey) : null;
+    testType === "enemy"
+      ? normalizeEnemyResultKey(normalizedResult.resultKey)
+      : null;
   const enemyResultTranslation =
     enemyLocalization && enemyKey ? enemyLocalization.results[enemyKey] : null;
-  const enemyImage = getEnemyResultImageByKey(result.resultKey);
-  const translation = getLocalizedTestTranslation(language, testType)?.results?.[result.resultKey ?? ""];
-  if (!translation && !enemyResultTranslation && !enemyImage) return result;
+  const enemyImage = getEnemyResultImageByKey(normalizedResult.resultKey);
+  const translation =
+    getLocalizedTestTranslation(language, testType)?.results?.[
+      normalizedResult.resultKey ?? ""
+    ];
+  if (!translation && !enemyResultTranslation && !enemyImage) {
+    return normalizedResult;
+  }
 
   const localized: T = {
-    ...result,
+    ...normalizedResult,
     title:
       enemyResultTranslation?.title ??
       translation?.title ??
-      result.title,
+      normalizedResult.title,
     subtitle:
       enemyResultTranslation?.subtitle ??
       translation?.subtitle ??
-      result.subtitle,
+      normalizedResult.subtitle,
     tagline:
       enemyResultTranslation?.tagline ??
       translation?.tagline ??
-      result.tagline,
+      normalizedResult.tagline,
     description:
       enemyResultTranslation?.description ??
       translation?.description ??
-      result.description,
+      normalizedResult.description,
     strengths:
       enemyResultTranslation?.strengths ??
       translation?.strengths ??
-      result.strengths,
+      normalizedResult.strengths,
     growthAreas:
       enemyResultTranslation?.growthAreas ??
       translation?.growthAreas ??
-      result.growthAreas,
+      normalizedResult.growthAreas,
     developmentFocus:
       translation?.developmentFocus ??
-      localizeDevelopmentFocus(normalized, result.developmentFocus),
-    whyThisResult: translation?.whyThisResult ?? result.whyThisResult,
-    imageSrc: enemyImage?.imageSrc ?? result.imageSrc,
-    image_src: enemyImage?.imageSrc ?? result.image_src,
-    imageAlt: enemyImage?.imageAlt ?? result.imageAlt,
-    image_alt: enemyImage?.imageAlt ?? result.image_alt,
+      localizeDevelopmentFocus(normalized, normalizedResult.developmentFocus),
+    whyThisResult:
+      translation?.whyThisResult ?? normalizedResult.whyThisResult,
+    imageSrc: enemyImage?.imageSrc ?? normalizedResult.imageSrc,
+    image_src: enemyImage?.imageSrc ?? normalizedResult.image_src,
+    imageAlt: enemyImage?.imageAlt ?? normalizedResult.imageAlt,
+    image_alt: enemyImage?.imageAlt ?? normalizedResult.image_alt,
   };
 
   if (localized.details) {
@@ -1385,7 +1407,7 @@ export function localizeResultPayload<T extends { resultKey?: string; title?: st
     )?.narrative;
     localized.whyThisResult = buildPersonalityWhy(
       normalized,
-      localized.title ?? result.title ?? "",
+      localized.title ?? normalizedResult.title ?? "",
       localized.details.topTraits,
       firstNarrative,
     );
@@ -1400,7 +1422,7 @@ export function localizeResultPayload<T extends { resultKey?: string; title?: st
     );
     localized.whyThisResult = buildAnimalWhy(
       normalized,
-      localized.title ?? result.title ?? "",
+      localized.title ?? normalizedResult.title ?? "",
       localized.details.temperament ?? "",
       extraversionAxis?.leaningLabel,
       stabilityAxis?.leaningLabel,

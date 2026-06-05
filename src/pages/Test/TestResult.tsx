@@ -686,6 +686,8 @@ export const TestResult = () => {
 
   const testType = localizedResultData?.test_type;
   const result = localizedResultData?.result;
+  const strengths = result?.strengths ?? [];
+  const growthAreas = result?.growthAreas ?? [];
   const enemyUiCopy = getEnemyUiCopy(i18n.language);
 
   const handleRetake = () => navigate(`/tests/${id}/intro`);
@@ -870,7 +872,7 @@ export const TestResult = () => {
                 </h2>
 
                 <ul className="m-0 pl-6 text-[18px] font-normal leading-[28px] text-[#555555]">
-                  {result.strengths.map((item, index) => (
+                  {strengths.map((item, index) => (
                     <li key={index} className="mb-2">
                       {item}
                     </li>
@@ -884,7 +886,7 @@ export const TestResult = () => {
                 </h2>
 
                 <ul className="m-0 pl-6 text-[18px] font-normal leading-[28px] text-[#555555]">
-                  {result.growthAreas.map((item, index) => (
+                  {growthAreas.map((item, index) => (
                     <li key={index} className="mb-2">
                       {item}
                     </li>
