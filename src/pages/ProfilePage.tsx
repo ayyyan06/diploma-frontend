@@ -109,7 +109,7 @@ function ResultCard({ sub }: { sub: Submission }) {
           <img
             src={sub.result.imageSrc}
             alt={sub.result.imageAlt}
-            className="h-[52px] w-[52px] object-contain"
+            className="h-[52px] w-[52px] rounded-[14px] object-cover"
             onError={(event) => {
               (event.target as HTMLImageElement).style.display = "none";
             }}

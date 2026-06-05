@@ -688,7 +688,7 @@ export const TestResult = () => {
   const result = localizedResultData?.result;
   const enemyUiCopy = getEnemyUiCopy(i18n.language);
 
-  const handleRetake = () => navigate(`/tests/${id}`);
+  const handleRetake = () => navigate(`/tests/${id}/intro`);
   const handleCloseResult = () => {
     if (!result || !testType) {
       navigate("/tests");
@@ -836,7 +836,7 @@ export const TestResult = () => {
             <img
               src={result.imageSrc}
               alt={result.imageAlt}
-              className="mx-auto mb-[49px] block max-w-[180px]"
+              className="mx-auto mb-[49px] block h-[185px] w-[180px] rounded-[36px] object-cover"
             />
 
             {leftCardContent}

@@ -42,6 +42,13 @@ interface TestDetail {
   questions?: TestQuestion[];
 }
 
+interface StandardTestSession {
+  session_id: number;
+  test_id: number;
+  status: "in_progress" | "completed";
+  coins_remaining: number | null;
+}
+
 export const TestIntroPage = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -49,20 +56,29 @@ export const TestIntroPage = () => {
 
   const [test, setTest] = useState<TestDetail | null>(null);
   const [coins, setCoins] = useState<number | null>(null);
+  const [activeSession, setActiveSession] = useState<StandardTestSession | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const coinsResPromise = fetchWithToken("/api/v1/coins");
-        const testJson = await fetchWithToken(`/api/v1/tests/${id}`).then(
-          (response) => response.json(),
-        );
-        const coinsRes = await coinsResPromise;
-        const coinsJson = await coinsRes.json();
+        const [coinsJson, testJson, sessionJson] = await Promise.all([
+          fetchWithToken("/api/v1/coins").then((response) => response.json()),
+          fetchWithToken(`/api/v1/tests/${id}`).then((response) =>
+            response.json(),
+          ),
+          fetchWithToken(`/api/v1/tests/${id}/session`).then((response) =>
+            response.json(),
+          ),
+        ]);
+        const nextSession =
+          (sessionJson.session as StandardTestSession | null) ?? null;
         setTest(testJson as TestDetail);
-        setCoins(coinsJson.coins ?? null);
+        setActiveSession(nextSession);
+        setCoins(nextSession?.coins_remaining ?? coinsJson.coins ?? null);
       } catch (error) {
         console.error("Test intro loading error:", error);
       } finally {
@@ -75,7 +91,8 @@ export const TestIntroPage = () => {
     }
   }, [id]);
 
-  const canAfford = coins === null || coins >= TEST_COST;
+  const canAfford =
+    activeSession !== null || coins === null || coins >= TEST_COST;
   const localizedTest = useMemo(
     () => (test ? localizeTestDetail(test, i18n.language) : null),
     [test, i18n.language],
@@ -83,9 +100,30 @@ export const TestIntroPage = () => {
   const isEnemyTest = localizedTest?.type === "enemy";
   const introImageSrc = localizedTest?.image_src;
 
-  const handleStart = () => {
+  const handleStart = async () => {
     if (!canAfford) return;
-    navigate(`/tests/${id}`);
+
+    if (activeSession) {
+      navigate(`/tests/${id}`);
+      return;
+    }
+
+    try {
+      const response = await fetchWithToken(`/api/v1/tests/${id}/start`, {
+        method: "POST",
+      });
+      const nextSession = (await response.json()) as StandardTestSession;
+      setActiveSession(nextSession);
+
+      if (typeof nextSession.coins_remaining === "number") {
+        setCoins(nextSession.coins_remaining);
+      }
+
+      window.postMessage({ type: "coins:updated" }, window.location.origin);
+      navigate(`/tests/${id}`);
+    } catch (error) {
+      console.error("Test start error:", error);
+    }
   };
 
   if (loading) {
@@ -204,7 +242,9 @@ export const TestIntroPage = () => {
           </div>
 
           <button
-            onClick={handleStart}
+            onClick={() => {
+              void handleStart();
+            }}
             disabled={!canAfford}
             title={
               !canAfford

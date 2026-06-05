@@ -109,40 +109,41 @@ function ResultsDrawer({
 
         {!loading &&
           data &&
-          localizedResults.map((result) => (
-            <div
-              key={result.test_id}
-              className="mb-4 flex items-center gap-4 rounded-[18px] border-2 border-[#ece7dd] bg-white p-4"
-            >
+          localizedResults.map((result) => {
+            return (
               <div
-                className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-[14px]"
-                style={{
-                  background:
-                    ARCHETYPE_COLORS[result.test_type] ?? "#f7f2ea",
-                }}
+                key={result.test_id}
+                className="mb-4 flex items-center gap-4 rounded-[18px] border-2 border-[#ece7dd] bg-white p-4"
               >
-                <img
-                  src={result.image_src}
-                  alt={result.image_alt}
-                  className="h-[52px] w-[52px] object-contain"
-                  onError={(event) => {
-                    (event.target as HTMLImageElement).style.display = "none";
+                <div
+                  className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-[14px]"
+                  style={{
+                    background: ARCHETYPE_COLORS[result.test_type] ?? "#f7f2ea",
                   }}
-                />
+                >
+                  <img
+                    src={result.image_src}
+                    alt={result.image_alt}
+                    className="h-[52px] w-[52px] rounded-[14px] object-cover"
+                    onError={(event) => {
+                      (event.target as HTMLImageElement).style.display = "none";
+                    }}
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="mb-0.5 text-[12px] font-semibold uppercase tracking-wider text-[#9a8c6e]">
+                    {result.test_title}
+                  </p>
+                  <p className="mb-0.5 truncate text-[17px] font-bold text-[#111]">
+                    {result.title}
+                  </p>
+                  {result.subtitle && (
+                    <p className="text-[13px] text-[#777]">{result.subtitle}</p>
+                  )}
+                </div>
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="mb-0.5 text-[12px] font-semibold uppercase tracking-wider text-[#9a8c6e]">
-                  {result.test_title}
-                </p>
-                <p className="mb-0.5 truncate text-[17px] font-bold text-[#111]">
-                  {result.title}
-                </p>
-                {result.subtitle && (
-                  <p className="text-[13px] text-[#777]">{result.subtitle}</p>
-                )}
-              </div>
-            </div>
-          ))}
+            );
+          })}
       </div>
     </div>
   );

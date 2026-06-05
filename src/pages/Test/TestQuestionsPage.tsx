@@ -29,6 +29,13 @@ interface TestDetail {
   questions?: TestQuestion[];
 }
 
+interface StandardTestSession {
+  session_id: number;
+  test_id: number;
+  status: "in_progress" | "completed";
+  coins_remaining: number | null;
+}
+
 export const TestQestionsPage = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -46,8 +53,21 @@ export const TestQestionsPage = () => {
     const loadTest = async () => {
       try {
         setLoading(true);
-        const response = await fetchWithToken(`/api/v1/tests/${id}`);
-        setTest((await response.json()) as TestDetail);
+        const [testResponse, sessionResponse] = await Promise.all([
+          fetchWithToken(`/api/v1/tests/${id}`),
+          fetchWithToken(`/api/v1/tests/${id}/session`),
+        ]);
+
+        const sessionJson = (await sessionResponse.json()) as {
+          session: StandardTestSession | null;
+        };
+
+        if (!sessionJson.session || sessionJson.session.status !== "in_progress") {
+          navigate(`/tests/${id}/intro`, { replace: true });
+          return;
+        }
+
+        setTest((await testResponse.json()) as TestDetail);
       } catch (error) {
         console.error("Test loading error:", error);
       } finally {
