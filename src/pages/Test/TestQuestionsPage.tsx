@@ -7,10 +7,6 @@ import {
   localizeTestType,
 } from "../../content/testContentTranslations";
 import { registerTestCompletion } from "../../utils/altynAdamProgress";
-import {
-  clearPendingStandardTestCharge,
-  getPendingStandardTestCharge,
-} from "../../utils/standardTestPendingCharges";
 
 interface TestOption {
   id: string;
@@ -40,6 +36,15 @@ interface StandardTestSession {
   coins_remaining: number | null;
 }
 
+function getHttpStatus(error: unknown): number | null {
+  if (!(error instanceof Error)) {
+    return null;
+  }
+
+  const match = error.message.match(/Status:\s*(\d+)/);
+  return match ? Number(match[1]) : null;
+}
+
 export const TestQestionsPage = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -52,7 +57,6 @@ export const TestQestionsPage = () => {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>(
     {},
   );
-  const testId = id ?? "";
 
   useEffect(() => {
     const loadTest = async () => {
@@ -76,18 +80,14 @@ export const TestQestionsPage = () => {
         setTest(testResult.value);
 
         if (sessionResult.status === "rejected") {
-          console.warn(
-            "Standard test session endpoint unavailable; allowing legacy flow.",
-            sessionResult.reason,
-          );
+          navigate(`/tests/${id}/intro`, { replace: true });
           return;
         }
 
         const sessionJson = sessionResult.value;
-        const pendingCharge = testId ? getPendingStandardTestCharge(testId) : 0;
         const currentSession =
           sessionJson.session !== null &&
-          String(sessionJson.session.test_id) === testId
+          String(sessionJson.session.test_id) === String(id)
             ? sessionJson.session
             : null;
 
@@ -108,14 +108,8 @@ export const TestQestionsPage = () => {
           return;
         }
 
-        if (pendingCharge > 0) {
-          return;
-        }
-
-        if (!currentSession || currentSession.status === "completed") {
-          navigate(`/tests/${id}/intro`, { replace: true });
-          return;
-        }
+        navigate(`/tests/${id}/intro`, { replace: true });
+        return;
       } catch (error) {
         console.error("Test loading error:", error);
       } finally {
@@ -126,7 +120,7 @@ export const TestQestionsPage = () => {
     if (id) {
       void loadTest();
     }
-  }, [id, navigate, testId]);
+  }, [id, navigate]);
 
   const localizedTest = useMemo(
     () => (test ? localizeTestDetail(test, i18n.language) : null),
@@ -187,10 +181,6 @@ export const TestQestionsPage = () => {
           { answers: formattedAnswers },
         );
 
-        if (testId) {
-          clearPendingStandardTestCharge(testId);
-        }
-
         window.postMessage({ type: "coins:updated" }, window.location.origin);
 
         const completionState = registerTestCompletion(
@@ -211,6 +201,11 @@ export const TestQestionsPage = () => {
         });
       } catch (error) {
         console.error("Test submit error:", error);
+
+        if (getHttpStatus(error) === 409) {
+          window.postMessage({ type: "coins:updated" }, window.location.origin);
+          navigate(`/tests/${id}/intro`, { replace: true });
+        }
       } finally {
         setSubmitting(false);
       }

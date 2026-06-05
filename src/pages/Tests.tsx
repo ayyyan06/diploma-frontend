@@ -9,7 +9,6 @@ import {
   normalizeAltynAdamLanguage,
 } from "../data/altynAdamCulturalDialogues";
 import { getAdaptiveFigureUiCopy } from "../content/adaptiveFigureUiCopy";
-import { applyPendingStandardTestCharges } from "../utils/standardTestPendingCharges";
 import type {
   AltynAdamCulturalDialogueDefinition,
   StandardTestType,
@@ -59,7 +58,7 @@ export const Tests = () => {
         const coinsData = await coinsRes.json();
 
         setTests((testsData.tests as TestSummary[]) || []);
-        setCoins(applyPendingStandardTestCharges(coinsData.coins ?? null));
+        setCoins(coinsData.coins ?? null);
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : t("tests.errorPrefix"));
       } finally {

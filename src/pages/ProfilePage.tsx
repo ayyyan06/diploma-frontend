@@ -16,7 +16,6 @@ import {
   normalizeCompletedTestKey,
   syncCompletedUniqueTests,
 } from "../utils/altynAdamProgress";
-import { applyPendingStandardTestCharges } from "../utils/standardTestPendingCharges";
 import type { CompletedTestKey } from "../types/altynAdam";
 
 interface Me {
@@ -374,11 +373,7 @@ export const ProfilePage = () => {
           throw meResult.reason;
         }
 
-        const nextMe = meResult.value as Me;
-        setMe({
-          ...nextMe,
-          coins: applyPendingStandardTestCharges(nextMe.coins),
-        });
+        setMe(meResult.value as Me);
 
         if (submissionsResult.status === "fulfilled") {
           setSubmissions(submissionsResult.value.submissions ?? []);
@@ -428,7 +423,7 @@ export const ProfilePage = () => {
       try {
         const response = await fetchWithToken("/api/v1/me");
         const data = (await response.json()) as Me;
-        const nextCoins = applyPendingStandardTestCharges(data.coins);
+        const nextCoins = data.coins;
 
         setMe((prev) =>
           prev
@@ -455,10 +450,7 @@ export const ProfilePage = () => {
             prev
               ? {
                   ...prev,
-                  coins:
-                    event.data.pendingApplied === true
-                      ? nextCoins
-                      : applyPendingStandardTestCharges(nextCoins),
+                  coins: nextCoins,
                 }
               : prev,
           );

@@ -5,7 +5,6 @@ import { fetchWithToken } from "../api/apiutils";
 import { AltynAdamDialog } from "./AltynAdamDialog";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { registerDailyVisit } from "../utils/altynAdamProgress";
-import { applyPendingStandardTestCharges } from "../utils/standardTestPendingCharges";
 
 interface HeaderLocationState {
   showAltynAdamWelcome?: boolean;
@@ -34,7 +33,7 @@ export function Header() {
       try {
         const response = await fetchWithToken("/api/v1/coins");
         const data = await response.json();
-        setCoins(applyPendingStandardTestCharges(data.coins ?? null));
+        setCoins(data.coins ?? null);
       } catch {
         // Keep header stable even if coin balance is unavailable.
       }
@@ -57,11 +56,7 @@ export function Header() {
         const nextCoins = event.data.coins;
 
         if (typeof nextCoins === "number") {
-          setCoins(
-            event.data.pendingApplied === true
-              ? nextCoins
-              : applyPendingStandardTestCharges(nextCoins),
-          );
+          setCoins(nextCoins);
         } else {
           void loadCoins();
         }
