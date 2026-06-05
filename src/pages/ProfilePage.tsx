@@ -374,7 +374,11 @@ export const ProfilePage = () => {
           throw meResult.reason;
         }
 
-        setMe(meResult.value as Me);
+        const nextMe = meResult.value as Me;
+        setMe({
+          ...nextMe,
+          coins: applyPendingStandardTestCharges(nextMe.coins),
+        });
 
         if (submissionsResult.status === "fulfilled") {
           setSubmissions(submissionsResult.value.submissions ?? []);
@@ -420,11 +424,46 @@ export const ProfilePage = () => {
   }, []);
 
   useEffect(() => {
+    const loadMeCoins = async () => {
+      try {
+        const response = await fetchWithToken("/api/v1/me");
+        const data = (await response.json()) as Me;
+        const nextCoins = applyPendingStandardTestCharges(data.coins);
+
+        setMe((prev) =>
+          prev
+            ? {
+                ...prev,
+                coins: nextCoins,
+              }
+            : {
+                ...data,
+                coins: nextCoins,
+              },
+        );
+      } catch {
+        // Keep the current profile state if the balance refresh fails.
+      }
+    };
+
     const handler = (event: MessageEvent) => {
       if (event.data?.type === "coins:updated") {
-        if (typeof event.data.coins === "number") {
-          const coinsWithPending = applyPendingStandardTestCharges(event.data.coins);
-          setMe((prev) => prev ? { ...prev, coins: coinsWithPending } : null);
+        const nextCoins = event.data.coins;
+
+        if (typeof nextCoins === "number") {
+          setMe((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  coins:
+                    event.data.pendingApplied === true
+                      ? nextCoins
+                      : applyPendingStandardTestCharges(nextCoins),
+                }
+              : prev,
+          );
+        } else {
+          void loadMeCoins();
         }
       }
     };

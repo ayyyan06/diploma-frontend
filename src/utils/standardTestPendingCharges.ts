@@ -100,6 +100,11 @@ export function getTotalPendingStandardTestCharges(): number {
   );
 }
 
+export function applyPendingStandardTestCharges(coins: number): number;
+export function applyPendingStandardTestCharges(coins: null): null;
+export function applyPendingStandardTestCharges(
+  coins: number | null,
+): number | null;
 export function applyPendingStandardTestCharges(
   coins: number | null,
 ): number | null {

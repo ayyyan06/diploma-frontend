@@ -92,6 +92,19 @@ export const TestQestionsPage = () => {
             : null;
 
         if (currentSession?.status === "in_progress") {
+          if (typeof currentSession.coins_remaining === "number") {
+            window.postMessage(
+              {
+                type: "coins:updated",
+                coins: currentSession.coins_remaining,
+                pendingApplied: true,
+              },
+              window.location.origin,
+            );
+          } else {
+            window.postMessage({ type: "coins:updated" }, window.location.origin);
+          }
+
           return;
         }
 

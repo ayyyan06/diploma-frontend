@@ -71,12 +71,10 @@ export const TestIntroPage = () => {
 
   const [test, setTest] = useState<TestDetail | null>(null);
   const [coins, setCoins] = useState<number | null>(null);
-  const [activeSession, setActiveSession] = useState<StandardTestSession | null>(
-    null,
-  );
   const [hasPendingCharge, setHasPendingCharge] = useState(false);
   const [sessionFlowUnavailable, setSessionFlowUnavailable] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [starting, setStarting] = useState(false);
   const testId = id ?? "";
 
   useEffect(() => {
@@ -115,22 +113,38 @@ export const TestIntroPage = () => {
 
         if (sessionResult.status === "fulfilled") {
           const nextSession = sessionResult.value.session ?? null;
-          const isCurrentTestSession =
-            nextSession !== null && String(nextSession.test_id) === testId;
+          const currentSession =
+            nextSession !== null &&
+            String(nextSession.test_id) === testId &&
+            nextSession.status === "in_progress"
+              ? nextSession
+              : null;
 
-          if (isCurrentTestSession) {
+          if (currentSession) {
             setHasPendingCharge(existingPending > 0);
             setSessionFlowUnavailable(false);
-            setActiveSession(nextSession);
-            setCoins(
-              applyPendingStandardTestCharges(
-                nextSession.coins_remaining ?? coinsJson.coins ?? null,
-              ),
-            );
+            const sessionCoins = currentSession.coins_remaining ?? coinsJson.coins ?? null;
+            setCoins(sessionCoins);
+
+            if (typeof sessionCoins === "number") {
+              window.postMessage(
+                {
+                  type: "coins:updated",
+                  coins: sessionCoins,
+                  pendingApplied: true,
+                },
+                window.location.origin,
+              );
+            } else {
+              window.postMessage({ type: "coins:updated" }, window.location.origin);
+            }
+
+            if (existingPending > 0) {
+              clearPendingStandardTestCharge(testId);
+              setHasPendingCharge(false);
+            }
             return;
           }
-
-          setActiveSession(null);
 
           if (existingPending > 0) {
             setHasPendingCharge(true);
@@ -150,7 +164,6 @@ export const TestIntroPage = () => {
           sessionResult.reason,
         );
         setSessionFlowUnavailable(true);
-        setActiveSession(null);
         setHasPendingCharge(existingPending > 0);
         setCoins(applyPendingStandardTestCharges(coinsJson.coins ?? null));
       } catch (error) {
@@ -166,7 +179,6 @@ export const TestIntroPage = () => {
   }, [id, testId]);
 
   const canAfford =
-    activeSession !== null ||
     hasPendingCharge ||
     coins === null ||
     coins >= TEST_COST;
@@ -182,7 +194,7 @@ export const TestIntroPage = () => {
 
     if (typeof nextCoins === "number") {
       window.postMessage(
-        { type: "coins:updated", coins: nextCoins },
+        { type: "coins:updated", coins: nextCoins, pendingApplied: true },
         window.location.origin,
       );
       return;
@@ -192,7 +204,7 @@ export const TestIntroPage = () => {
   };
 
   const handleStart = async () => {
-    if (!canAfford) return;
+    if (starting || !canAfford) return;
 
     const existingPending = testId ? getPendingStandardTestCharge(testId) : 0;
 
@@ -221,6 +233,8 @@ export const TestIntroPage = () => {
           : Math.max(initialCoins - TEST_COST, 0)
         : null;
 
+    setStarting(true);
+
     if (optimisticCoins !== null) {
       syncCoins(optimisticCoins);
     }
@@ -230,17 +244,18 @@ export const TestIntroPage = () => {
         method: "POST",
       });
       const nextSession = (await response.json()) as StandardTestSession;
-      setHasPendingCharge(getPendingStandardTestCharge(testId) > 0);
+      if (testId) {
+        clearPendingStandardTestCharge(testId);
+      }
+      setHasPendingCharge(false);
       setSessionFlowUnavailable(false);
-      setActiveSession(nextSession);
 
       if (typeof nextSession.coins_remaining === "number") {
-        syncCoins(applyPendingStandardTestCharges(nextSession.coins_remaining));
+        syncCoins(nextSession.coins_remaining);
       } else {
         syncCoins(optimisticCoins);
       }
-      
-      clearPendingStandardTestCharge(testId);
+
       navigate(`/tests/${id}`);
     } catch (error) {
       console.error("Test start error:", error);
@@ -286,6 +301,8 @@ export const TestIntroPage = () => {
       }
 
       setHasPendingCharge(existingPending > 0);
+    } finally {
+      setStarting(false);
     }
   };
 
@@ -408,7 +425,7 @@ export const TestIntroPage = () => {
             onClick={() => {
               void handleStart();
             }}
-            disabled={!canAfford}
+            disabled={starting || !canAfford}
             title={
               !canAfford
                 ? t("testIntro.needTooltip", { cost: TEST_COST })

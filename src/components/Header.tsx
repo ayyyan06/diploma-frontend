@@ -54,8 +54,14 @@ export function Header() {
 
     const handler = (event: MessageEvent) => {
       if (event.data?.type === "coins:updated") {
-        if (typeof event.data.coins === "number") {
-          setCoins(applyPendingStandardTestCharges(event.data.coins));
+        const nextCoins = event.data.coins;
+
+        if (typeof nextCoins === "number") {
+          setCoins(
+            event.data.pendingApplied === true
+              ? nextCoins
+              : applyPendingStandardTestCharges(nextCoins),
+          );
         } else {
           void loadCoins();
         }
