@@ -7,6 +7,7 @@ import {
   localizeTestType,
 } from "../../content/testContentTranslations";
 import { registerTestCompletion } from "../../utils/altynAdamProgress";
+import { clearPendingStandardTestCharge } from "../../utils/standardTestPendingCharges";
 
 interface TestOption {
   id: string;
@@ -44,10 +45,12 @@ export const TestQestionsPage = () => {
   const [test, setTest] = useState<TestDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [sessionFlowUnavailable, setSessionFlowUnavailable] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>(
     {},
   );
+  const testId = id ?? "";
 
   useEffect(() => {
     const loadTest = async () => {
@@ -71,11 +74,16 @@ export const TestQestionsPage = () => {
         setTest(testResult.value);
 
         if (sessionResult.status === "rejected") {
+          setSessionFlowUnavailable(true);
           console.warn(
             "Standard test session endpoint unavailable; allowing legacy flow.",
             sessionResult.reason,
           );
           return;
+        }
+
+        if (testId) {
+          clearPendingStandardTestCharge(testId);
         }
 
         const sessionJson = sessionResult.value;
@@ -94,7 +102,7 @@ export const TestQestionsPage = () => {
     if (id) {
       void loadTest();
     }
-  }, [id]);
+  }, [id, navigate, testId]);
 
   const localizedTest = useMemo(
     () => (test ? localizeTestDetail(test, i18n.language) : null),
@@ -154,6 +162,14 @@ export const TestQestionsPage = () => {
           { method: "POST" },
           { answers: formattedAnswers },
         );
+
+        if (testId) {
+          clearPendingStandardTestCharge(testId);
+        }
+
+        if (sessionFlowUnavailable) {
+          window.postMessage({ type: "coins:updated" }, window.location.origin);
+        }
 
         const completionState = registerTestCompletion(
           (test?.type as

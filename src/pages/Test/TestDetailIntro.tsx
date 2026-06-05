@@ -3,6 +3,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { fetchWithToken } from "../../api/apiutils";
 import { localizeTestDetail } from "../../content/testContentTranslations";
+import {
+  applyPendingStandardTestCharges,
+  clearPendingStandardTestCharge,
+  getPendingStandardTestCharge,
+  setPendingStandardTestCharge,
+} from "../../utils/standardTestPendingCharges";
 
 const TEST_COST = 100;
 
@@ -70,6 +76,7 @@ export const TestIntroPage = () => {
   );
   const [sessionFlowUnavailable, setSessionFlowUnavailable] = useState(false);
   const [loading, setLoading] = useState(true);
+  const testId = id ?? "";
 
   useEffect(() => {
     const loadData = async () => {
@@ -103,6 +110,10 @@ export const TestIntroPage = () => {
         setTest(testJson);
 
         if (sessionResult.status === "fulfilled") {
+          if (testId) {
+            clearPendingStandardTestCharge(testId);
+          }
+
           const nextSession = sessionResult.value.session ?? null;
           setSessionFlowUnavailable(false);
           setActiveSession(nextSession);
@@ -116,7 +127,7 @@ export const TestIntroPage = () => {
         );
         setSessionFlowUnavailable(true);
         setActiveSession(null);
-        setCoins(coinsJson.coins ?? null);
+        setCoins(applyPendingStandardTestCharges(coinsJson.coins ?? null));
       } catch (error) {
         console.error("Test intro loading error:", error);
       } finally {
@@ -127,7 +138,7 @@ export const TestIntroPage = () => {
     if (id) {
       void loadData();
     }
-  }, [id]);
+  }, [id, testId]);
 
   const canAfford =
     activeSession !== null || coins === null || coins >= TEST_COST;
@@ -138,12 +149,52 @@ export const TestIntroPage = () => {
   const isEnemyTest = localizedTest?.type === "enemy";
   const introImageSrc = localizedTest?.image_src;
 
+  const syncCoins = (nextCoins: number | null) => {
+    setCoins(nextCoins);
+
+    if (typeof nextCoins === "number") {
+      window.postMessage(
+        { type: "coins:updated", coins: nextCoins },
+        window.location.origin,
+      );
+      return;
+    }
+
+    window.postMessage({ type: "coins:updated" }, window.location.origin);
+  };
+
   const handleStart = async () => {
     if (!canAfford) return;
 
     if (activeSession || sessionFlowUnavailable) {
+      if (!activeSession && sessionFlowUnavailable && testId) {
+        const existingPending = getPendingStandardTestCharge(testId);
+
+        if (existingPending === 0) {
+          setPendingStandardTestCharge(testId, TEST_COST);
+        }
+
+        if (typeof coins === "number") {
+          const nextCoins =
+            existingPending > 0 ? coins : Math.max(coins - TEST_COST, 0);
+          syncCoins(nextCoins);
+        } else {
+          syncCoins(null);
+        }
+      }
+
       navigate(`/tests/${id}`);
       return;
+    }
+
+    const initialCoins = coins;
+    const optimisticCoins =
+      typeof initialCoins === "number"
+        ? Math.max(initialCoins - TEST_COST, 0)
+        : null;
+
+    if (optimisticCoins !== null) {
+      syncCoins(optimisticCoins);
     }
 
     try {
@@ -151,21 +202,41 @@ export const TestIntroPage = () => {
         method: "POST",
       });
       const nextSession = (await response.json()) as StandardTestSession;
+      if (testId) {
+        clearPendingStandardTestCharge(testId);
+      }
       setActiveSession(nextSession);
 
       if (typeof nextSession.coins_remaining === "number") {
-        setCoins(nextSession.coins_remaining);
+        syncCoins(nextSession.coins_remaining);
+      } else {
+        syncCoins(optimisticCoins);
       }
-
-      window.postMessage({ type: "coins:updated" }, window.location.origin);
       navigate(`/tests/${id}`);
     } catch (error) {
       console.error("Test start error:", error);
 
       const status = getHttpStatus(error);
-      if (status === 404 || status === 405) {
+      if ((status === 404 || status === 405 || status === 500) && testId) {
         setSessionFlowUnavailable(true);
+        if (getPendingStandardTestCharge(testId) === 0) {
+          setPendingStandardTestCharge(testId, TEST_COST);
+        }
+
+        if (optimisticCoins !== null) {
+          syncCoins(optimisticCoins);
+        } else {
+          syncCoins(null);
+        }
+
         navigate(`/tests/${id}`);
+        return;
+      }
+
+      if (typeof initialCoins === "number") {
+        syncCoins(initialCoins);
+      } else {
+        syncCoins(null);
       }
     }
   };

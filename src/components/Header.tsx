@@ -5,6 +5,7 @@ import { fetchWithToken } from "../api/apiutils";
 import { AltynAdamDialog } from "./AltynAdamDialog";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { registerDailyVisit } from "../utils/altynAdamProgress";
+import { applyPendingStandardTestCharges } from "../utils/standardTestPendingCharges";
 
 interface HeaderLocationState {
   showAltynAdamWelcome?: boolean;
@@ -33,7 +34,7 @@ export function Header() {
       try {
         const response = await fetchWithToken("/api/v1/coins");
         const data = await response.json();
-        setCoins(data.coins);
+        setCoins(applyPendingStandardTestCharges(data.coins ?? null));
       } catch {
         // Keep header stable even if coin balance is unavailable.
       }
@@ -53,7 +54,11 @@ export function Header() {
 
     const handler = (event: MessageEvent) => {
       if (event.data?.type === "coins:updated") {
-        void loadCoins();
+        if (typeof event.data.coins === "number") {
+          setCoins(event.data.coins);
+        } else {
+          void loadCoins();
+        }
       }
 
       if (event.data?.type === "friendRequests:updated") {
