@@ -22,7 +22,15 @@ export async function login(body: LoginPayload) {
   });
 
   if (!res.ok) {
-    throw new Error("Incorrect email or password");
+    const errorText = await res.text();
+
+    if (res.status === 401) {
+      throw new Error("Incorrect email or password");
+    }
+
+    throw new Error(
+      errorText || `Login failed with status ${res.status}`,
+    );
   }
 
   const data = await res.json();

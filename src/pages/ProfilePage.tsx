@@ -349,24 +349,67 @@ export const ProfilePage = () => {
               .catch(() => null)
           : Promise.resolve<AdaptiveFigureSessionSummary | null>(null);
 
-        const [meRes, subRes, frRes, recRes] = await Promise.all([
-          fetchWithToken("/api/v1/me"),
-          fetchWithToken("/api/v1/submissions"),
-          fetchWithToken("/api/v1/community/friends"),
-          fetchWithToken("/api/v1/me/recommendations"),
+        const [
+          meResult,
+          submissionsResult,
+          friendsResult,
+          recommendationsResult,
+          adaptiveSessionData,
+        ] = await Promise.allSettled([
+          fetchWithToken("/api/v1/me").then((response) => response.json()),
+          fetchWithToken("/api/v1/submissions").then((response) =>
+            response.json(),
+          ),
+          fetchWithToken("/api/v1/community/friends").then((response) =>
+            response.json(),
+          ),
+          fetchWithToken("/api/v1/me/recommendations").then((response) =>
+            response.json(),
+          ),
+          adaptiveSessionPromise,
         ]);
 
-        const meData = await meRes.json();
-        const submissionsData = await subRes.json();
-        const friendsData = await frRes.json();
-        const recommendationsData = await recRes.json();
-        const adaptiveSessionData = await adaptiveSessionPromise;
+        if (meResult.status === "rejected") {
+          throw meResult.reason;
+        }
 
-        setMe(meData);
-        setSubmissions(submissionsData.submissions ?? []);
-        setFriends(friendsData.friends ?? []);
-        setRecommendations(recommendationsData.recommendations ?? []);
-        setHasCompletedAdaptiveFigure(adaptiveSessionData?.status === "completed");
+        setMe(meResult.value as Me);
+
+        if (submissionsResult.status === "fulfilled") {
+          setSubmissions(submissionsResult.value.submissions ?? []);
+        } else {
+          console.error("Profile submissions load failed:", submissionsResult.reason);
+          setSubmissions([]);
+        }
+
+        if (friendsResult.status === "fulfilled") {
+          setFriends(friendsResult.value.friends ?? []);
+        } else {
+          console.error("Profile friends load failed:", friendsResult.reason);
+          setFriends([]);
+        }
+
+        if (recommendationsResult.status === "fulfilled") {
+          setRecommendations(recommendationsResult.value.recommendations ?? []);
+        } else {
+          console.error(
+            "Profile recommendations load failed:",
+            recommendationsResult.reason,
+          );
+          setRecommendations([]);
+        }
+
+        if (adaptiveSessionData.status === "fulfilled") {
+          setHasCompletedAdaptiveFigure(
+            adaptiveSessionData.value?.status === "completed",
+          );
+        } else {
+          console.error(
+            "Adaptive figure session load failed:",
+            adaptiveSessionData.reason,
+          );
+          setHasCompletedAdaptiveFigure(false);
+        }
       } catch (error) {
         console.error(error);
       } finally {
