@@ -16,6 +16,7 @@ import {
   normalizeCompletedTestKey,
   syncCompletedUniqueTests,
 } from "../utils/altynAdamProgress";
+import { applyPendingStandardTestCharges } from "../utils/standardTestPendingCharges";
 import type { CompletedTestKey } from "../types/altynAdam";
 
 interface Me {
@@ -416,6 +417,20 @@ export const ProfilePage = () => {
         setLoading(false);
       }
     })();
+  }, []);
+
+  useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      if (event.data?.type === "coins:updated") {
+        if (typeof event.data.coins === "number") {
+          const coinsWithPending = applyPendingStandardTestCharges(event.data.coins);
+          setMe((prev) => prev ? { ...prev, coins: coinsWithPending } : null);
+        }
+      }
+    };
+
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
   }, []);
 
   useEffect(() => {

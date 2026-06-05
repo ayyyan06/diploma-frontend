@@ -239,6 +239,8 @@ export const TestIntroPage = () => {
       } else {
         syncCoins(optimisticCoins);
       }
+      
+      clearPendingStandardTestCharge(testId);
       navigate(`/tests/${id}`);
     } catch (error) {
       console.error("Test start error:", error);
