@@ -26,7 +26,7 @@ interface DialogueSeed {
 }
 
 const CHECK_LEAD_IN = {
-  en: "Let us see which detail stayed with you.",
+  en: "Let us see which cultural detail stayed with you.",
   ru: "Давай проверим, какая деталь у тебя осталась в памяти.",
   kk: "Енді қай деталь есіңде қалғанын тексеріп көрейік.",
 } satisfies LocalizedText;
@@ -488,7 +488,7 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
     testType: "personality",
     resultKey: "aldarKose",
     introText: text(
-      "Aldar Kose is usually reduced to 'the trickster'. But in Kazakh stories trickery often exposes vanity, greed, or lazy power.",
+      "Aldar Kose is often flattened into 'the trickster'. In Kazakh oral tradition, though, his cunning exposes greedy bai, vain officials, and people who misuse status.",
       "Алдара Косе часто сводят к 'хитрецу'. Но в казахских историях хитрость нередко работает как способ вывести наружу чужую жадность, тщеславие или ленивую власть.",
       "Алдар Көсені көбіне 'айлакер' деп қана түсіндіреді. Бірақ қазақ әңгімелерінде айла көп жағдайда өзгенің ашкөздігін, менмендігін не жалқау билігін әшкерелейді.",
     ),
@@ -502,12 +502,12 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
           "Мұндай трикстер не үшін керек?",
         ),
         firstText: text(
-          "The trickster moves where direct force cannot. He survives by reading motives, shifting frames, and making hidden absurdity visible.",
+          "Aldar Kose matters where power cannot be challenged head-on. He reads motives, flips the social scene, and lets the greedy embarrass themselves in front of the community.",
           "Трикстер действует там, где прямая сила бессильна. Он выживает за счёт чтения мотивов, смены рамки и умения сделать скрытую нелепость видимой.",
           "Трикстер тура күш жетпейтін жерде жұмыс істейді. Ол ниетті сезіп, жағдайдың қалыбын өзгертіп, жасырын қисынсыздықты көрінетін етеді.",
         ),
         secondText: text(
-          "That is why Aldar Kose is not only 'clever'. His wit is social: it protects the weak by making arrogance stumble over itself.",
+          "So his wit is not random cleverness. In Kazakh tales it works like a folk correction: laughter protects the weaker side by stripping false importance from the stronger one.",
           "Поэтому Алдар Косе — это не просто 'умный'. Его остроумие социально: оно защищает слабого, заставляя самоуверенность споткнуться о саму себя.",
           "Сондықтан Алдар Көсе жай ғана 'ақылды' емес. Оның тапқырлығы әлеуметтік мәнге ие: ол әлсізді күшпен емес, менмендіктің өзіне сүріндіру арқылы қорғайды.",
         ),
@@ -559,12 +559,12 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
           "Әңгімелердің терең логикасын айт",
         ),
         firstText: text(
-          "Stories about Aldar Kose often reverse hierarchy without open war. A rich fool, a greedy host, or a proud official loses face not because someone crushes him, but because his own excess becomes obvious.",
+          "In many stories, Aldar Kose defeats a rich bai or boastful host without open battle. He wins by making excess visible, so the audience sees how pride and greed collapse under their own weight.",
           "Истории об Алдаре Косе часто переворачивают иерархию без открытой войны. Богатый глупец, жадный хозяин или гордый чиновник теряет лицо не потому, что его ломают силой, а потому что его собственный избыток становится очевидным.",
           "Алдар Көсе туралы әңгімелер иерархияны ашық соғыссыз-ақ төңкере алады. Бай ақымақ, сараң қожа не тәкаппар би күшпен емес, өз шектен шығуының ашылып қалуы арқылы ұтылады.",
         ),
         secondText: text(
-          "That reversal matters culturally: laughter becomes a tool for moral balance. It reminds listeners that rank without measure is unstable.",
+          "That is why the figure teaches more than survival. He represents a specifically oral, communal justice: when rank forgets measure, wit and public laughter restore balance.",
           "Этот переворот важен культурно: смех становится инструментом нравственного равновесия. Он напоминает, что статус без меры неустойчив.",
           "Бұл төңкерістің мәдени мәні бар: күлкі моральдық тепе-теңдіктің құралына айналады. Ол өлшемсіз мәртебенің тұрақсыз екенін еске салады.",
         ),
@@ -1110,7 +1110,7 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
     testType: "weapon",
     resultKey: "bow",
     introText: text(
-      "The bow is not passive just because it keeps distance. In steppe warfare distance could be the sharpest form of control.",
+      "The bow was central to steppe warfare not because it stayed far away, but because mounted archers turned distance into control.",
       "Лук не становится пассивным только потому, что держит дистанцию. В степной войне дистанция могла быть самой острой формой контроля.",
       "Садақ қашықтық ұстайды деп пассивті болмайды. Дала соғысында дәл сол қашықтық бақылаудың ең өткір түрі бола алатын.",
     ),
@@ -1124,12 +1124,12 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
           "Садақ неге қақтығыс стилі болып тұр?",
         ),
         firstText: text(
-          "The bow favors timing over collision. It acts after reading distance, angle, and the cost of stepping in too early.",
+          "A bow fights through timing, angle, and range. In a nomadic context, the archer reads movement first and releases only when position, rhythm, and exposure align.",
           "Лук предпочитает момент столкновению. Он действует после того, как считывает дистанцию, угол и цену слишком раннего входа.",
           "Садақ соқтығысудан гөрі мезетті таңдайды. Ол қашықтықты, бұрышты және ерте кірісудің құнын байқап барып әрекет етеді.",
         ),
         secondText: text(
-          "That is why bow-like people often preserve leverage by waiting. Their restraint is strategic, not hesitant.",
+          "That is why the bow symbolizes disciplined patience, not passivity. The strength lies in holding the right distance until the moment becomes yours.",
           "Поэтому 'луковые' люди часто сохраняют преимущество именно ожиданием. Их сдержанность стратегическая, а не нерешительная.",
           "Сондықтан 'садақ' адамдар артықшылықты көбіне күту арқылы сақтайды. Олардың ұстамдылығы шешімсіздік емес, стратегия.",
         ),
@@ -1169,12 +1169,12 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
           "Қарудың терең логикасын айт",
         ),
         firstText: text(
-          "The composite bow mattered on the steppe because it worked with motion, not against it. Power came from distance, rhythm, and the ability to strike without getting trapped in one line.",
+          "The composite bow fit steppe life because it worked from horseback and in motion. Its logic was mobility: strike, wheel away, return from another angle, and never let the field trap you in one line.",
           "Составной лук был важен в степи потому, что работал вместе с движением, а не против него. Сила рождалась из дистанции, ритма и способности действовать, не застревая в одной линии.",
           "Құрама садақ далада маңызды болды, өйткені ол қозғалысқа қарсы емес, сонымен бірге жұмыс істеді. Күш қашықтықтан, ырғақтан және бір сызыққа байланып қалмай әрекет етуден туған.",
         ),
         secondText: text(
-          "So as a conflict symbol, the bow represents intelligence of position. It asks not 'can I push now?', but 'from where will my action matter most?'",
+          "Culturally, that makes the bow an image of positional intelligence. It teaches that in Kazakh martial tradition, mastery is not only force, but knowing where and when force should enter.",
           "Поэтому как символ конфликта лук означает интеллект позиции. Он спрашивает не 'могу ли я сейчас продавить?', а 'из какой точки моё действие будет самым значимым?'",
           "Сондықтан қақтығыс символы ретінде садақ позицияның ақылын білдіреді. Ол 'қазір итере аламын ба?' деп емес, 'қай жерден әрекетім ең әсерлі болады?' деп сұрайды.",
         ),
@@ -1224,7 +1224,7 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
     testType: "weapon",
     resultKey: "spear",
     introText: text(
-      "The spear is direct, but directness is not the same thing as recklessness. A spear makes a line visible.",
+      "The nayza is direct, but in Kazakh martial symbolism directness is tied to honor, declared intent, and a visible line.",
       "Копьё прямолинейно, но прямота не равна безрассудству. Копьё делает линию видимой.",
       "Найза тура, бірақ туралық бейберекеттік емес. Найза шекараны көрінетін етеді.",
     ),
@@ -1238,12 +1238,12 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
           "Найза стилінің күші неде?",
         ),
         firstText: text(
-          "The spear clarifies where you stand. Instead of letting tension thicken in silence, it names the line and forces reality into the open.",
+          "A spear makes a boundary plain. Instead of letting tension rot in hints and silence, it sets the line in the open so everyone can see where you stand.",
           "Копьё проясняет, где ты стоишь. Вместо того чтобы давать напряжению густеть в молчании, оно называет линию и выводит реальность наружу.",
           "Найза сенің қай жерде тұрғаныңды айқындайды. Үнсіздік ішінде шиеленісті қоюландыра бермей, ол шекараны атап, шындықты ашыққа шығарады.",
         ),
         secondText: text(
-          "That is why this style often feels honest even when it is uncomfortable. The discomfort comes from contact, but the value comes from clarity.",
+          "That openness is why spear-like conflict can feel harsh yet clean. The discomfort comes from contact, but the value comes from refusing to hide the issue behind maneuver.",
           "Поэтому этот стиль часто ощущается честным даже тогда, когда он неудобен. Дискомфорт приносит столкновение, но ценность приносит ясность.",
           "Сондықтан бұл стиль жайсыз болса да адал сезіледі. Қолайсыздық қақтығыстан туады, бірақ құндылығы айқындықтан келеді.",
         ),
@@ -1283,12 +1283,12 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
           "Мұндағы терең символдық қабат қандай?",
         ),
         firstText: text(
-          "A spear reaches outward in a single visible direction. Symbolically that makes it a weapon of declared intent rather than hidden maneuver.",
+          "The nayza points in one clear direction, and in steppe memory that matters. It resembles the public line of challenge, banner, and vow more than a hidden strike from cover.",
           "Копьё тянется наружу в одном видимом направлении. Символически это делает его оружием заявленного намерения, а не скрытого манёвра.",
           "Найза көзге көрінетін бір бағытпен алға шығады. Сол себепті ол символдық тұрғыдан жасырын айланың емес, жарияланған ниеттің қаруы болып көрінеді.",
         ),
         secondText: text(
-          "That matters in culture too: some people preserve dignity by not disguising the point. Even before impact, the line itself says where the boundary is.",
+          "So the spear becomes a cultural sign of declared intent. It teaches that dignity can come from naming the boundary openly before the clash begins.",
           "Это важно и культурно: некоторые люди сохраняют достоинство именно тем, что не маскируют суть. Ещё до удара сама линия уже говорит, где проходит граница.",
           "Мұның мәдени мәні де бар: кей адамдар қадірін дәл мағынаны жасырмау арқылы сақтайды. Соққыдан бұрын-ақ сызықтың өзі шекараның қайда екенін көрсетеді.",
         ),
@@ -1338,7 +1338,7 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
     testType: "weapon",
     resultKey: "saber",
     introText: text(
-      "A saber is curved for a reason. Its image suggests movement that adapts while staying effective.",
+      "The qylysh is curved for a reason. In steppe cavalry culture, that curve belongs to movement, redirection, and effective action from the saddle.",
       "Сабля изогнута не случайно. Её образ намекает на движение, которое умеет подстраиваться и при этом не теряет силу.",
       "Қылыштың иіні бекер емес. Оның бейнесі икемделе отырып та әсерін жоғалтпайтын қозғалысты меңзейді.",
     ),
@@ -1352,12 +1352,12 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
           "Қылыш неге келісіммен байланысады?",
         ),
         firstText: text(
-          "The saber does not insist on one rigid angle. It cuts by moving with the curve of the moment, which makes it a strong symbol for flexible response.",
+          "A saber does not demand one rigid line. It works with motion, turning the rider's path and angle into force, which is why it fits flexible response better than blunt collision.",
           "Сабля не настаивает на одном жёстком угле. Она работает через движение по изгибу момента, поэтому становится сильным символом гибкого ответа.",
           "Қылыш бір ғана қатаң бұрышқа байланып қалмайды. Ол сәттің иінімен бірге қозғалып әсер етеді, сондықтан икемді жауаптың күшті белгісіне айналады.",
         ),
         secondText: text(
-          "In conflict terms, that means preserving motion. Instead of getting trapped in pride, you look for a path both sides can still move through.",
+          "In conflict terms, that means keeping the exchange alive. Instead of hardening into pride, you look for the angle where movement, dignity, and effectiveness can still coexist.",
           "В языке конфликта это означает сохранять движение. Вместо того чтобы застрять в гордости, ты ищешь путь, по которому обе стороны ещё могут идти дальше.",
           "Қақтығыс тілінде бұл қозғалысты сақтауды білдіреді. Менмендікке байланып қалмай, екі жақ та әлі жүре алатын жол ізделеді.",
         ),
@@ -1397,12 +1397,12 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
           "Тереңірек символын көрсет",
         ),
         firstText: text(
-          "A curved blade suggests redirection rather than blunt impact. Symbolically it teaches that strength can travel through angle, not only through force.",
+          "The curved qylysh teaches that force need not arrive head-on. In mounted combat its shape favors passing cuts and redirection, so power travels through angle as much as through impact.",
           "Изогнутый клинок намекает на перенаправление, а не только на лобовой удар. Символически это учит, что сила может идти через угол, а не только через нажим.",
           "Иілген жүз тек тік соққыны емес, бағытты бұруды да меңзейді. Символдық тұрғыдан ол күштің тек қысыммен емес, бұрыш арқылы да жұмыс істейтінін көрсетеді.",
         ),
         secondText: text(
-          "That is why the saber becomes a good image for mediation. It does not deny tension; it changes how tension travels through the exchange.",
+          "That is why the saber becomes a strong image for mediation and tactical intelligence. It does not erase tension; it guides tension into a form that does less blind damage.",
           "Поэтому сабля становится удачным образом для посредничества. Она не отрицает напряжение, а меняет то, как напряжение проходит через обмен.",
           "Сондықтан қылыш бітім іздеудің жақсы бейнесіне айналады. Ол шиеленісті жоққа шығармайды, тек оның әңгіме ішіндегі жүру жолын өзгертеді.",
         ),
@@ -1452,7 +1452,7 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
     testType: "weapon",
     resultKey: "shield",
     introText: text(
-      "A shield can look defensive from the outside. But defense is often what gives a group time to stay human under pressure.",
+      "A qalqan can look purely defensive, yet in camp, raid, or battle it protects the people, animals, and space behind it.",
       "Щит может выглядеть оборонительным со стороны. Но именно защита часто даёт группе время остаться людьми под давлением.",
       "Қалқан сырт көзге қорғаныс қана сияқты көрінуі мүмкін. Бірақ қысым кезінде топтың адам қалпын сақтауына көбіне дәл сол қорғаныс уақыт береді.",
     ),
@@ -1466,12 +1466,12 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
           "Қорғау неге белсенді стиль?",
         ),
         firstText: text(
-          "A shield absorbs enough force for the situation not to shatter. It does not remove conflict, but it keeps the blow from becoming total.",
+          "A shield takes enough force that the line does not collapse. It cannot erase danger, but it prevents one blow from breaking the whole group.",
           "Щит принимает на себя достаточно удара, чтобы ситуация не рассыпалась. Он не убирает конфликт, но не даёт удару стать тотальным.",
           "Қалқан жағдай быт-шыт болып кетпеуі үшін соққының бір бөлігін өзіне алады. Ол қақтығысты жоймайды, бірақ соққының толық күйретуіне жол бермейді.",
         ),
         secondText: text(
-          "That is why shield-like people are often the ones who preserve trust in hard moments. They hold the field long enough for repair to stay possible.",
+          "That is why shield-like figures often preserve trust in hard moments. Their strength is not spectacle; it is holding the field long enough for kin, camp, or relationship to recover.",
           "Поэтому 'щитовые' люди часто сохраняют доверие в трудные моменты. Они удерживают поле достаточно долго, чтобы восстановление вообще оставалось возможным.",
           "Сондықтан 'қалқан' адамдар қиын сәтте сенімді сақтап қалатындар болады. Олар қалпына келу мүмкін болуы үшін жағдайды біраз уақыт ұстап тұрады.",
         ),
@@ -1511,12 +1511,12 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
           "Терең символикасын айт",
         ),
         firstText: text(
-          "A shield is relational: it turns toward impact so something behind it can remain standing. Its meaning is collective even when one person carries it.",
+          "A shield is relational by design: it turns toward impact so something behind it can remain standing. In steppe life that could mean a comrade, a family space, or the fragile order of the camp.",
           "Щит по природе своей реляционный: он поворачивается к удару так, чтобы что-то за ним могло устоять. Его смысл коллективен, даже если несёт его один человек.",
           "Қалқанның табиғаты байланыстық: ол соққыға өзі бұрылып, артындағы нәрсенің аман тұруына мүмкіндік береді. Бір адам ұстаса да, оның мағынасы ұжымдық.",
         ),
         secondText: text(
-          "That makes shield a strong symbol for caretaking under strain. It is not retreat from the world, but the willingness to bear pressure so others are not broken by it.",
+          "So culturally the qalqan symbolizes caretaking under strain. It teaches that protection is not withdrawal from the world, but choosing to carry pressure so others are not shattered by it.",
           "Из-за этого щит становится сильным символом заботы под давлением. Это не уход от мира, а готовность принять часть давления на себя, чтобы оно не сломало других.",
           "Сондықтан қалқан қысым кезіндегі қамқорлықтың күшті белгісі болады. Бұл әлемнен қашу емес, өзгелер сынбасын деп қысымның бір бөлігін өз мойнына алу.",
         ),
@@ -1566,7 +1566,7 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
     testType: "enemy",
     resultKey: "mystan",
     introText: text(
-      "Mystan Kempir frightens not only because she is magical, but because she twists a familiar role. The elder who should guide becomes the figure who misleads, withholds, or poisons trust.",
+      "Mystan Kempir frightens not only because she is magical, but because Kazakh folklore makes her a corrupted elder at the threshold of home and wilderness.",
       "Мыстан кемпір страшна не только магией, но и искажением знакомой роли. Та, кто по возрасту должна направлять и оберегать, превращается в фигуру, которая уводит в сторону и отравляет доверие.",
       "Мыстан кемпір тек сиқырымен емес, таныс рөлді бұрмалауымен қорқынышты. Жасы үлкен болғандықтан жол көрсетуі тиіс адам адастырып, сенімді улайтын бейнеге айналады.",
     ),
@@ -1580,12 +1580,12 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
           "Мыстан неге сонша терең мазалайды?",
         ),
         firstText: text(
-          "Her danger lies in broken trust. Mystan can wear the face of counsel, age, or care while hiding manipulation beneath it.",
+          "Her danger lies in broken trust. Mystan speaks with the face of counsel, age, and household familiarity, yet beneath that familiar role she misleads, withholds, and manipulates.",
           "Её опасность — в сломанном доверии. Мыстан может носить лицо совета, возраста и заботы, а под ним прятать манипуляцию.",
           "Оның қаупі — бұзылған сенімде. Мыстан кеңес, жас үлкендік не қамқорлық кейпіне еніп, астына айланы жасыра алады.",
         ),
         secondText: text(
-          "That is why this enemy awakens when warmth feels double-edged. A person starts hearing hidden motives inside every kind word.",
+          "That is why this enemy awakens when kindness feels unsafe. The wound is not only fear of attack, but fear that guidance itself has turned unreliable.",
           "Поэтому этот враг просыпается, когда тёплое начинает казаться двусмысленным. Человек начинает слышать скрытый мотив в каждом добром слове.",
           "Сондықтан бұл жау жылылықтың өзі екіұшты сезілгенде оянады. Адам әр жақсы сөздің ішінен жасырын себеп іздей бастайды.",
         ),
@@ -1637,12 +1637,12 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
           "Фольклорлық қабатын айт",
         ),
         firstText: text(
-          "In tales, Mystan often stands near the border of home and wilderness, tempting heroes off the safe path. She gives shape to the fear that danger may enter through the familiar.",
+          "In tales, Mystan often waits near the border of yurt-space and wild space, luring the hero off the safe path. She embodies the fear that danger can enter not as a monster from nowhere, but through something almost familiar.",
           "В сказаниях Мыстан часто стоит на границе дома и дикой стороны мира, уводя героя с безопасной дороги. Она придаёт форму страху, что опасность может прийти через что-то знакомое.",
           "Ертегілерде Мыстан көбіне үй мен түздің шекарасында тұрып, батырды қауіпсіз жолдан тайдыруға тырысады. Ол қауіптің таныс нәрсенің ішінен келуі мүмкін деген қорқынышқа бейне береді.",
         ),
         secondText: text(
-          "So culturally Mystan is not just a witch. She is the image of corrupted guidance: age without protection, nearness without safety, and knowledge without mercy.",
+          "So culturally she is more than a witch. She is the image of corrupted guidance: age without protection, knowledge without mercy, and nearness without safety.",
           "Поэтому культурно Мыстан — не просто ведьма. Это образ испорченного наставления: возраст без защиты, близость без безопасности и знание без милости.",
           "Сондықтан мәдени тұрғыдан Мыстан жай мыстан емес. Ол — қорғансыз үлкендік, қауіпсіздіксіз жақындық және мейірімсіз білім бейнесі.",
         ),
@@ -1692,7 +1692,7 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
     testType: "enemy",
     resultKey: "zheztyrnak",
     introText: text(
-      "Zheztyrnak is terrifying because beauty and harm arrive together. In folklore she appears graceful from afar, yet her metal claws reveal the violence hidden beneath charm.",
+      "Zheztyrnak terrifies because Kazakh folklore lets beauty and predation wear the same face. From afar she is graceful; up close, the iron claws appear.",
       "Жезтырнақ страшна тем, что красота и вред приходят вместе. В фольклоре она кажется изящной издалека, но её металлические когти выдают насилие, спрятанное под привлекательностью.",
       "Жезтырнақтың үрейі — сұлулық пен зиянның қатар келуінде. Фольклорда ол алыстан әсем көрінеді, бірақ темір тырнағы тартымдылықтың астындағы қатігездікті ашып береді.",
     ),
@@ -1706,12 +1706,12 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
           "Бұл жауда ең қатты не жаралайды?",
         ),
         firstText: text(
-          "This result is sensitive to harm wrapped in admiration. The deepest cut comes when sweetness, elegance, or attraction turns out to be a cover for cruelty.",
+          "This result is sensitive to harm wrapped in admiration. The deepest cut comes when refinement, sweetness, or desirability is only a polished cover for cruelty.",
           "Этот результат особенно чувствителен к вреду, завернутому в восхищение. Самый глубокий порез приходит тогда, когда мягкость, изящество или привлекательность оказываются лишь оболочкой жестокости.",
           "Бұл нәтиже сүйсінуге оралған зиянға сезімтал. Ең терең жара жұмсақтық, әсемдік не тартымдылық қатыгездіктің қабығы болып шыққанда туады.",
         ),
         secondText: text(
-          "That is why Zheztyrnak grows when polished approval no longer feels safe. A person starts wondering what is hidden behind every graceful gesture.",
+          "That is why Zheztyrnak grows wherever charm stops feeling safe. A person starts scanning every elegant gesture for the hidden claw beneath it.",
           "Поэтому Жезтырнақ усиливается, когда отполированное одобрение перестаёт ощущаться безопасным. Человек начинает гадать, что скрывается за каждым изящным жестом.",
           "Сондықтан Жезтырнақ сыртқы әсем мақұлдау қауіпсіз сезілмей қалған кезде күшейеді. Адам әр әсем қимылдың артында не жасырынғанын ойлай бастайды.",
         ),
@@ -1763,12 +1763,12 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
           "Тереңірек фольклорлық бейнесін көрсет",
         ),
         firstText: text(
-          "The iron claws matter. They tear away the false surface: what looked refined suddenly shows itself as predatory.",
+          "The iron claws are the key folklore detail. They rip away the false surface, revealing that what looked noble or alluring was predatory all along.",
           "Здесь важны именно железные когти. Они срывают ложную поверхность: то, что казалось утончённым, внезапно показывает свою хищную суть.",
           "Мұнда темір тырнақтың өзі маңызды. Ол жалған бетті жұлып тастайды: әсем көрінген нәрсе кенеттен жыртқыш табиғатын көрсетеді.",
         ),
         secondText: text(
-          "This teaches caution toward appearances detached from mercy. Not every beautiful face or elegant manner protects dignity; some only hide the cut more smoothly.",
+          "That makes Zheztyrnak a warning about appearances without mercy. In cultural terms, she teaches that beauty without ethical depth can become one more weapon.",
           "Это учит осторожности к красоте, оторванной от милосердия. Не каждое прекрасное лицо или изящная манера защищают достоинство — некоторые лишь мягче скрывают удар.",
           "Бұл мейірімнен ажыраған әсемдікке сақ болуды үйретеді. Әр сұлу жүз бен әдемі қимыл қадірді қорғамайды — кейбірі жараны тек жұмсартып жасырады.",
         ),
@@ -1818,7 +1818,7 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
     testType: "enemy",
     resultKey: "aydahar",
     introText: text(
-      "Aydahar is frightening not just because it is huge. In steppe tales it acts like a devouring force that seizes roads, water, or peace until the whole place bends around it.",
+      "Aydahar is frightening not just because it is huge. In Kazakh and steppe tales it devours the shared world by seizing roads, water, or peace until everything bends around its hunger.",
       "Айдаһар страшен не только размером. В степных сказаниях он действует как пожирающая сила, захватывающая дорогу, воду или покой, пока всё вокруг не начинает жить по его логике.",
       "Айдаһар тек алыптығымен қорқытпайды. Дала әңгімелерінде ол жолды, суды не тыныштықты басып алатын жалмауыш күш болып көрінеді де, айналаның бәрін өз ырғағына көндіреді.",
     ),
@@ -1832,12 +1832,12 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
           "Айдаһар психологиялық тұрғыдан нені білдіреді?",
         ),
         firstText: text(
-          "In this result, Aydahar symbolizes one danger swelling until it fills the whole field. The fear comes when pressure grows faster than order can be restored.",
+          "Here Aydahar symbolizes one danger swelling until it occupies the whole horizon. Fear rises when disorder grows so large that the mind no longer sees proportion.",
           "В этом результате Айдаһар символизирует одну угрозу, разрастающуюся до размеров всего поля. Страх начинается там, где давление растёт быстрее, чем успевает вернуться порядок.",
           "Бұл нәтижеде Айдаһар бір қауіпті бүкіл өрісті басып алатындай үлкейтіп жібереді. Қорқыныш қысым тәртіп қайта орнағаннан жылдамырақ өскен кезде туады.",
         ),
         secondText: text(
-          "That is why this enemy pushes toward urgency. If the threat is not named and bounded, the mind starts treating everything as if it were already under siege.",
+          "That is why this enemy pushes toward urgency. If the threat is not named and bounded, every corner starts to feel as though it already belongs to the dragon.",
           "Поэтому этот враг толкает к срочности. Если угрозу вовремя не назвать и не очертить, сознание начинает воспринимать всё так, будто поле уже осаждено.",
           "Сондықтан бұл жау асығыстыққа итереді. Егер қатер дер кезінде аталып, шектелмесе, сана бәрін әлдеқашан қоршауда тұрғандай қабылдай бастайды.",
         ),
@@ -1889,12 +1889,12 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
           "Фольклорлық қабатын айт",
         ),
         firstText: text(
-          "In folk imagination, Aydahar rarely harms only one corner. It blocks passage, takes what should flow, and forces heroes to confront what has grown too large to ignore.",
+          "In folklore, Aydahar rarely harms only one person. It blocks passage, claims what should flow, and forces heroes to face the devouring force everyone else has been circling around.",
           "В народном воображении Айдаһар редко вредит только в одном месте. Он перекрывает путь, присваивает то, что должно течь и идти дальше, и заставляет героя столкнуться с тем, что уже нельзя игнорировать.",
           "Халық қиялында Айдаһар бір ғана бұрышқа зиян келтірмейді. Ол жолды бөгейді, ағуы тиіс нәрсені иемденеді және батырды елемеуге болмайтындай болып үлкейген қатермен беттестіреді.",
         ),
         secondText: text(
-          "So culturally Aydahar becomes an image of escalation. Delay feeds it, and courage begins with restoring form where fear had started to spread.",
+          "Culturally, then, Aydahar is an image of escalation. Delay feeds it, and courage begins by restoring order where fear had started to spread like occupation.",
           "Поэтому культурно Айдаһар становится образом эскалации. Его подпитывает промедление, а храбрость начинается там, где человек возвращает форму расползающемуся страху.",
           "Сондықтан мәдени тұрғыдан Айдаһар — ұлғайып бара жатқан қатердің бейнесі. Оны кідіріс қоректендіреді, ал ерлік қорқыныш жайыла бастаған жерде қайтадан тәртіп орнатудан басталады.",
         ),
@@ -1936,7 +1936,7 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
     testType: "enemy",
     resultKey: "zhalgyzKozdiDau",
     introText: text(
-      "Zhalgyz Kozdi Dau is frightening not only because it is strong, but because it sees with one eye only. In folklore that single eye turns force into one-sided truth.",
+      "Zhalgyz Kozdi Dau is frightening not only because it is strong, but because its single eye stands for one-sided seeing. In folklore, that narrowed vision turns force into a false total truth.",
       "Жалғыз Көзді Дау страшен не только силой, но и тем, что видит одним глазом. В фольклоре этот единственный глаз превращает силу в одностороннюю 'правду'.",
       "Жалғыз Көзді Дау тек күшімен емес, бір көзбен ғана көретінімен қорқынышты. Фольклорда сол жалғыз көз күшті біржақты 'ақиқатқа' айналдырады.",
     ),
@@ -1950,12 +1950,12 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
           "Бұл жау психологиялық тұрғыдан не істейді?",
         ),
         firstText: text(
-          "This result is hurt most by crushing hierarchy and unarguable force. Fear appears when there is no room left for nuance, reply, or human scale.",
+          "This result is wounded most by crushing hierarchy and unquestionable force. Fear appears when one viewpoint grows so dominant that nuance, reply, and human scale have no room left.",
           "Этот результат сильнее всего ранят подавляющая иерархия и сила, с которой нельзя спорить. Страх появляется там, где уже не остаётся места для нюанса, ответа и человеческого масштаба.",
           "Бұл нәтижені ең қатты жаншитын нәрсе — басып тастайтын иерархия мен даусыз күш. Қорқыныш реңкке, жауапқа және адамдық өлшемге орын қалмаған жерде туады.",
         ),
         secondText: text(
-          "That is why this enemy can make the whole world feel reduced to command and submission. Once only one eye rules, many meanings are no longer allowed to exist.",
+          "That is why this enemy makes the world feel reduced to command and submission. Once only one eye is allowed to see, many meanings are pushed out of existence.",
           "Поэтому этот враг может заставить весь мир ощущаться сведённым к приказу и подчинению. Когда правит только один глаз, множественным смыслам будто больше не разрешено существовать.",
           "Сондықтан бұл жау бүкіл әлемді бұйрық пен бағынуға дейін тарылтып жібере алады. Бір ғана көз билеген кезде, көп мағынаға орын қалмайды.",
         ),
@@ -2007,12 +2007,12 @@ const DIALOGUE_SEEDS: readonly DialogueSeed[] = [
           "Тереңірек фольклорлық символын айт",
         ),
         firstText: text(
-          "The one eye matters. It turns the giant into more than brute strength; it makes him a figure of narrowed perception, where one reading takes over the whole field.",
+          "The one eye is the crucial symbol. It makes the giant more than physically powerful: he becomes the figure of narrowed perception, where one reading swallows the whole field.",
           "Важен именно один глаз. Он делает великана не просто грубой силой, а фигурой суженного восприятия, где одно прочтение захватывает всё поле.",
           "Мұнда бір көздің өзі маңызды. Ол алыпты жай күштен гөрі тарылған қабылдаудың бейнесіне айналдырады: бір ғана түсінік бүкіл кеңістікті басып алады.",
         ),
         secondText: text(
-          "In tales, heroes rarely escape such a giant by becoming stronger than him. They survive by wit, timing, and finding the blind side of brute certainty.",
+          "In tales, heroes do not overcome such a giant by becoming blunter than he is. They survive by wit, timing, and finding the blind side of one-sided certainty.",
           "В сказаниях герои редко спасаются от такого великана тем, что становятся сильнее него. Их спасают смекалка, чувство момента и умение найти слепую сторону грубой уверенности.",
           "Ертегілерде батырлар мұндай алыптан одан да күшті болып құтылмайды. Оларды құтқаратын — тапқырлық, мезетті сезу және дөрекі сенімнің соқыр тұсын табу.",
         ),

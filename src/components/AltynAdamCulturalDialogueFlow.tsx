@@ -95,9 +95,22 @@ export function AltynAdamCulturalDialogueFlow({
 
   const activePose = feedbackState?.pose ?? currentNode.pose;
   const imageSrc = POSE_IMAGES[activePose];
-  const message = feedbackState?.message ?? resolveLocalizedText(
-    currentNode.text,
-    resolvedLanguage,
+  const message: ReactNode = feedbackState?.message ?? (
+    currentNode.knowledgeCheck ? (
+      <div className="space-y-3">
+        <p className="m-0">
+          {resolveLocalizedText(currentNode.text, resolvedLanguage)}
+        </p>
+        <p className="m-0 font-semibold text-[#1f1f1f]">
+          {resolveLocalizedText(
+            currentNode.knowledgeCheck.question,
+            resolvedLanguage,
+          )}
+        </p>
+      </div>
+    ) : (
+      resolveLocalizedText(currentNode.text, resolvedLanguage)
+    )
   );
 
   const handleKnowledgeAnswer = (optionId: string) => {

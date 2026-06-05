@@ -7,7 +7,10 @@ import {
   localizeTestType,
 } from "../../content/testContentTranslations";
 import { registerTestCompletion } from "../../utils/altynAdamProgress";
-import { clearPendingStandardTestCharge } from "../../utils/standardTestPendingCharges";
+import {
+  clearPendingStandardTestCharge,
+  getPendingStandardTestCharge,
+} from "../../utils/standardTestPendingCharges";
 
 interface TestOption {
   id: string;
@@ -45,7 +48,6 @@ export const TestQestionsPage = () => {
   const [test, setTest] = useState<TestDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [sessionFlowUnavailable, setSessionFlowUnavailable] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>(
     {},
@@ -74,7 +76,6 @@ export const TestQestionsPage = () => {
         setTest(testResult.value);
 
         if (sessionResult.status === "rejected") {
-          setSessionFlowUnavailable(true);
           console.warn(
             "Standard test session endpoint unavailable; allowing legacy flow.",
             sessionResult.reason,
@@ -82,13 +83,23 @@ export const TestQestionsPage = () => {
           return;
         }
 
-        if (testId) {
-          clearPendingStandardTestCharge(testId);
+        const sessionJson = sessionResult.value;
+        const pendingCharge = testId ? getPendingStandardTestCharge(testId) : 0;
+        const currentSession =
+          sessionJson.session !== null &&
+          String(sessionJson.session.test_id) === testId
+            ? sessionJson.session
+            : null;
+
+        if (currentSession?.status === "in_progress") {
+          return;
         }
 
-        const sessionJson = sessionResult.value;
+        if (pendingCharge > 0) {
+          return;
+        }
 
-        if (!sessionJson.session || sessionJson.session.status !== "in_progress") {
+        if (!currentSession || currentSession.status === "completed") {
           navigate(`/tests/${id}/intro`, { replace: true });
           return;
         }
@@ -167,9 +178,7 @@ export const TestQestionsPage = () => {
           clearPendingStandardTestCharge(testId);
         }
 
-        if (sessionFlowUnavailable) {
-          window.postMessage({ type: "coins:updated" }, window.location.origin);
-        }
+        window.postMessage({ type: "coins:updated" }, window.location.origin);
 
         const completionState = registerTestCompletion(
           (test?.type as

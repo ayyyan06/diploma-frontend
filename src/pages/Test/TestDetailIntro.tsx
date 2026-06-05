@@ -74,6 +74,7 @@ export const TestIntroPage = () => {
   const [activeSession, setActiveSession] = useState<StandardTestSession | null>(
     null,
   );
+  const [hasPendingCharge, setHasPendingCharge] = useState(false);
   const [sessionFlowUnavailable, setSessionFlowUnavailable] = useState(false);
   const [loading, setLoading] = useState(true);
   const testId = id ?? "";
@@ -82,6 +83,9 @@ export const TestIntroPage = () => {
     const loadData = async () => {
       try {
         setLoading(true);
+        const existingPending = testId
+          ? getPendingStandardTestCharge(testId)
+          : 0;
         const [coinsResult, testResult, sessionResult] = await Promise.allSettled([
           fetchWithToken("/api/v1/coins").then((response) =>
             response.json() as Promise<{ coins?: number }>,
@@ -110,14 +114,34 @@ export const TestIntroPage = () => {
         setTest(testJson);
 
         if (sessionResult.status === "fulfilled") {
-          if (testId) {
-            clearPendingStandardTestCharge(testId);
+          const nextSession = sessionResult.value.session ?? null;
+          const isCurrentTestSession =
+            nextSession !== null && String(nextSession.test_id) === testId;
+
+          if (isCurrentTestSession) {
+            setHasPendingCharge(existingPending > 0);
+            setSessionFlowUnavailable(false);
+            setActiveSession(nextSession);
+            setCoins(
+              applyPendingStandardTestCharges(
+                nextSession.coins_remaining ?? coinsJson.coins ?? null,
+              ),
+            );
+            return;
           }
 
-          const nextSession = sessionResult.value.session ?? null;
+          setActiveSession(null);
+
+          if (existingPending > 0) {
+            setHasPendingCharge(true);
+            setSessionFlowUnavailable(true);
+            setCoins(applyPendingStandardTestCharges(coinsJson.coins ?? null));
+            return;
+          }
+
+          setHasPendingCharge(false);
           setSessionFlowUnavailable(false);
-          setActiveSession(nextSession);
-          setCoins(nextSession?.coins_remaining ?? coinsJson.coins ?? null);
+          setCoins(applyPendingStandardTestCharges(coinsJson.coins ?? null));
           return;
         }
 
@@ -127,6 +151,7 @@ export const TestIntroPage = () => {
         );
         setSessionFlowUnavailable(true);
         setActiveSession(null);
+        setHasPendingCharge(existingPending > 0);
         setCoins(applyPendingStandardTestCharges(coinsJson.coins ?? null));
       } catch (error) {
         console.error("Test intro loading error:", error);
@@ -141,7 +166,10 @@ export const TestIntroPage = () => {
   }, [id, testId]);
 
   const canAfford =
-    activeSession !== null || coins === null || coins >= TEST_COST;
+    activeSession !== null ||
+    hasPendingCharge ||
+    coins === null ||
+    coins >= TEST_COST;
   const localizedTest = useMemo(
     () => (test ? localizeTestDetail(test, i18n.language) : null),
     [test, i18n.language],
@@ -166,31 +194,31 @@ export const TestIntroPage = () => {
   const handleStart = async () => {
     if (!canAfford) return;
 
-    if (activeSession || sessionFlowUnavailable) {
-      if (!activeSession && sessionFlowUnavailable && testId) {
-        const existingPending = getPendingStandardTestCharge(testId);
+    const existingPending = testId ? getPendingStandardTestCharge(testId) : 0;
 
-        if (existingPending === 0) {
-          setPendingStandardTestCharge(testId, TEST_COST);
-        }
-
-        if (typeof coins === "number") {
-          const nextCoins =
-            existingPending > 0 ? coins : Math.max(coins - TEST_COST, 0);
-          syncCoins(nextCoins);
-        } else {
-          syncCoins(null);
-        }
-      }
-
+    if (sessionFlowUnavailable && existingPending > 0) {
+      setHasPendingCharge(true);
       navigate(`/tests/${id}`);
       return;
     }
 
     const initialCoins = coins;
+    const createdPending = testId && existingPending === 0;
+
+    if (createdPending) {
+      setPendingStandardTestCharge(
+        testId,
+        TEST_COST,
+        typeof initialCoins === "number" ? initialCoins : null,
+      );
+      setHasPendingCharge(true);
+    }
+
     const optimisticCoins =
       typeof initialCoins === "number"
-        ? Math.max(initialCoins - TEST_COST, 0)
+        ? existingPending > 0
+          ? initialCoins
+          : Math.max(initialCoins - TEST_COST, 0)
         : null;
 
     if (optimisticCoins !== null) {
@@ -202,13 +230,12 @@ export const TestIntroPage = () => {
         method: "POST",
       });
       const nextSession = (await response.json()) as StandardTestSession;
-      if (testId) {
-        clearPendingStandardTestCharge(testId);
-      }
+      setHasPendingCharge(getPendingStandardTestCharge(testId) > 0);
+      setSessionFlowUnavailable(false);
       setActiveSession(nextSession);
 
       if (typeof nextSession.coins_remaining === "number") {
-        syncCoins(nextSession.coins_remaining);
+        syncCoins(applyPendingStandardTestCharges(nextSession.coins_remaining));
       } else {
         syncCoins(optimisticCoins);
       }
@@ -217,11 +244,24 @@ export const TestIntroPage = () => {
       console.error("Test start error:", error);
 
       const status = getHttpStatus(error);
-      if ((status === 404 || status === 405 || status === 500) && testId) {
+      if (
+        (status === 404 ||
+          status === 405 ||
+          status === 500 ||
+          status === 502 ||
+          status === 503 ||
+          status === 504) &&
+        testId
+      ) {
         setSessionFlowUnavailable(true);
-        if (getPendingStandardTestCharge(testId) === 0) {
-          setPendingStandardTestCharge(testId, TEST_COST);
+        if (existingPending === 0) {
+          setPendingStandardTestCharge(
+            testId,
+            TEST_COST,
+            typeof initialCoins === "number" ? initialCoins : null,
+          );
         }
+        setHasPendingCharge(true);
 
         if (optimisticCoins !== null) {
           syncCoins(optimisticCoins);
@@ -233,11 +273,17 @@ export const TestIntroPage = () => {
         return;
       }
 
+      if (createdPending) {
+        clearPendingStandardTestCharge(testId);
+      }
+
       if (typeof initialCoins === "number") {
         syncCoins(initialCoins);
       } else {
         syncCoins(null);
       }
+
+      setHasPendingCharge(existingPending > 0);
     }
   };
 
