@@ -53,21 +53,37 @@ export const TestQestionsPage = () => {
     const loadTest = async () => {
       try {
         setLoading(true);
-        const [testResponse, sessionResponse] = await Promise.all([
-          fetchWithToken(`/api/v1/tests/${id}`),
-          fetchWithToken(`/api/v1/tests/${id}/session`),
+        const [testResult, sessionResult] = await Promise.allSettled([
+          fetchWithToken(`/api/v1/tests/${id}`).then((response) =>
+            response.json() as Promise<TestDetail>,
+          ),
+          fetchWithToken(`/api/v1/tests/${id}/session`).then((response) =>
+            response.json() as Promise<{
+              session: StandardTestSession | null;
+            }>,
+          ),
         ]);
 
-        const sessionJson = (await sessionResponse.json()) as {
-          session: StandardTestSession | null;
-        };
+        if (testResult.status === "rejected") {
+          throw testResult.reason;
+        }
+
+        setTest(testResult.value);
+
+        if (sessionResult.status === "rejected") {
+          console.warn(
+            "Standard test session endpoint unavailable; allowing legacy flow.",
+            sessionResult.reason,
+          );
+          return;
+        }
+
+        const sessionJson = sessionResult.value;
 
         if (!sessionJson.session || sessionJson.session.status !== "in_progress") {
           navigate(`/tests/${id}/intro`, { replace: true });
           return;
         }
-
-        setTest((await testResponse.json()) as TestDetail);
       } catch (error) {
         console.error("Test loading error:", error);
       } finally {

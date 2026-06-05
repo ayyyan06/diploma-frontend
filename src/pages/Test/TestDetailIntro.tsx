@@ -49,6 +49,15 @@ interface StandardTestSession {
   coins_remaining: number | null;
 }
 
+function getHttpStatus(error: unknown): number | null {
+  if (!(error instanceof Error)) {
+    return null;
+  }
+
+  const match = error.message.match(/Status:\s*(\d+)/);
+  return match ? Number(match[1]) : null;
+}
+
 export const TestIntroPage = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -59,26 +68,55 @@ export const TestIntroPage = () => {
   const [activeSession, setActiveSession] = useState<StandardTestSession | null>(
     null,
   );
+  const [sessionFlowUnavailable, setSessionFlowUnavailable] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const [coinsJson, testJson, sessionJson] = await Promise.all([
-          fetchWithToken("/api/v1/coins").then((response) => response.json()),
+        const [coinsResult, testResult, sessionResult] = await Promise.allSettled([
+          fetchWithToken("/api/v1/coins").then((response) =>
+            response.json() as Promise<{ coins?: number }>,
+          ),
           fetchWithToken(`/api/v1/tests/${id}`).then((response) =>
-            response.json(),
+            response.json() as Promise<TestDetail>,
           ),
           fetchWithToken(`/api/v1/tests/${id}/session`).then((response) =>
-            response.json(),
+            response.json() as Promise<{
+              session: StandardTestSession | null;
+            }>,
           ),
         ]);
-        const nextSession =
-          (sessionJson.session as StandardTestSession | null) ?? null;
-        setTest(testJson as TestDetail);
-        setActiveSession(nextSession);
-        setCoins(nextSession?.coins_remaining ?? coinsJson.coins ?? null);
+
+        if (coinsResult.status === "rejected") {
+          throw coinsResult.reason;
+        }
+
+        if (testResult.status === "rejected") {
+          throw testResult.reason;
+        }
+
+        const coinsJson = coinsResult.value;
+        const testJson = testResult.value;
+
+        setTest(testJson);
+
+        if (sessionResult.status === "fulfilled") {
+          const nextSession = sessionResult.value.session ?? null;
+          setSessionFlowUnavailable(false);
+          setActiveSession(nextSession);
+          setCoins(nextSession?.coins_remaining ?? coinsJson.coins ?? null);
+          return;
+        }
+
+        console.warn(
+          "Standard test session endpoint unavailable; using legacy flow.",
+          sessionResult.reason,
+        );
+        setSessionFlowUnavailable(true);
+        setActiveSession(null);
+        setCoins(coinsJson.coins ?? null);
       } catch (error) {
         console.error("Test intro loading error:", error);
       } finally {
@@ -103,7 +141,7 @@ export const TestIntroPage = () => {
   const handleStart = async () => {
     if (!canAfford) return;
 
-    if (activeSession) {
+    if (activeSession || sessionFlowUnavailable) {
       navigate(`/tests/${id}`);
       return;
     }
@@ -123,6 +161,12 @@ export const TestIntroPage = () => {
       navigate(`/tests/${id}`);
     } catch (error) {
       console.error("Test start error:", error);
+
+      const status = getHttpStatus(error);
+      if (status === 404 || status === 405) {
+        setSessionFlowUnavailable(true);
+        navigate(`/tests/${id}`);
+      }
     }
   };
 
