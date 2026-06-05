@@ -112,6 +112,10 @@ interface ResultApiResponse {
   updated_at: string;
 }
 
+interface SubmissionResultApiResponse {
+  submissions: ResultApiResponse[];
+}
+
 interface TestResultLocationState {
   altynAdamReminderCount?: number;
 }
@@ -121,6 +125,15 @@ interface CulturalDialogueRouteState {
     testType: "personality" | "animal" | "weapon" | "enemy";
     resultKey: string;
   };
+}
+
+function getHttpStatus(error: unknown): number | null {
+  if (!(error instanceof Error)) {
+    return null;
+  }
+
+  const match = error.message.match(/Status:\s*(\d+)/);
+  return match ? Number(match[1]) : null;
 }
 
 function isPersonality(
@@ -633,10 +646,41 @@ export const TestResult = () => {
     const fetchResult = async () => {
       try {
         setLoading(true);
-        const response = await fetchWithToken(`/api/v1/tests/${id}/result`, {
-          method: "GET",
-        });
-        setResultData(await response.json());
+        try {
+          const response = await fetchWithToken(`/api/v1/tests/${id}/result`, {
+            method: "GET",
+          });
+          setResultData(await response.json());
+          return;
+        } catch (primaryError) {
+          const status = getHttpStatus(primaryError);
+
+          if (
+            status !== 404 &&
+            status !== 500 &&
+            status !== 502 &&
+            status !== 503 &&
+            status !== 504
+          ) {
+            throw primaryError;
+          }
+
+          const submissionsResponse = await fetchWithToken("/api/v1/submissions", {
+            method: "GET",
+          });
+          const submissionsData =
+            (await submissionsResponse.json()) as SubmissionResultApiResponse;
+          const matchedSubmission =
+            submissionsData.submissions.find(
+              (submission) => String(submission.test_id) === String(id),
+            ) ?? null;
+
+          if (!matchedSubmission) {
+            throw primaryError;
+          }
+
+          setResultData(matchedSubmission);
+        }
       } catch (err) {
         console.error(err);
         setError(
