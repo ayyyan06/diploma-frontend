@@ -25,6 +25,13 @@ interface TestSummary {
   image_alt: string;
 }
 
+interface AdaptiveTestMeta {
+  title: string;
+  description: string;
+  image_src: string;
+  image_alt: string;
+}
+
 interface TestsLocationState {
   altynAdamCulturalDialogue?: {
     testType: StandardTestType;
@@ -38,6 +45,7 @@ export const Tests = () => {
   const navigate = useNavigate();
   const [tests, setTests] = useState<TestSummary[]>([]);
   const [coins, setCoins] = useState<number | null>(null);
+  const [adaptiveMeta, setAdaptiveMeta] = useState<AdaptiveTestMeta | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeDialogue, setActiveDialogue] =
@@ -49,16 +57,19 @@ export const Tests = () => {
       try {
         setLoading(true);
 
-        const [testsRes, coinsRes] = await Promise.all([
+        const [testsRes, coinsRes, adaptiveMetaRes] = await Promise.all([
           fetchWithToken("/api/v1/tests"),
           fetchWithToken("/api/v1/coins"),
+          fetchWithToken("/api/v1/adaptive-figure/test"),
         ]);
 
         const testsData = await testsRes.json();
         const coinsData = await coinsRes.json();
+        const adaptiveMetaData = await adaptiveMetaRes.json();
 
         setTests((testsData.tests as TestSummary[]) || []);
         setCoins(coinsData.coins ?? null);
+        setAdaptiveMeta((adaptiveMetaData as AdaptiveTestMeta) ?? null);
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : t("tests.errorPrefix"));
       } finally {
@@ -90,6 +101,12 @@ export const Tests = () => {
     [i18n.language],
   );
   const canAfford = coins === null || coins >= TEST_COST;
+  const adaptiveTitle = adaptiveMeta?.title ?? adaptiveFigureCopy.card.title;
+  const adaptiveDescription =
+    adaptiveMeta?.description ?? adaptiveFigureCopy.card.description;
+  const adaptiveImageSrc =
+    adaptiveMeta?.image_src ?? "/images/altyn-adam-oblozhka.png";
+  const adaptiveImageAlt = adaptiveMeta?.image_alt ?? adaptiveTitle;
 
   useEffect(() => {
     const locationState = location.state as TestsLocationState | null;
@@ -224,8 +241,8 @@ export const Tests = () => {
           <div className="grid gap-0 lg:grid-cols-[0.92fr_1.08fr]">
             <div className="bg-[#f3efe6] p-6 sm:p-8">
               <img
-                src="/images/altyn-adam-oblozhka.png"
-                alt={adaptiveFigureCopy.card.title}
+                src={adaptiveImageSrc}
+                alt={adaptiveImageAlt}
                 className={`h-full min-h-[220px] w-full rounded-[28px] object-cover ${
                   !canAfford ? "opacity-60 grayscale" : ""
                 }`}
@@ -240,7 +257,7 @@ export const Tests = () => {
                     </p>
 
                     <h2 className="mt-3 text-[34px] font-bold leading-[1.14] text-[#171717] max-[640px]:text-[28px]">
-                      {adaptiveFigureCopy.card.title}
+                      {adaptiveTitle}
                     </h2>
                   </div>
 
@@ -270,7 +287,7 @@ export const Tests = () => {
                 </div>
 
                 <p className="m-0 max-w-[760px] text-[16px] leading-[1.75] text-[#5f5c56]">
-                  {adaptiveFigureCopy.card.description}
+                  {adaptiveDescription}
                 </p>
               </div>
 

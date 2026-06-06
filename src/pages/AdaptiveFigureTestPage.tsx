@@ -65,6 +65,13 @@ interface AdaptiveSessionPayload {
   result: AdaptiveResult | null;
 }
 
+interface AdaptiveTestMeta {
+  title: string;
+  description: string;
+  image_src: string;
+  image_alt: string;
+}
+
 const wait = (ms: number) =>
   new Promise<void>((resolve) => {
     window.setTimeout(resolve, ms);
@@ -97,6 +104,7 @@ export const AdaptiveFigureTestPage = () => {
   );
 
   const [session, setSession] = useState<AdaptiveSessionPayload | null>(null);
+  const [adaptiveMeta, setAdaptiveMeta] = useState<AdaptiveTestMeta | null>(null);
   const [coins, setCoins] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
@@ -121,6 +129,9 @@ export const AdaptiveFigureTestPage = () => {
         const coinsPromise = fetchWithToken("/api/v1/coins").then((response) =>
           response.json(),
         );
+        const adaptiveMetaPromise = fetchWithToken("/api/v1/adaptive-figure/test").then((response) =>
+          response.json(),
+        );
 
         const storedSessionId = localStorage.getItem(SESSION_STORAGE_KEY);
         let nextSession: AdaptiveSessionPayload | null = null;
@@ -141,12 +152,16 @@ export const AdaptiveFigureTestPage = () => {
           }
         }
 
-        const coinsJson = await coinsPromise;
+        const [coinsJson, adaptiveMetaJson] = await Promise.all([
+          coinsPromise,
+          adaptiveMetaPromise,
+        ]);
 
         if (!isMounted) return;
 
         setSession(nextSession);
         setCoins(nextSession?.coins_remaining ?? coinsJson.coins ?? null);
+        setAdaptiveMeta((adaptiveMetaJson as AdaptiveTestMeta) ?? null);
       } catch (err: unknown) {
         if (!isMounted) return;
         setError(err instanceof Error ? err.message : copy.errors.load);
@@ -202,6 +217,9 @@ export const AdaptiveFigureTestPage = () => {
   }, [questionPoseIndex, session, starting, submitting]);
 
   const canAfford = coins === null || coins >= TEST_COST;
+  const introTitle = adaptiveMeta?.title ?? session?.test_title ?? copy.card.title;
+  const introDescription =
+    adaptiveMeta?.description ?? session?.test_description ?? copy.card.description;
   const currentQuestionNumber =
     session?.status === "in_progress" ? session.question_count + 1 : 0;
   const questionProgress =
@@ -345,11 +363,11 @@ export const AdaptiveFigureTestPage = () => {
               </p>
 
               <h1 className="m-0 text-[38px] font-bold leading-[1.18] text-[#161616] max-[640px]:text-[30px]">
-                {copy.card.title}
+                {introTitle}
               </h1>
 
               <p className="mt-5 max-w-[720px] text-[17px] leading-[1.75] text-[#5d5a55]">
-                {copy.card.description}
+                {introDescription}
               </p>
 
               <div className="mt-6 flex flex-wrap gap-3">

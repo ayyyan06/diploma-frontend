@@ -679,10 +679,19 @@ export function localizeAdaptiveQuestion<T extends QuestionLike>(
     return question;
   }
 
-  const translation =
-    QUESTION_TRANSLATIONS[question.id]?.[normalizeLanguage(language)];
+  const translations = QUESTION_TRANSLATIONS[question.id];
+  const translation = translations?.[normalizeLanguage(language)];
+  const defaultEnglishText = translations?.en?.text;
 
-  return translation ? { ...question, text: translation.text } : question;
+  if (!translation) {
+    return question;
+  }
+
+  if (defaultEnglishText && question.text !== defaultEnglishText) {
+    return question;
+  }
+
+  return { ...question, text: translation.text };
 }
 
 export function localizeAdaptiveFigure<T extends FigureLike>(
