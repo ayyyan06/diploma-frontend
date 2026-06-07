@@ -60,7 +60,7 @@ export function AchievementsGrid({
         </p>
       </div>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3 [grid-auto-rows:0.8fr]">
         {ALTTYN_ADAM_ACHIEVEMENTS.map((achievement) => {
           const isUnlocked = unlockedSet.has(achievement.id);
           const title =
@@ -81,7 +81,19 @@ export function AchievementsGrid({
                   : "border-[#ece7dd] bg-[#faf8f3] opacity-60"
               }`}
             >
-              <div className="flex gap-4">
+              <div className="flex justify-end">
+                <span
+                  className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] ${
+                    isUnlocked
+                      ? "bg-[#fff1b8] text-[#9a6e00]"
+                      : "bg-white text-[#9a9488]"
+                  }`}
+                >
+                  {isUnlocked ? copy.unlocked : copy.locked}
+                </span>
+              </div>
+
+              <div className="mt-2 flex gap-4">
                 <img
                   src={achievement.image}
                   alt={title}
@@ -95,22 +107,11 @@ export function AchievementsGrid({
                 />
 
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-start justify-between gap-3">
-                    <h3 className="m-0 text-[18px] font-bold leading-[1.3] text-[#171717]">
-                      {title}
-                    </h3>
-                    <span
-                      className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] ${
-                        isUnlocked
-                          ? "bg-[#fff1b8] text-[#9a6e00]"
-                          : "bg-white text-[#9a9488]"
-                      }`}
-                    >
-                      {isUnlocked ? copy.unlocked : copy.locked}
-                    </span>
-                  </div>
+                  <h3 className="m-0 text-[15px] font-bold leading-[1.3] text-[#171717]">
+                    {title}
+                  </h3>
 
-                  <p className="m-0 mt-3 text-[14px] leading-[1.6] text-[#645f56]">
+                  <p className="m-0 mt-2 text-[11px] leading-[1.6] text-[#645f56]">
                     {description}
                   </p>
                 </div>

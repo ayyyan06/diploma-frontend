@@ -156,6 +156,8 @@ const ru = {
     noTestsCompletedYet: "Тесты ещё не пройдены.",
     noFriendsYet: "Пока нет друзей.",
     findPeople: "Найти людей",
+    suggestedFriends: "Люди с похожими результатами",
+    sharedTests: "{{count}} общих тест(а)",
   },
   profile: {
     logout: "Выйти",

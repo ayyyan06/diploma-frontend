@@ -9,6 +9,20 @@ type FriendshipStatus =
   | "pending_received"
   | "friends";
 
+interface SharedArchetype {
+  test_type: string;
+  test_title: string;
+  result_key: string;
+  result_title: string;
+}
+
+interface SuggestedFriend {
+  user: CommunityUser;
+  score: number;
+  shared_test_count: number;
+  shared_archetypes: SharedArchetype[];
+}
+
 interface CommunityUser {
   id: number;
   username: string;
@@ -282,18 +296,99 @@ function IncomingBanner({
   );
 }
 
+const ARCHETYPE_CHIP_COLORS: Record<string, { bg: string; text: string }> = {
+  personality: { bg: "#FFF9E8", text: "#9a6e00" },
+  animal:      { bg: "#EEF8FF", text: "#1d6fa4" },
+  weapon:      { bg: "#F7F4FF", text: "#6d40c4" },
+  enemy:       { bg: "#FFF4EC", text: "#b45309" },
+};
+
+function SuggestedFriendCard({
+  suggestion,
+  onAdd,
+}: {
+  suggestion: SuggestedFriend;
+  onAdd: (user: CommunityUser) => void;
+}) {
+  const { t } = useTranslation();
+  const { user, shared_archetypes, shared_test_count } = suggestion;
+
+  const initials = user.nickname
+    .split(" ")
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
+
+  return (
+    <article className="flex flex-col rounded-[20px] border-2 border-[#ece7dd] bg-white p-5 transition-all duration-200 hover:border-[#f2c200] hover:shadow-[0_6px_24px_rgba(242,194,0,0.10)]">
+      <div className="mb-3 flex items-center gap-3">
+        <div
+          className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-full text-[15px] font-black text-white"
+          style={{ background: "linear-gradient(135deg,#f2c200 0%,#e09900 100%)" }}
+        >
+          {initials}
+        </div>
+        <div className="min-w-0">
+          <p className="truncate text-[16px] font-bold leading-tight text-[#111]">
+            {user.nickname}
+          </p>
+          <p className="text-[12px] text-[#999]">@{user.username}</p>
+        </div>
+      </div>
+
+      <div className="mb-3 flex flex-wrap gap-1.5">
+        {shared_archetypes.length > 0 ? (
+          shared_archetypes.map((a) => {
+            const color = ARCHETYPE_CHIP_COLORS[a.test_type] ?? { bg: "#f5f2ea", text: "#6b675f" };
+            return (
+              <span
+                key={a.test_type}
+                className="rounded-[6px] px-2 py-0.5 text-[11px] font-semibold"
+                style={{ background: color.bg, color: color.text }}
+              >
+                {a.result_title}
+              </span>
+            );
+          })
+        ) : (
+          <span className="text-[12px] text-[#aaa]">
+            {t("community.sharedTests", { count: shared_test_count })}
+          </span>
+        )}
+      </div>
+
+      <button
+        onClick={() => onAdd(user)}
+        disabled={user.friendship_status !== "none"}
+        className="mt-auto w-full rounded-[11px] border-2 border-[#f2c200] bg-[#fff8d9] py-1.5 text-[13px] font-bold text-[#9a6e00] transition-all hover:bg-[#f2c200] hover:text-white disabled:cursor-default disabled:opacity-60"
+      >
+        {user.friendship_status === "pending_sent"
+          ? t("community.pending")
+          : t("community.addFriend")}
+      </button>
+    </article>
+  );
+}
+
 export const CommunityPage = () => {
   const { t } = useTranslation();
   const [users, setUsers] = useState<CommunityUser[]>([]);
+  const [suggestions, setSuggestions] = useState<SuggestedFriend[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [drawerUser, setDrawerUser] = useState<CommunityUser | null>(null);
 
   const loadUsers = useCallback(async () => {
     try {
-      const res = await fetchWithToken("/api/v1/community/users");
-      const data = await res.json();
-      setUsers(data.users);
+      const [usersRes, suggestionsRes] = await Promise.all([
+        fetchWithToken("/api/v1/community/users"),
+        fetchWithToken("/api/v1/community/suggested-friends"),
+      ]);
+      const usersData = await usersRes.json();
+      const suggestionsData = await suggestionsRes.json();
+      setUsers(usersData.users);
+      setSuggestions(suggestionsData.suggestions ?? []);
     } finally {
       setLoading(false);
     }
@@ -325,6 +420,13 @@ export const CommunityPage = () => {
           item.id === user.id
             ? { ...item, friendship_status: "pending_sent" }
             : item,
+        ),
+      );
+      setSuggestions((prev) =>
+        prev.map((s) =>
+          s.user.id === user.id
+            ? { ...s, user: { ...s.user, friendship_status: "pending_sent" } }
+            : s,
         ),
       );
     }
@@ -377,6 +479,23 @@ export const CommunityPage = () => {
       </div>
 
       <IncomingBanner requests={incomingRequests} onRespond={handleRespond} />
+
+      {suggestions.length > 0 && (
+        <div className="mb-10">
+          <p className="mb-4 text-[13px] font-bold uppercase tracking-widest text-[#9a8c6e]">
+            {t("community.suggestedFriends")}
+          </p>
+          <div className="grid grid-cols-3 gap-4 max-[900px]:grid-cols-2 max-[520px]:grid-cols-1">
+            {suggestions.map((s) => (
+              <SuggestedFriendCard
+                key={s.user.id}
+                suggestion={s}
+                onAdd={handleAction}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="mb-8 flex items-center gap-3 rounded-[16px] border-2 border-[#ece7dd] bg-white px-5 py-3 focus-within:border-[#f2c200]">
         <svg

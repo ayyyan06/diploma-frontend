@@ -18,6 +18,7 @@ export function RecommendedBookCard({
 }) {
   const { i18n, t } = useTranslation();
   const copy = getRecommendationCopy(i18n.language);
+  const lang = (i18n.language === "ru" || i18n.language === "kk") ? i18n.language : "en";
   const reason =
     book.matchedTags.length > 0
       ? `${copy.reasonPrefix}: ${formatMatchedTags(book.matchedTags, i18n.language)}`
@@ -28,7 +29,7 @@ export function RecommendedBookCard({
       <div className="flex gap-4 max-[720px]:flex-col">
         <img
           src={book.imageUrl}
-          alt={book.title}
+          alt={book.title[lang]}
           className="h-[132px] w-[96px] shrink-0 rounded-[16px] border border-[#f2eadb] object-cover"
         />
 
@@ -37,17 +38,17 @@ export function RecommendedBookCard({
             {t("profile.recommendationTypes.book", { defaultValue: "Book" })}
           </span>
 
-          <h3 className="text-[18px] font-bold text-[#111]">{book.title}</h3>
+          <h3 className="text-[18px] font-bold text-[#111]">{book.title[lang]}</h3>
 
           <p className="mt-1 text-[14px] font-medium text-[#666]">
-            {book.author}
+            {book.author[lang]}
           </p>
 
           <p
             className="mt-3 text-[14px] leading-relaxed text-[#666]"
             style={clampedDescription()}
           >
-            {book.description}
+            {book.description[lang]}
           </p>
 
           <p className="mt-3 text-[12px] italic text-[#9a8c6e]">{reason}</p>

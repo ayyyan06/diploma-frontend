@@ -1,3 +1,5 @@
+export type { LocalizedText } from "../types/altynAdam";
+
 export type RecommendationTag =
   | "wisdom"
   | "leadership"
@@ -31,22 +33,22 @@ export interface ProfileTestResult {
 
 export interface RecommendationBook {
   id: string;
-  title: string;
-  author: string;
+  title: LocalizedText;
+  author: LocalizedText;
   price: number;
   kitapalUrl: string;
   imageUrl: string;
-  description: string;
+  description: LocalizedText;
   tags: RecommendationTag[];
 }
 
 export interface RecommendationMovie {
   id: string;
-  title: string;
-  director: string;
+  title: LocalizedText;
+  director: LocalizedText;
   imageUrl: string;
   learnMoreUrl: string;
-  description: string;
+  description: LocalizedText;
   tags: RecommendationTag[];
 }
 

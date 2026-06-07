@@ -155,6 +155,8 @@ const en = {
     noTestsCompletedYet: "No tests completed yet.",
     noFriendsYet: "No friends yet.",
     findPeople: "Find people",
+    suggestedFriends: "People with Similar Results",
+    sharedTests: "{{count}} shared test(s)",
   },
   profile: {
     logout: "Log out",

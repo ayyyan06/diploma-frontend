@@ -158,6 +158,8 @@ const kk = {
     noTestsCompletedYet: "Әлі ешбір тест аяқталмаған.",
     noFriendsYet: "Әзірге достар жоқ.",
     findPeople: "Адамдарды табу",
+    suggestedFriends: "Ұқсас нәтижелері бар адамдар",
+    sharedTests: "{{count}} ортақ тест",
   },
   profile: {
     logout: "Шығу",

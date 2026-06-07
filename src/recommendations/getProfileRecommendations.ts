@@ -125,7 +125,7 @@ function matchBooks(
         return right.matchCount - left.matchCount;
       }
 
-      return left.title.localeCompare(right.title);
+      return left.title.en.localeCompare(right.title.en);
     });
 }
 
@@ -150,7 +150,7 @@ function matchMovies(
         return right.matchCount - left.matchCount;
       }
 
-      return left.title.localeCompare(right.title);
+      return left.title.en.localeCompare(right.title.en);
     });
 }
 

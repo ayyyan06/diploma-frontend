@@ -51,10 +51,17 @@ interface Friend {
   since: string;
 }
 
+interface LocalizedString {
+  en: string;
+  ru: string;
+  kk: string;
+}
+
 interface Recommendation {
   id: number;
-  title: string;
-  description: string;
+  title: LocalizedString | string;
+  message: LocalizedString | string;
+  description?: LocalizedString | string;
   type: string;
   url?: string | null;
   image_src?: string | null;
@@ -211,8 +218,19 @@ function ResultCard({ sub }: { sub: Submission }) {
   );
 }
 
+function resolveLocalized(
+  value: LocalizedString | string | undefined,
+  lang: "en" | "ru" | "kk",
+): string {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  return value[lang] ?? value.en ?? "";
+}
+
 function RecommendationCard({ rec }: { rec: Recommendation }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang =
+    i18n.language === "ru" || i18n.language === "kk" ? i18n.language : "en";
   const palette = REC_TYPE_COLORS[rec.type] ?? {
     bg: "#FFF9E8",
     accent: "#f2c200",
@@ -232,7 +250,7 @@ function RecommendationCard({ rec }: { rec: Recommendation }) {
         {rec.image_src ? (
           <img
             src={rec.image_src}
-            alt={rec.title}
+            alt={resolveLocalized(rec.title, lang)}
             className="h-[72px] w-[72px] shrink-0 rounded-[16px] object-cover"
             onError={(event) => {
               (event.target as HTMLImageElement).style.display = "none";
@@ -257,10 +275,12 @@ function RecommendationCard({ rec }: { rec: Recommendation }) {
             </span>
           </div>
 
-          <p className="mb-1 text-[17px] font-bold text-[#111]">{rec.title}</p>
+          <p className="mb-1 text-[17px] font-bold text-[#111]">
+            {resolveLocalized(rec.title, lang)}
+          </p>
 
           <p className="text-[14px] leading-relaxed text-[#666]">
-            {rec.description}
+            {resolveLocalized(rec.message ?? rec.description, lang)}
           </p>
 
           {rec.reason && (
