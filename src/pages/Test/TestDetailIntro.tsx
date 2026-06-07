@@ -281,11 +281,11 @@ export const TestIntroPage = () => {
             </div>
           )}
 
-          <div className="mb-[54px] flex gap-[20px]">
+          <div className="mb-[54px] flex items-stretch gap-[20px]">
             {localizedTest.info_boxes?.map((box, index: number) => (
               <div
                 key={index}
-                className={`box-border h-[116px] w-[180px] rounded-[18px] pb-[38px] pl-[16px] pr-[17px] pt-[18px] ${
+                className={`box-border min-h-[116px] w-[180px] rounded-[18px] px-[16px] pb-[18px] pt-[18px] ${
                   toneColors[box.tone] || "bg-[#F5F5F5]"
                 }`}
               >

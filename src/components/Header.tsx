@@ -95,7 +95,7 @@ export function Header() {
 
   return (
     <>
-      <header className="mt-8 box-border flex items-center justify-between gap-6 px-[60px] font-sans max-[1100px]:flex-wrap max-[1100px]:justify-center max-[680px]:px-5">
+      <header className="mt-8 box-border flex items-center justify-between gap-[clamp(12px,1.4vw,24px)] px-[clamp(24px,3vw,60px)] font-sans max-[1240px]:flex-wrap max-[680px]:justify-center max-[680px]:px-5">
         <NavLink to="/" className="flex items-center gap-4 p-0">
           <img
             className="h-[56px] w-[56px] rounded-full object-cover"
@@ -104,19 +104,19 @@ export function Header() {
           />
 
           <div className="flex flex-col leading-none">
-            <span className="text-[28px] font-black tracking-wide text-[#2b2b2b]">
+            <span className="text-[clamp(21px,1.8vw,28px)] font-black tracking-wide text-[#2b2b2b]">
               {t("common.appName")}
             </span>
 
-            <span className="mt-1 text-[12px] font-medium uppercase tracking-[4px] text-[#9a6e00]">
+            <span className="mt-1 text-[clamp(10px,0.85vw,12px)] font-medium uppercase tracking-[clamp(2px,0.3vw,4px)] text-[#9a6e00]">
               {t("common.tagline")}
             </span>
           </div>
         </NavLink>
 
         <nav
-          className="flex flex-1 items-center justify-center gap-[54px]
-          max-[1100px]:order-3 max-[1100px]:basis-full
+          className="flex flex-1 items-center justify-center gap-[clamp(20px,2.4vw,48px)]
+          max-[1240px]:order-3 max-[1240px]:basis-full
           max-[680px]:flex-wrap max-[680px]:gap-5"
         >
           {menuItems.map((item) => (
@@ -124,7 +124,7 @@ export function Header() {
               key={item.label}
               to={item.path}
               className={({ isActive }) =>
-                `relative text-[20px] font-medium transition-colors
+                `relative text-[clamp(15px,1.1vw,20px)] font-medium transition-colors
                 hover:text-[#8b6c00]
                 ${
                   isActive
@@ -149,15 +149,15 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-[18px] max-[680px]:w-full max-[680px]:flex-wrap max-[680px]:justify-center">
+        <div className="flex items-center gap-[clamp(10px,1.1vw,18px)] max-[680px]:w-full max-[680px]:flex-wrap max-[680px]:justify-center">
           <LanguageSwitcher />
 
           {coins !== null && (
             <div
-              className="flex h-[44px] min-w-[130px] items-center justify-center gap-[8px]
+              className="flex h-[44px] min-w-[clamp(104px,8vw,130px)] items-center justify-center gap-[8px]
               rounded-[12px] border-[3px] border-[#f2c200]
-              bg-[#fff8d9] px-[18px] py-[10px]
-              text-[16px] font-bold text-[#9a6e00]
+              bg-[#fff8d9] px-[clamp(12px,1.2vw,18px)] py-[10px]
+              text-[clamp(14px,1vw,16px)] font-bold text-[#9a6e00]
               select-none"
             >
               <span
@@ -174,9 +174,9 @@ export function Header() {
 
           <NavLink
             to="/tests"
-            className="flex h-[44px] w-[130px] items-center justify-center
+            className="flex h-[44px] w-[clamp(108px,9vw,130px)] items-center justify-center
             rounded-[12px] bg-[#f2c200]
-            text-[16px] font-semibold text-white
+            text-[clamp(14px,1vw,16px)] font-semibold text-white
             transition-opacity hover:opacity-90"
           >
             {t("header.startTest")}
@@ -184,7 +184,7 @@ export function Header() {
 
           <NavLink to="/profile">
             <img
-              className="ml-[56px] h-[36px] w-[36px] shrink-0 object-contain"
+              className="h-[36px] w-[36px] shrink-0 object-contain"
               src="/icons/profile-icon.svg"
               alt={t("header.profileAlt")}
             />

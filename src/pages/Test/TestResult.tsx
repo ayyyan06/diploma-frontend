@@ -120,12 +120,6 @@ interface TestResultLocationState {
   altynAdamReminderCount?: number;
 }
 
-interface CulturalDialogueRouteState {
-  altynAdamCulturalDialogue: {
-    testType: "personality" | "animal" | "weapon" | "enemy";
-    resultKey: string;
-  };
-}
 
 function getHttpStatus(error: unknown): number | null {
   if (!(error instanceof Error)) {
@@ -641,6 +635,13 @@ export const TestResult = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isReminderDialogOpen, setIsReminderDialogOpen] = useState(false);
+  // The reminder is not shown on mount. It waits ("pending") until the user
+  // clicks any button on the result page, so Altyn Adam only appears after
+  // passing the test AND clicking a button — never right away.
+  const [isReminderPending, setIsReminderPending] = useState(false);
+  const [pendingDestination, setPendingDestination] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     const fetchResult = async () => {
@@ -709,7 +710,7 @@ export const TestResult = () => {
       reminderCount !== null &&
       shouldShowAltynAdamReminder(reminderCount)
     ) {
-      setIsReminderDialogOpen(true);
+      setIsReminderPending(true);
     }
   }, [error, loading, reminderCount]);
 
@@ -734,29 +735,61 @@ export const TestResult = () => {
   const growthAreas = result?.growthAreas ?? [];
   const enemyUiCopy = getEnemyUiCopy(i18n.language);
 
-  const handleRetake = () => navigate(`/tests/${id}/intro`);
-  const handleCloseResult = () => {
-    if (!result || !testType) {
-      navigate("/tests");
+  const performNavigation = (destination: string) => {
+    if (!result?.resultKey || !testType) {
+      navigate(destination);
       return;
     }
 
-    const resultKey = result.resultKey;
-
-    if (!resultKey) {
-      navigate("/tests");
-      return;
-    }
+    // Navigate through Tests.tsx so the cultural dialogue is shown there
+    // (the proven original pathway). afterDialogueNav tells Tests.tsx where
+    // to redirect once the dialogue is finished.
+    const afterDialogueNav = destination !== "/tests" ? destination : undefined;
 
     navigate("/tests", {
       state: {
-        altynAdamCulturalDialogue: {
-          testType,
-          resultKey,
-        },
-      } satisfies CulturalDialogueRouteState,
+        altynAdamCulturalDialogue: { testType, resultKey: result.resultKey },
+        ...(afterDialogueNav ? { afterDialogueNav } : {}),
+      },
     });
   };
+
+  const navigateWithDialogue = (destination: string) => {
+    // If a reminder is waiting, surface it on this click first. Once it is
+    // dismissed we continue to the stored destination (which then triggers
+    // the cultural dialogue on the Tests page).
+    if (isReminderPending && !isReminderDialogOpen) {
+      setPendingDestination(destination);
+      setIsReminderPending(false);
+      setIsReminderDialogOpen(true);
+      return;
+    }
+
+    performNavigation(destination);
+  };
+
+  const handleRetake = () => navigateWithDialogue(`/tests/${id}/intro`);
+  const handleCloseResult = () => navigateWithDialogue("/tests");
+
+  // Intercept any anchor/nav click on the page and route it through the dialogue
+  useEffect(() => {
+    const handleLinkClick = (e: MouseEvent) => {
+      if (isReminderDialogOpen) return;
+
+      const anchor = (e.target as HTMLElement).closest("a[href]") as HTMLAnchorElement | null;
+      if (!anchor) return;
+
+      const href = anchor.getAttribute("href");
+      if (!href || href.startsWith("http") || href.startsWith("mailto")) return;
+
+      e.preventDefault();
+      navigateWithDialogue(href);
+    };
+
+    document.addEventListener("click", handleLinkClick, true);
+    return () => document.removeEventListener("click", handleLinkClick, true);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isReminderDialogOpen, isReminderPending, result, testType]);
 
   const closeReminderDialog = () => {
     if (reminderCount !== null) {
@@ -764,6 +797,14 @@ export const TestResult = () => {
     }
 
     setIsReminderDialogOpen(false);
+
+    // Continue to wherever the click was headed; this triggers the cultural
+    // dialogue on the Tests page.
+    if (pendingDestination !== null) {
+      const destination = pendingDestination;
+      setPendingDestination(null);
+      performNavigation(destination);
+    }
   };
 
   const handleReminderProfileClick = () => {
@@ -772,6 +813,7 @@ export const TestResult = () => {
     }
 
     setIsReminderDialogOpen(false);
+    setPendingDestination(null);
     navigate("/profile");
   };
 
@@ -982,6 +1024,7 @@ export const TestResult = () => {
           },
         ]}
       />
+
     </>
   );
 };

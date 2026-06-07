@@ -1,4 +1,6 @@
-export type { LocalizedText } from "../types/altynAdam";
+import type { LocalizedText } from "../types/altynAdam";
+
+export type { LocalizedText };
 
 export type RecommendationTag =
   | "wisdom"

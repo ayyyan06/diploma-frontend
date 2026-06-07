@@ -37,6 +37,7 @@ interface TestsLocationState {
     testType: StandardTestType;
     resultKey: string;
   };
+  afterDialogueNav?: string;
 }
 
 export const Tests = () => {
@@ -51,6 +52,7 @@ export const Tests = () => {
   const [activeDialogue, setActiveDialogue] =
     useState<AltynAdamCulturalDialogueDefinition | null>(null);
   const [isDialogueOpen, setIsDialogueOpen] = useState(false);
+  const [afterDialogueNav, setAfterDialogueNav] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -101,9 +103,11 @@ export const Tests = () => {
     [i18n.language],
   );
   const canAfford = coins === null || coins >= TEST_COST;
-  const adaptiveTitle = adaptiveMeta?.title ?? adaptiveFigureCopy.card.title;
-  const adaptiveDescription =
-    adaptiveMeta?.description ?? adaptiveFigureCopy.card.description;
+  // The backend meta is not localized (always English), so the title and
+  // description come from the localized UI copy. Only the image is taken
+  // from the backend meta.
+  const adaptiveTitle = adaptiveFigureCopy.card.title;
+  const adaptiveDescription = adaptiveFigureCopy.card.description;
   const adaptiveImageSrc =
     adaptiveMeta?.image_src ?? "/images/altyn-adam-oblozhka.png";
   const adaptiveImageAlt = adaptiveMeta?.image_alt ?? adaptiveTitle;
@@ -124,6 +128,7 @@ export const Tests = () => {
     if (dialogueDefinition) {
       setActiveDialogue(dialogueDefinition);
       setIsDialogueOpen(true);
+      setAfterDialogueNav(locationState?.afterDialogueNav ?? null);
     }
 
     navigate(location.pathname, {
@@ -320,6 +325,10 @@ export const Tests = () => {
         onClose={() => {
           setIsDialogueOpen(false);
           setActiveDialogue(null);
+          if (afterDialogueNav) {
+            setAfterDialogueNav(null);
+            navigate(afterDialogueNav);
+          }
         }}
       />
     </>
