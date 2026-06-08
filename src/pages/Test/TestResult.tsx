@@ -768,7 +768,7 @@ export const TestResult = () => {
     performNavigation(destination);
   };
 
-  const handleRetake = () => navigateWithDialogue(`/tests/${id}/intro`);
+  const handleRetake = () => navigate(`/tests/${id}/intro`);
   const handleCloseResult = () => navigateWithDialogue("/tests");
 
   // Intercept any anchor/nav click on the page and route it through the dialogue
