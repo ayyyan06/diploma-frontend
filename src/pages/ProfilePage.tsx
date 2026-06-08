@@ -347,6 +347,7 @@ export const ProfilePage = () => {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [recommendationsLoading, setRecommendationsLoading] = useState(true);
   const [tab, setTab] = useState<"results" | "friends">("results");
   const [loading, setLoading] = useState(true);
   const [hasCompletedAdaptiveFigure, setHasCompletedAdaptiveFigure] =
@@ -373,7 +374,6 @@ export const ProfilePage = () => {
           meResult,
           submissionsResult,
           friendsResult,
-          recommendationsResult,
           adaptiveSessionData,
         ] = await Promise.allSettled([
           fetchWithToken("/api/v1/me").then((response) => response.json()),
@@ -381,9 +381,6 @@ export const ProfilePage = () => {
             response.json(),
           ),
           fetchWithToken("/api/v1/community/friends").then((response) =>
-            response.json(),
-          ),
-          fetchWithToken("/api/v1/me/recommendations").then((response) =>
             response.json(),
           ),
           adaptiveSessionPromise,
@@ -409,16 +406,6 @@ export const ProfilePage = () => {
           setFriends([]);
         }
 
-        if (recommendationsResult.status === "fulfilled") {
-          setRecommendations(recommendationsResult.value.recommendations ?? []);
-        } else {
-          console.error(
-            "Profile recommendations load failed:",
-            recommendationsResult.reason,
-          );
-          setRecommendations([]);
-        }
-
         if (adaptiveSessionData.status === "fulfilled") {
           setHasCompletedAdaptiveFigure(
             adaptiveSessionData.value?.status === "completed",
@@ -434,6 +421,21 @@ export const ProfilePage = () => {
         console.error(error);
       } finally {
         setLoading(false);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const response = await fetchWithToken("/api/v1/me/recommendations");
+        const data = (await response.json()) as { recommendations: Recommendation[] };
+        setRecommendations(data.recommendations ?? []);
+      } catch (error) {
+        console.error("Profile recommendations load failed:", error);
+        setRecommendations([]);
+      } finally {
+        setRecommendationsLoading(false);
       }
     })();
   }, []);
@@ -640,7 +642,14 @@ export const ProfilePage = () => {
               <div className="mt-10">
                 <SectionTitle>{t("profile.recommendationsTitle")}</SectionTitle>
 
-                {recommendations.length === 0 ? (
+                {recommendationsLoading ? (
+                  <div className="flex items-center gap-4 rounded-[22px] border-2 border-[#ece7dd] bg-white px-6 py-10">
+                    <div className="h-6 w-6 shrink-0 animate-spin rounded-full border-[3px] border-[#f2c200] border-t-transparent" />
+                    <p className="text-[15px] text-[#999]">
+                      {t("profile.recommendationsLoading")}
+                    </p>
+                  </div>
+                ) : recommendations.length === 0 ? (
                   <div className="rounded-[22px] border-2 border-dashed border-[#ece7dd] py-12 text-center">
                     <p className="text-[16px] text-[#bbb]">
                       {t("profile.noRecommendationsYet")}

@@ -165,6 +165,7 @@ const en = {
     myResults: "My Test Results",
     myFriends: "My Friends",
     recommendationsTitle: "Recommendations From AI",
+    recommendationsLoading: "AI is working on your recommendations…",
     noRecommendationsYet: "No recommendations yet.",
     recommendationsHint:
       "Complete more tests to unlock personalized suggestions.",

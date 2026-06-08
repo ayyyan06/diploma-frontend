@@ -168,6 +168,7 @@ const kk = {
     myResults: "Менің тест нәтижелерім",
     myFriends: "Менің достарым",
     recommendationsTitle: "AI ұсыныстары",
+    recommendationsLoading: "AI сіз үшін ұсыныстар іздеуде…",
     noRecommendationsYet: "Ұсыныстар әзірге жоқ.",
     recommendationsHint:
       "Жеке ұсыныстарды ашу үшін тағы да тесттерден өтіңіз.",

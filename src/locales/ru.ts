@@ -166,6 +166,7 @@ const ru = {
     myResults: "Мои результаты тестов",
     myFriends: "Мои друзья",
     recommendationsTitle: "Рекомендации от AI",
+    recommendationsLoading: "AI подбирает рекомендации для вас…",
     noRecommendationsYet: "Рекомендаций пока нет.",
     recommendationsHint:
       "Пройдите еще тесты, чтобы получить персональные рекомендации.",
