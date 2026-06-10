@@ -72,6 +72,25 @@ interface WeaponResult extends BaseResult {
   details: WeaponDetails;
 }
 
+interface GenericScaleTrait {
+  key: string;
+  label: string;
+  shortLabel?: string;
+  description?: string;
+  score: number;
+  narrative: string;
+}
+
+interface GenericScaleDetails {
+  runnerUpTitle: string;
+  topTraits: string[];
+  traits: GenericScaleTrait[];
+}
+
+interface GenericScaleResult extends BaseResult {
+  details: GenericScaleDetails;
+}
+
 interface EnemyScore {
   key: string;
   label: string;
@@ -98,15 +117,33 @@ interface EnemyResult extends BaseResult {
   details: EnemyDetails;
 }
 
+interface GenericResultScore {
+  key: string;
+  label: string;
+  title: string;
+  count: number;
+  percent: number;
+}
+
+interface GenericResultDetails {
+  resultScores: GenericResultScore[];
+}
+
+interface GenericResultType extends BaseResult {
+  details: GenericResultDetails;
+}
+
 type TestResultData =
   | PersonalityResult
   | AnimalResult
   | WeaponResult
-  | EnemyResult;
+  | EnemyResult
+  | GenericScaleResult
+  | GenericResultType;
 
 interface ResultApiResponse {
   test_id: number;
-  test_type: "personality" | "animal" | "weapon" | "enemy";
+  test_type: "personality" | "animal" | "weapon" | "enemy" | "scale" | "result";
   test_title: string;
   result: TestResultData;
   updated_at: string;
@@ -118,6 +155,50 @@ interface SubmissionResultApiResponse {
 
 interface TestResultLocationState {
   altynAdamReminderCount?: number;
+}
+
+function getCustomResultUiCopy(language: string) {
+  if (language.startsWith("ru")) {
+    return {
+      topQualities: "Главные качества",
+      qualityScores: "Показатели по качествам",
+      closestProfile: "Близкий профиль",
+      topOutcomes: "Ближайшие результаты",
+      answerDistribution: "Распределение ответов",
+      answersLabel: "ответов",
+    };
+  }
+
+  if (language.startsWith("kk")) {
+    return {
+      topQualities: "Басты қасиеттер",
+      qualityScores: "Қасиеттер көрсеткіші",
+      closestProfile: "Жақын профиль",
+      topOutcomes: "Ең жақын нәтижелер",
+      answerDistribution: "Жауаптар үлесі",
+      answersLabel: "жауап",
+    };
+  }
+
+  return {
+    topQualities: "Top qualities",
+    qualityScores: "Quality scores",
+    closestProfile: "Closest profile",
+    topOutcomes: "Closest outcomes",
+    answerDistribution: "Answer distribution",
+    answersLabel: "answers",
+  };
+}
+
+function supportsCulturalDialogue(
+  testType: string,
+): testType is "personality" | "animal" | "weapon" | "enemy" {
+  return (
+    testType === "personality" ||
+    testType === "animal" ||
+    testType === "weapon" ||
+    testType === "enemy"
+  );
 }
 
 
@@ -151,11 +232,23 @@ function isWeapon(type: string, details: unknown): details is WeaponDetails {
   );
 }
 
+function isScale(type: string, details: unknown): details is GenericScaleDetails {
+  return type === "scale" && details != null && "traits" in (details as object);
+}
+
 function isEnemy(type: string, details: unknown): details is EnemyDetails {
   return (
     type === "enemy" &&
     details != null &&
     "enemyScores" in (details as object)
+  );
+}
+
+function isResultType(type: string, details: unknown): details is GenericResultDetails {
+  return (
+    type === "result" &&
+    details != null &&
+    "resultScores" in (details as object)
   );
 }
 
@@ -322,6 +415,80 @@ function WeaponLeftCard({ details }: { details: WeaponDetails }) {
         ))}
       </div>
     </>
+  );
+}
+
+function GenericScaleLeftCard({ details }: { details: GenericScaleDetails }) {
+  const { i18n } = useTranslation();
+  const copy = getCustomResultUiCopy(i18n.language);
+
+  return (
+    <>
+      <h2 className="m-0 mb-[14px] text-center text-[22px] font-bold leading-[28px] text-[#111111]">
+        {copy.topQualities}
+      </h2>
+
+      <ul className="m-0 pl-6 text-[18px] font-normal leading-[23px] text-[#555555]">
+        {details.topTraits?.map((trait) => (
+          <li key={trait} className="mb-2">
+            {trait}
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+}
+
+function GenericResultLeftCard({ details }: { details: GenericResultDetails }) {
+  const { i18n } = useTranslation();
+  const copy = getCustomResultUiCopy(i18n.language);
+  const topResults = [...(details.resultScores ?? [])]
+    .sort((a, b) => b.count - a.count || b.percent - a.percent)
+    .slice(0, 3);
+
+  return (
+    <>
+      <h2 className="m-0 mb-[14px] text-center text-[22px] font-bold leading-[28px] text-[#111111]">
+        {copy.topOutcomes}
+      </h2>
+
+      <ul className="m-0 pl-6 text-[18px] font-normal leading-[23px] text-[#555555]">
+        {topResults.map((score) => (
+          <li key={score.key} className="mb-2">
+            {(score.title || score.label) ?? score.key} ({score.percent}%)
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+}
+
+function GenericResultSpectrumBar({ score }: { score: GenericResultScore }) {
+  const { i18n } = useTranslation();
+  const copy = getCustomResultUiCopy(i18n.language);
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="text-[18px] font-bold leading-[1.35] text-[#222222]">
+          {score.title || score.label}
+        </span>
+
+        <span className="text-[15px] font-bold text-[#8b6c00]">
+          {score.count} {copy.answersLabel} / {score.percent}%
+        </span>
+      </div>
+
+      <div
+        className="h-3 w-full overflow-hidden rounded-full bg-[#f4ece1]"
+        aria-hidden="true"
+      >
+        <div
+          className="h-full rounded-full bg-[#f2c200] transition-all duration-500"
+          style={{ width: `${score.percent}%` }}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -506,6 +673,89 @@ function WeaponDetailsSection({ result }: { result: WeaponResult }) {
             score={score}
             maxScore={maxScore}
           />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function GenericScaleDetailsSection({ result }: { result: GenericScaleResult }) {
+  const { t, i18n } = useTranslation();
+  const { details } = result;
+  const copy = getCustomResultUiCopy(i18n.language);
+  const sortedTraits = [...(details.traits ?? [])].sort(
+    (a, b) => b.score - a.score,
+  );
+  const showRunnerUp =
+    !!details.runnerUpTitle && details.runnerUpTitle !== result.title;
+
+  return (
+    <>
+      <div className="box-border w-full rounded-[24px] border-2 border-[#ece7dd] bg-white pb-10 pl-[41px] pr-10 pt-5 max-[640px]:px-5">
+        <h2 className="m-0 mb-[22px] text-[28px] font-bold leading-[35px] text-[#111111]">
+          {copy.qualityScores}
+        </h2>
+
+        <div className="flex flex-col gap-5">
+          {sortedTraits.map((trait) => (
+            <ScoreBar
+              key={trait.key}
+              label={trait.label}
+              badge={trait.shortLabel}
+              score={trait.score}
+              narrative={trait.narrative}
+            />
+          ))}
+        </div>
+      </div>
+
+      {(showRunnerUp || result.developmentFocus) && (
+        <div className="flex gap-10 max-[640px]:flex-col">
+          {showRunnerUp && (
+            <div className="box-border min-w-0 flex-1 rounded-[24px] border-2 border-[#c4dff0] bg-[#eef8ff] pb-8 pl-10 pr-8 pt-5 max-[640px]:pl-6">
+              <h2 className="m-0 mb-3 text-[22px] font-bold leading-[28px] text-[#111]">
+                {copy.closestProfile}
+              </h2>
+
+              <p className="m-0 text-[18px] text-[#555]">
+                {details.runnerUpTitle}
+              </p>
+            </div>
+          )}
+
+          {result.developmentFocus && (
+            <div className="box-border min-w-0 flex-1 rounded-[24px] border-2 border-[#f0c4c4] bg-[#fff5f5] pb-8 pl-10 pr-8 pt-5 max-[640px]:pl-6">
+              <h2 className="m-0 mb-3 text-[22px] font-bold leading-[28px] text-[#111]">
+                {t("testResult.developmentFocus")}
+              </h2>
+
+              <p className="m-0 text-[18px] text-[#555]">
+                {result.developmentFocus}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  );
+}
+
+function GenericResultDetailsSection({ result }: { result: GenericResultType }) {
+  const { i18n } = useTranslation();
+  const copy = getCustomResultUiCopy(i18n.language);
+  const sortedScores = [...(result.details.resultScores ?? [])].sort(
+    (a, b) => b.count - a.count || b.percent - a.percent,
+  );
+
+  return (
+    <div className="box-border w-full rounded-[24px] border-2 border-[#ece7dd] bg-white pb-10 pl-[41px] pr-10 pt-5 max-[640px]:px-5">
+      <h2 className="m-0 mb-[22px] text-[28px] font-bold leading-[35px] text-[#111111]">
+        {copy.answerDistribution}
+      </h2>
+
+      <div className="flex flex-col gap-5">
+        {sortedScores.map((score) => (
+          <GenericResultSpectrumBar key={score.key} score={score} />
         ))}
       </div>
     </div>
@@ -741,6 +991,11 @@ export const TestResult = () => {
       return;
     }
 
+    if (!supportsCulturalDialogue(testType)) {
+      navigate(destination);
+      return;
+    }
+
     // Navigate through Tests.tsx so the cultural dialogue is shown there
     // (the proven original pathway). afterDialogueNav tells Tests.tsx where
     // to redirect once the dialogue is finished.
@@ -863,8 +1118,16 @@ export const TestResult = () => {
       return <WeaponLeftCard details={result.details} />;
     }
 
+    if (isScale(testType, result.details)) {
+      return <GenericScaleLeftCard details={result.details} />;
+    }
+
     if (isEnemy(testType, result.details)) {
       return <EnemyLeftCard details={result.details} />;
+    }
+
+    if (isResultType(testType, result.details)) {
+      return <GenericResultLeftCard details={result.details} />;
     }
 
     return null;
@@ -883,8 +1146,16 @@ export const TestResult = () => {
       return <WeaponDetailsSection result={result as WeaponResult} />;
     }
 
+    if (isScale(testType, result.details)) {
+      return <GenericScaleDetailsSection result={result as GenericScaleResult} />;
+    }
+
     if (isEnemy(testType, result.details)) {
       return <EnemyDetailsSection result={result as EnemyResult} />;
+    }
+
+    if (isResultType(testType, result.details)) {
+      return <GenericResultDetailsSection result={result as GenericResultType} />;
     }
 
     return null;

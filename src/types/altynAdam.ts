@@ -2,7 +2,11 @@ export type AltynAdamLanguage = "en" | "ru" | "kk";
 
 export type StandardTestType = "personality" | "animal" | "weapon" | "enemy";
 
-export type CompletedTestKey = StandardTestType | "adaptive-figure";
+export type CompletedTestKey =
+  | StandardTestType
+  | "scale"
+  | "result"
+  | "adaptive-figure";
 
 export type AltynAdamPose =
   | "welcome"

@@ -33,6 +33,8 @@ const COMPLETED_TEST_KEYS = new Set<CompletedTestKey>([
   "animal",
   "weapon",
   "enemy",
+  "scale",
+  "result",
   "adaptive-figure",
 ]);
 

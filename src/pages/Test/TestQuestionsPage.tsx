@@ -6,7 +6,10 @@ import {
   localizeTestDetail,
   localizeTestType,
 } from "../../content/testContentTranslations";
-import { registerTestCompletion } from "../../utils/altynAdamProgress";
+import {
+  normalizeCompletedTestKey,
+  registerTestCompletion,
+} from "../../utils/altynAdamProgress";
 
 interface TestOption {
   id: string;
@@ -183,17 +186,15 @@ export const TestQestionsPage = () => {
 
         window.postMessage({ type: "coins:updated" }, window.location.origin);
 
-        const completionState = registerTestCompletion(
-          (test?.type as
-            | "personality"
-            | "animal"
-            | "weapon"
-            | "enemy"
-            | undefined) ?? "personality",
-        );
+        const completionTestKey = test?.type
+          ? normalizeCompletedTestKey(test.type)
+          : null;
+        const completionState = completionTestKey
+          ? registerTestCompletion(completionTestKey)
+          : null;
 
         navigate(`/tests/${id}/result`, {
-          state: completionState.shouldShowReminder
+          state: completionState?.shouldShowReminder
             ? {
                 altynAdamReminderCount: completionState.completedTestCount,
               }

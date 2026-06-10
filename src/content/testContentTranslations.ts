@@ -7,7 +7,13 @@ import {
 
 type ContentLanguage = "en" | "ru" | "kk";
 type SupportedLocalizedLanguage = "ru" | "kk";
-type TestType = "personality" | "animal" | "weapon" | "enemy";
+type TestType =
+  | "personality"
+  | "animal"
+  | "weapon"
+  | "enemy"
+  | "scale"
+  | "result";
 type InfoTone = "duration" | "format" | "result";
 
 type InfoBoxTranslation = {
@@ -61,15 +67,21 @@ const TYPE_LABELS: Record<ContentLanguage, Record<string, string>> = {
     animal: "Animal",
     weapon: "Weapon",
     enemy: "Enemy",
+    scale: "Scale",
+    result: "Result",
     color: "Color",
   },
   ru: {
+    scale: "Шкала",
+    result: "Результат",
     personality: "Личность",
     animal: "Животное",
     weapon: "Оружие",
     color: "Цвет",
   },
   kk: {
+    scale: "Шкала",
+    result: "Нәтиже",
     personality: "Тұлға",
     animal: "Жануар",
     weapon: "Қару",

@@ -1,5 +1,9 @@
 import { useTranslation } from "react-i18next";
-import { formatMatchedTags, getRecommendationCopy } from "../../recommendations/copy";
+import {
+  formatMatchedTags,
+  getBookWhatsAppUrl,
+  getRecommendationCopy,
+} from "../../recommendations/copy";
 import type { MatchedRecommendationBook } from "../../recommendations/types";
 
 function clampedDescription() {
@@ -18,11 +22,14 @@ export function RecommendedBookCard({
 }) {
   const { i18n, t } = useTranslation();
   const copy = getRecommendationCopy(i18n.language);
-  const lang = (i18n.language === "ru" || i18n.language === "kk") ? i18n.language : "en";
+  const lang = (i18n.language === "ru" || i18n.language === "kk")
+    ? i18n.language
+    : "en";
   const reason =
     book.matchedTags.length > 0
       ? `${copy.reasonPrefix}: ${formatMatchedTags(book.matchedTags, i18n.language)}`
       : copy.fallbackReason;
+  const whatsappUrl = getBookWhatsAppUrl(i18n.language, book.title[lang]);
 
   return (
     <article className="rounded-[22px] border-2 border-[#ece7dd] bg-white p-5 transition-all duration-200 hover:border-[#f2c200] hover:shadow-[0_8px_32px_rgba(242,194,0,0.10)]">
@@ -54,12 +61,12 @@ export function RecommendedBookCard({
           <p className="mt-3 text-[12px] italic text-[#9a8c6e]">{reason}</p>
 
           <a
-            href={book.kitapalUrl}
+            href={whatsappUrl}
             target="_blank"
             rel="noreferrer"
             className="mt-4 inline-flex w-fit items-center justify-center rounded-[12px] border-2 border-[#f2c200] bg-[#fff8d9] px-4 py-2 text-[13px] font-bold text-[#9a6e00] transition-all hover:bg-[#f2c200] hover:text-white"
           >
-            {copy.learnMore}
+            {copy.contactOnWhatsApp}
           </a>
         </div>
       </div>

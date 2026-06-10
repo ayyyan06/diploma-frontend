@@ -50,6 +50,12 @@ export function RecommendationsSection({
             {copy.booksTitle}
           </h3>
 
+          {books.length > 0 ? (
+            <p className="mb-4 inline-flex rounded-full bg-[#fff8d9] px-3 py-1 text-[13px] font-semibold text-[#9a6e00]">
+              {copy.booksPromo}
+            </p>
+          ) : null}
+
           <div className="space-y-4">
             {books.map((book) => (
               <RecommendedBookCard key={book.id} book={book} />

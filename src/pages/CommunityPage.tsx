@@ -54,6 +54,8 @@ const ARCHETYPE_COLORS: Record<string, string> = {
   animal: "#EEF8FF",
   weapon: "#F7F4FF",
   enemy: "#FFF4EC",
+  scale: "#ECFDF5",
+  result: "#FFF7ED",
   color: "#FFF0F0",
 };
 
@@ -301,6 +303,8 @@ const ARCHETYPE_CHIP_COLORS: Record<string, { bg: string; text: string }> = {
   animal:      { bg: "#EEF8FF", text: "#1d6fa4" },
   weapon:      { bg: "#F7F4FF", text: "#6d40c4" },
   enemy:       { bg: "#FFF4EC", text: "#b45309" },
+  scale:       { bg: "#ECFDF5", text: "#047857" },
+  result:      { bg: "#FFF7ED", text: "#c2410c" },
 };
 
 function SuggestedFriendCard({

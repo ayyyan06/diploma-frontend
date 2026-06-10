@@ -77,6 +77,8 @@ const ARCHETYPE_COLORS: Record<string, { bg: string; accent: string }> = {
   animal: { bg: "#EEF8FF", accent: "#60a5fa" },
   weapon: { bg: "#F7F4FF", accent: "#a78bfa" },
   enemy: { bg: "#FFF4EC", accent: "#d97706" },
+  scale: { bg: "#ECFDF5", accent: "#10b981" },
+  result: { bg: "#FFF7ED", accent: "#f97316" },
   color: { bg: "#FFF0F0", accent: "#f87171" },
 };
 
